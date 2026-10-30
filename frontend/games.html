@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech Games Arena | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+      gap: 20px;
+    }
+    .game-arena-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(16px);
+      transition: var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+    .game-arena-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--border-glow);
+      box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.7), var(--shadow-glow);
+    }
+    .game-card-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    .game-badge-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .rules-list {
+      margin: 16px 0 24px;
+      padding-left: 20px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    .game-filters {
+      display: grid;
+      grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .game-filter {
+      min-width: 0;
+      padding: 12px 14px;
+      color: var(--text-main);
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      font: inherit;
+    }
+    .game-filter:focus-visible, .game-play-link:focus-visible {
+      outline: 2px solid var(--cyan-accent);
+      outline-offset: 2px;
+    }
+    .game-play-link {
+      width: 100%;
+      padding: 14px;
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    .game-card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0;
+    }
+    .games-state {
+      padding: 28px;
+      color: var(--text-secondary);
+      text-align: center;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      background: var(--bg-card);
+    }
+    @media (max-width: 650px) {
+      .game-filters { grid-template-columns: 1fr; }
+      .game-arena-card { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('games.html', 'Tech Games Arena', 'Sharpen your engineering intuition through competitive algorithmic sprints and debugging tournaments.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <a href="leaderboard.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-trophy" style="color:#fbbf24;"></i> View Leaderboard
+        </a>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="game-filters" aria-label="Filter games">
+          <input class="game-filter" id="game-search" type="search" placeholder="Search games..." aria-label="Search games by name">
+          <select class="game-filter" id="game-category" aria-label="Filter games by category">
+            <option value="">All categories</option>
+          </select>
+          <select class="game-filter" id="game-difficulty" aria-label="Filter games by difficulty">
+            <option value="">All difficulties</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+        </div>
+        <p id="game-count" style="color:var(--text-secondary);font-size:13px;margin:0 0 14px;" aria-live="polite">Loading games...</p>
+        <div class="games-grid" id="games-grid" aria-live="polite">
+          <div class="games-state">Loading available games...</div>
+        </div>
+      `;
+
+      const gamesGrid = document.getElementById('games-grid');
+      const searchInput = document.getElementById('game-search');
+      const categorySelect = document.getElementById('game-category');
+      const difficultySelect = document.getElementById('game-difficulty');
+      let games = [];
+
+      function renderGames() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        const category = categorySelect.value;
+        const difficulty = difficultySelect.value;
+        const filteredGames = games.filter(game => {
+          const searchText = `${game.title || ''} ${game.description || ''} ${(game.tags || []).join(' ')} ${game.category || ''}`.toLowerCase();
+          return (!searchTerm || searchText.includes(searchTerm))
+            && (!category || game.category === category)
+            && (!difficulty || game.difficulty === difficulty);
+        });
+
+        document.getElementById('game-count').textContent = `${filteredGames.length} of ${games.length} games`;
+        gamesGrid.replaceChildren();
+        if (!filteredGames.length) {
+          const empty = document.createElement('div');
+          empty.className = 'games-state';
+          empty.textContent = games.length ? 'No games match those filters.' : 'No active games are available right now.';
+          gamesGrid.append(empty);
+          return;
+        }
+
+        filteredGames.forEach(game => {
+          const debugGame = game.gameType === 'debugging';
+          const card = document.createElement('article');
+          card.className = 'game-arena-card';
+          card.style.borderTop = `4px solid ${game.color || 'var(--purple-primary)'}`;
+
+          const details = document.createElement('div');
+          const icon = document.createElement('div');
+          icon.className = 'game-card-icon';
+          icon.style.background = `${game.color || '#6c4cff'}22`;
+          icon.style.color = game.color || '#c4b5fd';
+          const iconGlyph = document.createElement('i');
+          iconGlyph.classList.add('fa-solid');
+          String(game.icon || 'fa-gamepad').split(/\s+/).forEach(iconClass => {
+            if (/^fa-[\w-]+$/.test(iconClass)) iconGlyph.classList.add(iconClass);
+          });
+          iconGlyph.setAttribute('aria-hidden', 'true');
+          icon.append(iconGlyph);
+
+          const badges = document.createElement('div');
+          badges.className = 'game-card-meta';
+          [
+            game.category || 'Technology',
+            game.difficulty || 'All levels',
+            `${game.totalQuestions || 0} Questions`,
+            `Up to +${game.xpReward || 0} XP`
+          ].forEach((label, index) => {
+            const badge = document.createElement('span');
+            badge.className = `nexus-badge ${['badge-purple', 'badge-blue', 'badge-green', 'badge-amber'][index]}`;
+            badge.textContent = label;
+            badges.append(badge);
+          });
+
+          const title = document.createElement('h3');
+          title.style.cssText = 'font-size:22px;margin:0 0 10px;font-weight:800;';
+          title.textContent = game.title || 'Technical Game';
+          const description = document.createElement('p');
+          description.style.cssText = 'color:var(--text-secondary);font-size:14px;line-height:1.7;';
+          description.textContent = game.description || 'Practice technical skills with this challenge.';
+
+          const personalBest = document.createElement('p');
+          personalBest.style.cssText = 'color:var(--text-secondary);font-size:13px;margin-top:14px;';
+          personalBest.textContent = game.userBestScore === null || game.userBestScore === undefined
+            ? 'No personal best recorded yet'
+            : `Personal best: ${game.userBestScore}%`;
+          details.append(icon, badges, title, description, personalBest);
+
+          const playLink = document.createElement('a');
+          playLink.className = 'btn-nexus btn-nexus-primary game-play-link';
+          playLink.href = debugGame
+            ? `debugging-game.html?id=${encodeURIComponent(game.slug || game._id)}`
+            : `tech-quiz.html?id=${encodeURIComponent(game.slug || game._id)}`;
+          const playIcon = document.createElement('i');
+          playIcon.className = `fa-solid ${debugGame ? 'fa-screwdriver-wrench' : 'fa-play'}`;
+          playIcon.setAttribute('aria-hidden', 'true');
+          playLink.append(playIcon, document.createTextNode(` Play ${game.title || 'Game'}`));
+
+          card.append(details, playLink);
+          gamesGrid.append(card);
+        });
+      }
+
+      searchInput.addEventListener('input', renderGames);
+      categorySelect.addEventListener('change', renderGames);
+      difficultySelect.addEventListener('change', renderGames);
+
+      try {
+        const response = await api.get('/games');
+        if (!response.success || !Array.isArray(response.games)) {
+          throw new Error(response.message || 'Game list could not be loaded.');
+        }
+        games = response.games;
+        [...new Set(games.map(game => game.category).filter(Boolean))].sort().forEach(value => {
+          const option = document.createElement('option');
+          option.value = value;
+          option.textContent = value;
+          categorySelect.append(option);
+        });
+        renderGames();
+      } catch (error) {
+        document.getElementById('game-count').textContent = 'Games could not be loaded.';
+        gamesGrid.replaceChildren();
+        const message = document.createElement('div');
+        message.className = 'games-state';
+        message.textContent = error.message || 'Games could not be loaded. Please try again.';
+        gamesGrid.append(message);
+      }
+    });
+  </script>
+</body>
+</html>

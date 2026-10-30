@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .notif-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .notif-filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: rgba(99, 102, 241, 0.2);
+      border-color: var(--cyan-accent);
+      color: #fff;
+    }
+    .notif-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .notif-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 22px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: var(--transition-fast);
+      position: relative;
+    }
+    .notif-item.unread {
+      border-left: 4px solid var(--cyan-accent);
+      background: rgba(26, 38, 64, 0.65);
+    }
+    .notif-item:hover {
+      border-color: var(--border-glow);
+      transform: translateX(3px);
+    }
+    .notif-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .icon-course { background: rgba(99, 102, 241, 0.15); color: #818cf8; }
+    .icon-certificate { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .icon-internship { background: rgba(14, 165, 233, 0.15); color: #38bdf8; }
+    .icon-event { background: rgba(168, 85, 247, 0.15); color: #c084fc; }
+    .icon-game { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .icon-xp { background: rgba(234, 179, 8, 0.15); color: #facc15; }
+    .icon-system { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+
+    .notif-content {
+      flex: 1;
+    }
+    .notif-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .notif-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .notif-time {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .notif-body {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    .notif-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      align-items: center;
+    }
+    .notif-btn {
+      padding: 4px 12px;
+      font-size: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition-fast);
+    }
+    .notif-btn-primary {
+      background: var(--gradient-primary);
+      color: #fff;
+      border: none;
+    }
+    .notif-btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+    }
+    .notif-btn-ghost:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    let allNotifications = [];
+    let currentFilter = 'all';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('notifications.html', 'Notifications', 'Real-time course milestones, alerts, and platform announcements.');
+      if (!layout) return;
+
+      const { pageContent } = layout;
+
+      pageContent.innerHTML = `
+        <div class="notif-toolbar">
+          <div class="notif-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="course">Courses</button>
+            <button class="filter-btn" data-filter="certificate">Certificates</button>
+            <button class="filter-btn" data-filter="internship">Internships</button>
+            <button class="filter-btn" data-filter="event">Events</button>
+            <button class="filter-btn" data-filter="game">Games</button>
+            <button class="filter-btn" data-filter="system">System</button>
+          </div>
+          <div>
+            <button class="btn-nexus btn-nexus-secondary" id="btnMarkAllRead" style="font-size:13px;padding:7px 16px;">
+              <i class="fa-solid fa-check-double"></i> Mark All as Read
+            </button>
+          </div>
+        </div>
+
+        <div id="notifContainer" class="notif-list">
+          <div class="state-container">
+            <div class="state-spinner"></div>
+            <div class="state-title">Loading notifications...</div>
+          </div>
+        </div>
+      `;
+
+      // Event Listeners for Filters
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentFilter = btn.dataset.filter;
+          renderNotifications();
+        });
+      });
+
+      // Mark All Read
+      document.getElementById('btnMarkAllRead').addEventListener('click', async () => {
+        try {
+          await api.put('/notifications/read-all', {});
+          allNotifications.forEach(n => n.read = true);
+          renderNotifications();
+        } catch (e) {
+          console.error('Error marking all notifications read:', e);
+        }
+      });
+
+      loadNotifications();
+    });
+
+    async function loadNotifications() {
+      try {
+        const res = await api.get('/notifications');
+        allNotifications = (res && res.notifications) ? res.notifications : [];
+        renderNotifications();
+      } catch (err) {
+        console.error('Failed to load notifications:', err);
+        const container = document.getElementById('notifContainer');
+        if (container) {
+          container.innerHTML = `
+            <div class="state-container">
+              <i class="fa-solid fa-triangle-exclamation" style="font-size:32px;color:#f87171;margin-bottom:12px;"></i>
+              <div class="state-title">Unable to load notifications</div>
+              <div class="state-desc">Please check your connection and try again.</div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function renderNotifications() {
+      const container = document.getElementById('notifContainer');
+      if (!container) return;
+
+      const filtered = currentFilter === 'all' 
+        ? allNotifications 
+        : allNotifications.filter(n => (n.type || 'system').toLowerCase() === currentFilter);
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div class="state-container" style="padding:48px 24px;">
+            <i class="fa-regular fa-bell-slash" style="font-size:38px;color:var(--text-muted);margin-bottom:14px;"></i>
+            <div class="state-title" style="font-size:16px;">No notifications found</div>
+            <div class="state-desc">You are all caught up! Updates regarding courses, events, and milestones will appear here.</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(n => {
+        const type = (n.type || 'system').toLowerCase();
+        let icon = 'fa-solid fa-bell';
+        let iconClass = 'icon-system';
+
+        if (type === 'course') {
+          icon = 'fa-solid fa-graduation-cap';
+          iconClass = 'icon-course';
+        } else if (type === 'certificate') {
+          icon = 'fa-solid fa-award';
+          iconClass = 'icon-certificate';
+        } else if (type === 'internship') {
+          icon = 'fa-solid fa-briefcase';
+          iconClass = 'icon-internship';
+        } else if (type === 'event') {
+          icon = 'fa-solid fa-calendar-check';
+          iconClass = 'icon-event';
+        } else if (type === 'game') {
+          icon = 'fa-solid fa-gamepad';
+          iconClass = 'icon-game';
+        } else if (type === 'xp') {
+          icon = 'fa-solid fa-bolt';
+          iconClass = 'icon-xp';
+        }
+
+        const timeStr = n.createdAt ? new Date(n.createdAt).toLocaleString(undefined, {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        }) : '';
+
+        return `
+          <div class="notif-item ${n.read ? '' : 'unread'}" id="notif-${n._id}">
+            <div class="notif-icon-box ${iconClass}">
+              <i class="${icon}"></i>
+            </div>
+            <div class="notif-content">
+              <div class="notif-title-row">
+                <span class="notif-title">${n.title || 'Notification'}</span>
+                <span class="notif-time">${timeStr}</span>
+              </div>
+              <div class="notif-body">${n.message || ''}</div>
+              <div class="notif-actions">
+                ${n.link ? `<a href="${n.link}" class="notif-btn notif-btn-primary">View Details <i class="fa-solid fa-arrow-right"></i></a>` : ''}
+                ${!n.read ? `<button class="notif-btn notif-btn-ghost" onclick="markAsRead('${n._id}')"><i class="fa-solid fa-check"></i> Mark read</button>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function markAsRead(id) {
+      try {
+        await api.put(`/notifications/${id}/read`, {});
+        const item = allNotifications.find(n => n._id === id);
+        if (item) item.read = true;
+        renderNotifications();
+      } catch (e) {
+        console.error('Failed to mark read:', e);
+      }
+    }
+  </script>
+</body>
+</html>

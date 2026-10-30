@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internship Opportunities | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .internships-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 24px;
+    }
+    .internship-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(14px);
+      transition: var(--transition-normal);
+      position: relative;
+    }
+    .internship-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-glow);
+      box-shadow: var(--shadow-glow);
+    }
+    .company-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    .company-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: #0f172a;
+      border: 1px solid var(--border-medium);
+      flex-shrink: 0;
+    }
+    .company-meta h4 {
+      font-size: 18px;
+      color: #fff;
+      margin-bottom: 2px;
+    }
+    .company-meta span {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .skills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 12px 0 16px;
+    }
+    .skill-tag {
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #94a3b8;
+    }
+    .disclaimer-banner {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      font-size: 13px;
+      color: #fde68a;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .meta-details-list {
+      font-size: 12px;
+      color: var(--text-secondary);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.5);
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      margin-bottom: 16px;
+    }
+    .meta-details-list div {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .meta-details-list strong {
+      color: #fff;
+      font-weight: 500;
+      text-align: right;
+    }
+    .card-actions-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 16px;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('internship.html', 'Internship Portal', 'Explore industry opportunities, review company profiles, and submit verified applications.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <a href="my-internships.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-list-check" style="color:var(--cyan-accent);"></i> My Applications
+        </a>
+      `;
+
+      pageContent.innerHTML = `
+        <!-- Official Disclaimer banner (Section 13) -->
+        <div class="disclaimer-banner">
+          <i class="fa-solid fa-shield-halved" style="margin-top:2px;font-size:16px;"></i>
+          <div>
+            <strong>Authenticity & Corporate Information Policy</strong>
+            <p style="margin-top:3px;opacity:0.95;">
+              Listing information for well-known enterprises (e.g. TCS, Infosys, Zoho) represents educational simulation records unless marked as administrative verified. EDUTECH NEXUS does not claim official partnerships. Please verify all recruitment details on official corporate websites.
+            </p>
+          </div>
+        </div>
+
+        <div class="toolbar-section">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="internship-search" class="nexus-input" placeholder="Search by role, company name, skills, or location...">
+          </div>
+          <div class="filter-group">
+            <select id="type-filter" class="nexus-select">
+              <option value="all">Free & Paid</option>
+              <option value="Free">Free Only</option>
+              <option value="Paid">Paid Only</option>
+            </select>
+            <select id="mode-filter" class="nexus-select">
+              <option value="all">All Modes</option>
+              <option value="Remote">Remote</option>
+              <option value="Hybrid">Hybrid</option>
+              <option value="On-site">On-site</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="internships-grid" id="internships-grid">
+          <div class="state-container" style="grid-column:1/-1;">
+            <div class="state-spinner"></div>
+            <div class="state-title">Loading Opportunities from Database...</div>
+          </div>
+        </div>
+      `;
+
+      let allInternships = [];
+
+      async function fetchInternships() {
+        try {
+          const res = await api.get('/internships');
+          allInternships = res.internships || [];
+          renderInternships(allInternships);
+        } catch (err) {
+          document.getElementById('internships-grid').innerHTML = `
+            <div class="state-container" style="grid-column:1/-1;">
+              <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="state-title">Unable to Load Internships</div>
+              <p class="state-desc">${err.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      function renderInternships(list) {
+        const grid = document.getElementById('internships-grid');
+        if (!grid) return;
+
+        const search = (document.getElementById('internship-search')?.value || '').toLowerCase().trim();
+        const typeF = document.getElementById('type-filter')?.value || 'all';
+        const modeF = document.getElementById('mode-filter')?.value || 'all';
+
+        const filtered = list.filter(item => {
+          const matchSearch = !search || 
+            item.title.toLowerCase().includes(search) || 
+            item.company.toLowerCase().includes(search) || 
+            (item.location || '').toLowerCase().includes(search) || 
+            (item.skills || []).some(s => s.toLowerCase().includes(search));
+          const matchType = typeF === 'all' || item.type === typeF || (typeF === 'Free' && (!item.fee || item.fee === 0));
+          const matchMode = modeF === 'all' || item.workMode === modeF || item.mode === modeF;
+          return matchSearch && matchType && matchMode;
+        });
+
+        if (!filtered.length) {
+          grid.innerHTML = `
+            <div class="state-container" style="grid-column:1/-1;">
+              <div class="state-icon"><i class="fa-solid fa-briefcase"></i></div>
+              <div class="state-title">No Internships Found</div>
+              <p class="state-desc">Try clearing your filters or check back later.</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = filtered.map(item => {
+          const logo = item.companyLogo || (item.companyId?.logo) || 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&w=200&q=80';
+          const isPaid = (item.fee && item.fee > 0) || item.type === 'Paid';
+          const linkedCompanyId = item.companyId && typeof item.companyId === 'object'
+            ? item.companyId._id
+            : item.companyId;
+          const companyTarget = linkedCompanyId || item.company;
+          const companyProfileUrl = `company-profile.html?${new URLSearchParams({ id: String(companyTarget) })}`;
+          const deadlineFormatted = item.deadline ? new Date(item.deadline).toLocaleDateString() : 'Rolling Admission';
+
+          return `
+            <article class="internship-card">
+              <div>
+                <div class="company-row">
+                  <img src="${logo}" alt="${item.company}" class="company-logo" onerror="this.src='https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&w=200&q=80'">
+                  <div class="company-meta">
+                    <h4>${item.title}</h4>
+                    <span><i class="fa-solid fa-building"></i> ${item.company}</span>
+                  </div>
+                </div>
+
+                <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                  <span class="nexus-badge ${isPaid ? 'badge-amber' : 'badge-green'}">${isPaid ? `Paid Fee: ₹${item.fee || item.totalFee}` : 'Free Application'}</span>
+                  <span class="nexus-badge badge-blue"><i class="fa-solid fa-location-dot"></i> ${item.workMode || item.mode || 'Hybrid'}</span>
+                  <span class="nexus-badge badge-purple"><i class="fa-regular fa-clock"></i> ${item.duration || '3 Months'}</span>
+                </div>
+
+                <p style="font-size:13px;color:var(--text-secondary);margin-bottom:12px;line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                  ${item.description}
+                </p>
+
+                <!-- Detailed Structured Meta -->
+                <div class="meta-details-list">
+                  <div>
+                    <span>Stipend:</span>
+                    <strong style="color:#6ee7b7;">${item.stipend || 'Competitive'}</strong>
+                  </div>
+                  <div>
+                    <span>Location:</span>
+                    <strong>${item.location || 'Multiple Cities / Remote'}</strong>
+                  </div>
+                  <div>
+                    <span>Application Deadline:</span>
+                    <strong>${deadlineFormatted}</strong>
+                  </div>
+                  <div>
+                    <span>Eligibility:</span>
+                    <strong style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;">${item.eligibility || 'College Students & Graduates'}</strong>
+                  </div>
+                  <div>
+                    <span>Method:</span>
+                    <strong>${item.applicationMethod || 'Online Application Form'}</strong>
+                  </div>
+                </div>
+
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;">Required Skills:</div>
+                <div class="skills-row">
+                  ${(item.skills || ['Technology', 'Problem Solving']).slice(0, 4).map(s => `<span class="skill-tag">${s}</span>`).join('')}
+                </div>
+              </div>
+
+              <!-- 3 Required Buttons: VIEW DETAILS, COMPANY PROFILE, APPLY / REGISTER -->
+              <div class="card-actions-row">
+                <a href="internship-details.html?id=${item._id}" class="btn-nexus btn-nexus-secondary" style="font-size:12px;padding:8px 10px;text-align:center;">
+                  <i class="fa-solid fa-circle-info"></i> VIEW DETAILS
+                </a>
+                <a href="${companyProfileUrl}" class="btn-nexus btn-nexus-secondary" style="font-size:12px;padding:8px 10px;text-align:center;">
+                  <i class="fa-solid fa-building"></i> COMPANY PROFILE
+                </a>
+                <a href="internship-details.html?id=${item._id}&apply=true" class="btn-nexus btn-nexus-primary" style="font-size:12px;padding:8px 10px;text-align:center;grid-column:1/-1;">
+                  <i class="fa-solid fa-paper-plane"></i> APPLY / REGISTER
+                </a>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('internship-search')?.addEventListener('input', () => renderInternships(allInternships));
+      document.getElementById('type-filter')?.addEventListener('change', () => renderInternships(allInternships));
+      document.getElementById('mode-filter')?.addEventListener('change', () => renderInternships(allInternships));
+
+      await fetchInternships();
+    });
+  </script>
+</body>
+</html>

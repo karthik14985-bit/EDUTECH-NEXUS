@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internship Details & Application | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .internship-detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 32px;
+      align-items: flex-start;
+    }
+    .internship-header-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(16px);
+    }
+    .company-banner-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+    .company-logo-lg {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      object-fit: cover;
+      background: #0f172a;
+      border: 1px solid var(--border-medium);
+    }
+    .info-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(14px);
+    }
+    .info-section h3 {
+      font-size: 19px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+    }
+    .meta-row:last-child {
+      border-bottom: none;
+    }
+
+    /* Modal Form Styling */
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    @media (max-width: 768px) {
+      .form-grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .internship-detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('internship.html', 'Internship Overview', 'Review role requirements, eligibility, stipend, and submit your verified application.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const internshipId = urlParams.get('id');
+
+      headerActions.innerHTML = `
+        <a href="internship.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-arrow-left"></i> All Internships
+        </a>
+      `;
+
+      if (!internshipId) {
+        pageContent.innerHTML = `
+          <div class="state-container">
+            <div class="state-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+            <div class="state-title">No Internship Selected</div>
+            <p class="state-desc">Please choose an opportunity from the internship portal.</p>
+            <a href="internship.html" class="btn-nexus btn-nexus-primary" style="margin-top:16px;">View Internships</a>
+          </div>
+        `;
+        return;
+      }
+
+      pageContent.innerHTML = `
+        <div class="state-container" id="details-loader">
+          <div class="state-spinner"></div>
+          <div class="state-title">Loading Internship Details...</div>
+        </div>
+        <div class="internship-detail-grid" id="internship-content" style="display:none;"></div>
+
+        <!-- Professional Application Modal -->
+        <div class="modal-overlay" id="apply-modal">
+          <div class="modal-dialog" style="max-width:760px;max-height:90vh;overflow-y:auto;">
+            <div class="modal-header">
+              <div>
+                <h3 style="font-size:18px;">Internship Application</h3>
+                <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Complete your candidate profile to apply for this opportunity.</p>
+              </div>
+              <button class="modal-close" id="apply-modal-close">&times;</button>
+            </div>
+            
+            <form id="apply-form" class="modal-body" style="padding:24px;">
+              <div id="modal-app-error" style="display:none;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);padding:10px 14px;border-radius:var(--radius-sm);color:#fca5a5;font-size:13px;margin-bottom:16px;"></div>
+
+              <h4 style="font-size:14px;color:var(--cyan-accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-user"></i> 1. Personal & Contact Information
+              </h4>
+              
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Full Name *</label>
+                  <input type="text" id="app-fullname" class="nexus-input" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Age *</label>
+                  <input type="number" id="app-age" class="nexus-input" min="16" max="99" required>
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Email Address *</label>
+                  <input type="email" id="app-email" class="nexus-input" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone Number *</label>
+                  <input type="tel" id="app-phone" class="nexus-input" required>
+                </div>
+              </div>
+
+              <!-- Persona / User Type -->
+              <div class="form-group">
+                <label class="form-label">Current Persona / User Type *</label>
+                <select id="app-usertype" class="nexus-select" style="width:100%;">
+                  <option value="student">Student</option>
+                  <option value="staff">Staff</option>
+                  <option value="worker">Worker</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <!-- Dynamic Persona Fields -->
+              <div id="app-conditional-fields" style="background:rgba(15,23,42,0.5);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:16px;margin-bottom:18px;"></div>
+
+              <h4 style="font-size:14px;color:var(--cyan-accent);text-transform:uppercase;letter-spacing:1px;margin:20px 0 12px;display:flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-location-dot"></i> 2. Location & Address
+              </h4>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">City / Place *</label>
+                  <input type="text" id="app-city" class="nexus-input" placeholder="e.g. Coimbatore" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">State *</label>
+                  <input type="text" id="app-state" class="nexus-input" placeholder="e.g. Tamil Nadu" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Full Address</label>
+                <input type="text" id="app-address" class="nexus-input" placeholder="Door No, Street Name, Postal Area">
+              </div>
+
+              <h4 style="font-size:14px;color:var(--cyan-accent);text-transform:uppercase;letter-spacing:1px;margin:20px 0 12px;display:flex;align-items:center;gap:6px;">
+                <i class="fa-solid fa-briefcase"></i> 3. Professional Links & Qualifications
+              </h4>
+
+              <div class="form-group">
+                <label class="form-label">Technical Skills (comma separated) *</label>
+                <input type="text" id="app-skills" class="nexus-input" placeholder="Python, React, Machine Learning, SQL" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Prior Experience / Projects</label>
+                <textarea id="app-experience" class="nexus-textarea" rows="2" placeholder="List any previous internships, hackathons, or academic projects..."></textarea>
+              </div>
+
+              <!-- PDF Resume Upload with Strict Validation -->
+              <div class="form-group">
+                <label class="form-label">Resume / CV (PDF Only, Max 5MB) *</label>
+                <input type="file" id="app-resume-file" accept="application/pdf,.pdf" class="nexus-input" style="padding:8px;" required>
+                <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">
+                  Only standard PDF files are permitted. File will be validated and encoded securely.
+                </div>
+                <div id="resume-file-info" style="font-size:12px;color:#10b981;margin-top:4px;display:none;"></div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">GitHub Profile</label>
+                  <input type="url" id="app-github" class="nexus-input" placeholder="https://github.com/username">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">LinkedIn Profile</label>
+                  <input type="url" id="app-linkedin" class="nexus-input" placeholder="https://linkedin.com/in/username">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Portfolio Website URL</label>
+                <input type="url" id="app-portfolio" class="nexus-input" placeholder="https://yourportfolio.dev">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Cover Letter / Note to Mentors *</label>
+                <textarea id="app-coverletter" class="nexus-textarea" rows="3" placeholder="Explain why you are interested in this internship and how your skills align..." required></textarea>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Additional Information / Remarks</label>
+                <input type="text" id="app-additional" class="nexus-input" placeholder="Any availability dates, preferred tech stack, etc.">
+              </div>
+
+              <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px;border-top:1px solid var(--border-subtle);padding-top:16px;">
+                <button type="button" class="btn-nexus btn-nexus-secondary" id="apply-cancel">Cancel</button>
+                <button type="submit" class="btn-nexus btn-nexus-primary" id="apply-submit-btn">
+                  <i class="fa-solid fa-paper-plane"></i> Submit Application
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Success Result Modal -->
+        <div class="modal-overlay" id="app-success-modal">
+          <div class="modal-dialog" style="max-width:540px;text-align:center;">
+            <div style="padding:32px 24px;">
+              <div style="width:68px;height:68px;border-radius:50%;background:rgba(16,185,129,0.15);border:2px solid #10b981;color:#10b981;display:inline-flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:16px;">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <h2 style="font-size:22px;color:#fff;margin-bottom:8px;letter-spacing:0.5px;">APPLICATION SUBMITTED ✓</h2>
+              
+              <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:16px;margin:18px 0;text-align:left;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:12px;color:var(--text-muted);text-transform:uppercase;">Application ID:</span>
+                  <strong id="success-app-id" style="font-size:16px;color:#fbbf24;font-family:monospace;letter-spacing:1px;">EN-INT-2026-0001</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;">
+                  <span style="font-size:12px;color:var(--text-muted);text-transform:uppercase;">Status:</span>
+                  <span class="nexus-badge badge-blue" id="success-status" style="font-size:12px;">Pending / Under Review</span>
+                </div>
+              </div>
+
+              <p style="color:var(--text-secondary);font-size:14px;line-height:1.7;margin-bottom:24px;">
+                "Your application has been submitted successfully.<br>Please wait for a response."
+              </p>
+
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <a id="success-whatsapp-link" href="#" target="_blank" rel="noopener noreferrer" class="btn-nexus" style="background:#25D366;color:#fff;border:none;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;">
+                  <i class="fa-brands fa-whatsapp" style="font-size:18px;"></i> Contact Recruitment via WhatsApp
+                </a>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <a href="my-internships.html" class="btn-nexus btn-nexus-primary" style="padding:10px;text-align:center;">
+                    <i class="fa-solid fa-list-check"></i> My Applications
+                  </a>
+                  <a href="internship.html" class="btn-nexus btn-nexus-secondary" style="padding:10px;text-align:center;">
+                    Browse More
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      try {
+        const res = await api.get(`/internships/${internshipId}`);
+        if (!res.success || !res.internship) throw new Error(res.message || 'Internship not found');
+
+        const item = res.internship;
+        const company = res.company || {};
+        const isPaid = (item.fee && item.fee > 0) || item.type === 'Paid';
+        const logo = item.companyLogo || company.logo || 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&w=200&q=80';
+        const linkedCompanyId = item.companyId && typeof item.companyId === 'object'
+          ? item.companyId._id
+          : item.companyId;
+        const companyTarget = linkedCompanyId || item.company;
+        const companyProfileUrl = `company-profile.html?${new URLSearchParams({ id: String(companyTarget) })}`;
+
+        document.getElementById('details-loader').style.display = 'none';
+        const grid = document.getElementById('internship-content');
+        grid.style.display = 'grid';
+
+        grid.innerHTML = `
+          <!-- Main Left Column -->
+          <div>
+            <div class="internship-header-card">
+              <div class="company-banner-row">
+                <img src="${logo}" alt="${item.company}" class="company-logo-lg" onerror="this.src='https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&w=200&q=80'">
+                <div>
+                  <h2 style="font-size:24px;margin-bottom:4px;color:#fff;">${item.title}</h2>
+                  <div style="color:var(--cyan-accent);font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;">
+                    <span>${item.company}</span>
+                    <a href="${companyProfileUrl}" style="color:var(--text-muted);font-size:12px;text-decoration:none;">
+                      <i class="fa-solid fa-arrow-up-right-from-square"></i> View Profile
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+                <span class="nexus-badge ${isPaid ? 'badge-amber' : 'badge-green'}">${isPaid ? `Paid Fee: ₹${item.fee || item.totalFee}` : 'Free Application'}</span>
+                <span class="nexus-badge badge-blue"><i class="fa-solid fa-location-dot"></i> ${item.workMode || item.mode || 'Hybrid'}</span>
+                <span class="nexus-badge badge-purple"><i class="fa-solid fa-building"></i> ${item.location || 'Chennai, India'}</span>
+                <span class="nexus-badge badge-green"><i class="fa-regular fa-clock"></i> ${item.duration || '3 Months'}</span>
+              </div>
+
+              <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:var(--radius-sm);padding:12px 16px;font-size:12px;color:#fde68a;">
+                <i class="fa-solid fa-circle-info"></i> ${item.disclaimer || 'Sample company listing for educational simulations. EDUTECH NEXUS does not claim an official partnership unless verified.'}
+              </div>
+            </div>
+
+            <div class="info-section">
+              <h3><i class="fa-solid fa-align-left" style="color:var(--cyan-accent);"></i> Role Description</h3>
+              <p style="color:var(--text-secondary);font-size:15px;line-height:1.8;">${item.description}</p>
+            </div>
+
+            <div class="info-section">
+              <h3><i class="fa-solid fa-user-graduate" style="color:var(--purple-primary);"></i> Eligibility Criteria</h3>
+              <p style="color:var(--text-secondary);font-size:15px;line-height:1.7;">${item.eligibility || 'Open to engineering and technology students with foundational programming knowledge.'}</p>
+            </div>
+
+            <div class="info-section">
+              <h3><i class="fa-solid fa-microchip" style="color:var(--emerald-accent);"></i> Desired Skills</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                ${(item.skills || ['JavaScript', 'Python', 'Problem Solving']).map(s => `<span class="skill-tag" style="font-size:13px;padding:6px 14px;background:rgba(255,255,255,0.05);border:1px solid var(--border-subtle);border-radius:6px;color:#cbd5e1;">${s}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Sticky Sidebar Right Column -->
+          <div>
+            <div class="glass-panel" style="padding:26px;position:sticky;top:96px;">
+              <h3 style="font-size:18px;margin-bottom:16px;">Internship Overview</h3>
+
+              <div style="margin-bottom:20px;">
+                <div class="meta-row">
+                  <span style="color:var(--text-secondary);">Stipend:</span>
+                  <strong style="color:#6ee7b7;">${item.stipend || 'Competitive'}</strong>
+                </div>
+                <div class="meta-row">
+                  <span style="color:var(--text-secondary);">Work Mode:</span>
+                  <strong style="color:#fff;">${item.workMode || 'Hybrid'}</strong>
+                </div>
+                <div class="meta-row">
+                  <span style="color:var(--text-secondary);">Duration:</span>
+                  <strong style="color:#fff;">${item.duration || '3 Months'}</strong>
+                </div>
+                <div class="meta-row">
+                  <span style="color:var(--text-secondary);">Fee Structure:</span>
+                  <strong style="color:${isPaid ? '#fbbf24' : '#34d399'};">${isPaid ? `₹${item.fee || item.totalFee}` : 'Free'}</strong>
+                </div>
+                <div class="meta-row">
+                  <span style="color:var(--text-secondary);">Deadline:</span>
+                  <strong style="color:#fff;">${item.deadline ? new Date(item.deadline).toLocaleDateString() : 'Rolling'}</strong>
+                </div>
+                <div class="meta-row">
+                  <span style="color:var(--text-secondary);">Official Website:</span>
+                  <strong style="color:var(--cyan-accent);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                    ${item.companyWebsite || company.website ? `<a href="${item.companyWebsite || company.website}" target="_blank" rel="noopener noreferrer" style="color:var(--cyan-accent);text-decoration:none;">Visit Official Website</a>` : 'N/A'}
+                  </strong>
+                </div>
+                <div class="meta-row">
+                  <span style="color:var(--text-secondary);">Inquiries Email:</span>
+                  <span style="color:var(--text-muted);font-size:12px;">${item.companyEmail || company.email || 'careers@edutechnexus.com'}</span>
+                </div>
+              </div>
+
+              <button class="btn-nexus btn-nexus-primary" id="open-apply-btn" style="width:100%;padding:14px;font-size:15px;">
+                <i class="fa-solid fa-paper-plane"></i> REGISTER / APPLY
+              </button>
+
+              <div style="margin-top:14px;text-align:center;">
+                <a href="${companyProfileUrl}" class="btn-nexus btn-nexus-secondary" style="width:100%;font-size:13px;padding:10px;">
+                  <i class="fa-solid fa-building"></i> COMPANY PROFILE
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Pre-fill Modal Logic with Logged-in User Data
+        const u = currentUser || {};
+        document.getElementById('app-fullname').value = u.fullName || '';
+        document.getElementById('app-email').value = u.email || '';
+        document.getElementById('app-phone').value = u.phone || '';
+        document.getElementById('app-age').value = u.age || '';
+        document.getElementById('app-city').value = u.city || '';
+        document.getElementById('app-state').value = u.state || 'Tamil Nadu';
+        document.getElementById('app-address').value = u.address || '';
+        document.getElementById('app-github').value = u.github || '';
+        document.getElementById('app-linkedin').value = u.linkedin || '';
+        document.getElementById('app-portfolio').value = u.portfolio || '';
+        document.getElementById('app-skills').value = Array.isArray(u.skills) ? u.skills.join(', ') : (u.skills || '');
+
+        const userTypeSelect = document.getElementById('app-usertype');
+        userTypeSelect.value = (u.userType || 'student').toLowerCase();
+
+        function renderConditionalFields(type) {
+          const container = document.getElementById('app-conditional-fields');
+          if (type === 'student') {
+            container.innerHTML = `
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">College / Institution Name *</label>
+                  <input type="text" id="app-institution" class="nexus-input" value="${u.institution || u.college || ''}" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department *</label>
+                  <input type="text" id="app-dept" class="nexus-input" value="${u.department || ''}" required>
+                </div>
+              </div>
+              <div class="form-grid-2" style="margin-top:10px;">
+                <div class="form-group">
+                  <label class="form-label">Year of Study *</label>
+                  <select id="app-year" class="nexus-select" style="width:100%;">
+                    <option value="1" ${u.year === '1' ? 'selected' : ''}>1st Year</option>
+                    <option value="2" ${u.year === '2' ? 'selected' : ''}>2nd Year</option>
+                    <option value="3" ${u.year === '3' ? 'selected' : ''}>3rd Year</option>
+                    <option value="4" ${u.year === '4' ? 'selected' : ''}>4th Year</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Register Number *</label>
+                  <input type="text" id="app-regnum" class="nexus-input" value="${u.registerNumber || u.studentId || ''}" required>
+                </div>
+              </div>
+            `;
+          } else if (type === 'staff') {
+            container.innerHTML = `
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Institution Name *</label>
+                  <input type="text" id="app-institution" class="nexus-input" value="${u.institution || u.college || ''}" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department *</label>
+                  <input type="text" id="app-dept" class="nexus-input" value="${u.department || ''}" required>
+                </div>
+              </div>
+              <div class="form-group" style="margin-top:10px;">
+                <label class="form-label">Designation *</label>
+                <input type="text" id="app-designation" class="nexus-input" value="${u.designation || ''}" placeholder="e.g. Assistant Professor" required>
+              </div>
+            `;
+          } else if (type === 'worker') {
+            container.innerHTML = `
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Company Name *</label>
+                  <input type="text" id="app-company" class="nexus-input" value="${u.company || ''}" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Job Role / Designation *</label>
+                  <input type="text" id="app-jobrole" class="nexus-input" value="${u.designation || ''}" required>
+                </div>
+              </div>
+            `;
+          } else {
+            container.innerHTML = `
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Organization / Company</label>
+                  <input type="text" id="app-org" class="nexus-input" value="${u.company || u.institution || ''}">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Occupation *</label>
+                  <input type="text" id="app-occupation" class="nexus-input" value="${u.occupation || ''}" required>
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        renderConditionalFields(userTypeSelect.value);
+        userTypeSelect.onchange = () => renderConditionalFields(userTypeSelect.value);
+
+        // Resume PDF file handler & validation
+        let resumeBase64 = null;
+        let resumeFileName = '';
+        const resumeFileInput = document.getElementById('app-resume-file');
+        const resumeFileInfo = document.getElementById('resume-file-info');
+
+        resumeFileInput.onchange = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          // Validate PDF
+          if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+            showToast('Invalid file format. Only PDF documents are permitted.', 'error');
+            resumeFileInput.value = '';
+            resumeFileInfo.style.display = 'none';
+            resumeBase64 = null;
+            return;
+          }
+
+          // Validate max 5MB
+          if (file.size > 5 * 1024 * 1024) {
+            showToast('File size exceeds the 5MB limit. Please upload a smaller PDF.', 'error');
+            resumeFileInput.value = '';
+            resumeFileInfo.style.display = 'none';
+            resumeBase64 = null;
+            return;
+          }
+
+          resumeFileName = file.name;
+          const reader = new FileReader();
+          reader.onload = () => {
+            resumeBase64 = reader.result;
+            resumeFileInfo.textContent = `✓ Attached: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            resumeFileInfo.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        };
+
+        // Modal triggers
+        const applyModal = document.getElementById('apply-modal');
+        const openBtn = document.getElementById('open-apply-btn');
+        const closeBtn = document.getElementById('apply-modal-close');
+        const cancelBtn = document.getElementById('apply-cancel');
+        const applyForm = document.getElementById('apply-form');
+
+        openBtn.onclick = () => applyModal.classList.add('active');
+        closeBtn.onclick = () => applyModal.classList.remove('active');
+        cancelBtn.onclick = () => applyModal.classList.remove('active');
+        if (urlParams.get('apply') === 'true' || urlParams.get('apply') === '1') {
+          applyModal.classList.add('active');
+        }
+
+        // Form Submit Handler
+        applyForm.onsubmit = async (e) => {
+          e.preventDefault();
+          const errBox = document.getElementById('modal-app-error');
+          errBox.style.display = 'none';
+
+          if (!resumeBase64) {
+            errBox.textContent = 'Please attach your PDF resume to complete the application.';
+            errBox.style.display = 'block';
+            return;
+          }
+
+          const submitBtn = document.getElementById('apply-submit-btn');
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Submitting Application...';
+
+          try {
+            const userType = userTypeSelect.value;
+            const payload = {
+              fullName: document.getElementById('app-fullname').value.trim(),
+              age: document.getElementById('app-age').value,
+              email: document.getElementById('app-email').value.trim(),
+              phone: document.getElementById('app-phone').value.trim(),
+              userType,
+              city: document.getElementById('app-city').value.trim(),
+              place: document.getElementById('app-city').value.trim(),
+              state: document.getElementById('app-state').value.trim(),
+              address: document.getElementById('app-address').value.trim(),
+              skills: document.getElementById('app-skills').value.split(',').map(s => s.trim()).filter(Boolean),
+              experience: document.getElementById('app-experience').value.trim(),
+              githubUrl: document.getElementById('app-github').value.trim(),
+              linkedinUrl: document.getElementById('app-linkedin').value.trim(),
+              portfolioUrl: document.getElementById('app-portfolio').value.trim(),
+              coverLetter: document.getElementById('app-coverletter').value.trim(),
+              additionalInfo: document.getElementById('app-additional').value.trim(),
+              resumeUrl: resumeBase64,
+              resumeName: resumeFileName
+            };
+
+            if (userType === 'student') {
+              payload.institution = document.getElementById('app-institution')?.value.trim();
+              payload.college = payload.institution;
+              payload.department = document.getElementById('app-dept')?.value.trim();
+              payload.year = document.getElementById('app-year')?.value;
+              payload.registerNumber = document.getElementById('app-regnum')?.value.trim();
+            } else if (userType === 'staff') {
+              payload.institution = document.getElementById('app-institution')?.value.trim();
+              payload.department = document.getElementById('app-dept')?.value.trim();
+              payload.designation = document.getElementById('app-designation')?.value.trim();
+            } else if (userType === 'worker') {
+              payload.company = document.getElementById('app-company')?.value.trim();
+              payload.jobRole = document.getElementById('app-jobrole')?.value.trim();
+            } else {
+              payload.company = document.getElementById('app-org')?.value.trim();
+              payload.occupation = document.getElementById('app-occupation')?.value.trim();
+            }
+
+            const appRes = await api.post(`/internships/${item._id}/apply`, payload);
+
+            applyModal.classList.remove('active');
+            
+            // Show Success Modal
+            const successModal = document.getElementById('app-success-modal');
+            document.getElementById('success-app-id').textContent = appRes.applicationId || 'EN-INT-2026-0001';
+            const statusEl = document.getElementById('success-status');
+            if (statusEl) statusEl.textContent = appRes.status || 'Pending / Under Review';
+            const waLink = document.getElementById('success-whatsapp-link');
+            if (waLink) {
+              if (appRes.whatsappUrl) {
+                waLink.href = appRes.whatsappUrl;
+                waLink.style.display = 'flex';
+              } else {
+                waLink.style.display = 'none';
+              }
+            }
+            successModal.classList.add('active');
+
+          } catch (err) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Application';
+            errBox.textContent = err.message || 'Application submission failed. Please check your inputs.';
+            errBox.style.display = 'block';
+          }
+        };
+
+      } catch (err) {
+        document.getElementById('details-loader').innerHTML = `
+          <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i></div>
+          <div class="state-title">Error Loading Internship</div>
+          <p class="state-desc">${err.message}</p>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discussion Hub | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .discussions-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .discussion-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      backdrop-filter: blur(14px);
+      transition: var(--transition-normal);
+    }
+    .discussion-card:hover {
+      border-color: var(--border-glow);
+    }
+    .author-line {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .author-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-primary), var(--blue-electric));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+      font-size: 13px;
+    }
+    .card-actions-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 16px;
+      margin-top: 16px;
+    }
+    .action-pill-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition-fast);
+    }
+    .action-pill-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+    .action-pill-btn.liked {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.35);
+      color: #f87171;
+    }
+    .replies-tray {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .single-reply {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      border: 1px solid var(--border-subtle);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('discussion.html', 'Technical Discussions', 'Engage in collaborative peer problem solving, share architectural insights, and review questions.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <button class="btn-nexus btn-nexus-primary" id="new-discussion-btn">
+          <i class="fa-solid fa-plus"></i> Start Discussion
+        </button>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="toolbar-section">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="disc-search" class="nexus-input" placeholder="Search discussions by topic or keyword...">
+          </div>
+          <div class="filter-group">
+            <select id="disc-category" class="nexus-select">
+              <option value="all">All Topics</option>
+              <option value="General">General</option>
+              <option value="Career & Guidance">Career & Guidance</option>
+              <option value="Web Development">Web Development</option>
+              <option value="Artificial Intelligence">Artificial Intelligence</option>
+              <option value="Algorithms">Algorithms</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="discussions-stream" id="discussions-stream">
+          <div class="state-container">
+            <div class="state-spinner"></div>
+            <div class="state-title">Loading Discussions...</div>
+          </div>
+        </div>
+
+        <!-- New Discussion Modal -->
+        <div class="modal-overlay" id="disc-modal">
+          <div class="modal-dialog">
+            <div class="modal-header">
+              <h3 style="font-size:18px;">Start a New Discussion</h3>
+              <button class="modal-close" id="disc-modal-close">&times;</button>
+            </div>
+            <form id="disc-form" class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Discussion Title / Question</label>
+                <input type="text" id="post-title" class="nexus-input" placeholder="e.g. How to structure MongoDB compound indexes for analytics?" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Category</label>
+                <select id="post-category" class="nexus-select">
+                  <option value="General">General</option>
+                  <option value="Career & Guidance">Career & Guidance</option>
+                  <option value="Web Development">Web Development</option>
+                  <option value="Artificial Intelligence">Artificial Intelligence</option>
+                  <option value="Algorithms">Algorithms</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Detailed Description / Context</label>
+                <textarea id="post-content" class="nexus-textarea" rows="5" placeholder="Elaborate on your problem statement, code snippets, or thoughts..." required></textarea>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;">
+                <button type="button" class="btn-nexus btn-nexus-secondary" id="disc-cancel">Cancel</button>
+                <button type="submit" class="btn-nexus btn-nexus-primary" id="disc-submit-btn">Publish Discussion</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      let allDiscussions = [];
+
+      async function fetchDiscussions() {
+        try {
+          const res = await api.get('/discussions');
+          allDiscussions = res.discussions || [];
+          renderDiscussions(allDiscussions);
+        } catch (err) {
+          document.getElementById('discussions-stream').innerHTML = `
+            <div class="state-container">
+              <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="state-title">Unable to Load Discussions</div>
+              <p class="state-desc">${err.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      function renderDiscussions(list) {
+        const stream = document.getElementById('discussions-stream');
+        if (!stream) return;
+
+        const search = (document.getElementById('disc-search')?.value || '').toLowerCase().trim();
+        const cat = document.getElementById('disc-category')?.value || 'all';
+
+        const filtered = list.filter(d => {
+          const matchSearch = !search || d.title.toLowerCase().includes(search) || (d.content || '').toLowerCase().includes(search);
+          const matchCat = cat === 'all' || d.category === cat;
+          return matchSearch && matchCat;
+        });
+
+        if (!filtered.length) {
+          stream.innerHTML = `
+            <div class="state-container">
+              <div class="state-icon"><i class="fa-solid fa-comments"></i></div>
+              <div class="state-title">No Discussions Yet</div>
+              <p class="state-desc">Be the first student to post a technical question or topic!</p>
+            </div>
+          `;
+          return;
+        }
+
+        stream.innerHTML = filtered.map(d => {
+          const authorName = d.author?.fullName || 'Anonymous';
+          const authorDept = d.author?.department || 'Engineering';
+          const likesCount = (d.likes || []).length;
+          const isLiked = d.likes?.includes(layout.currentUser._id);
+
+          return `
+            <article class="discussion-card" id="card-${d._id}">
+              <div class="author-line">
+                <div class="author-avatar">${authorName[0]?.toUpperCase() || 'U'}</div>
+                <div>
+                  <div style="font-weight:600;font-size:14px;color:#fff;">${authorName}</div>
+                  <div style="font-size:12px;color:var(--text-muted);">${authorDept} · ${new Date(d.createdAt).toLocaleDateString()}</div>
+                </div>
+                <span class="nexus-badge badge-purple" style="margin-left:auto;">${d.category || 'General'}</span>
+              </div>
+
+              <h3 style="font-size:18px;margin-bottom:8px;">${d.title}</h3>
+              <p style="color:var(--text-secondary);font-size:14px;line-height:1.6;white-space:pre-line;">${d.content}</p>
+
+              <div class="card-actions-bar">
+                <button class="action-pill-btn ${isLiked ? 'liked' : ''}" data-like-id="${d._id}">
+                  <i class="fa-solid fa-heart"></i> <span id="like-count-${d._id}">${likesCount}</span>
+                </button>
+                <button class="action-pill-btn" data-toggle-replies="${d._id}">
+                  <i class="fa-solid fa-reply"></i> <span>${d.repliesCount || 0} Replies</span>
+                </button>
+              </div>
+
+              <!-- Replies Tray -->
+              <div class="replies-tray" id="tray-${d._id}" style="display:none;">
+                <div id="replies-list-${d._id}">
+                  <div class="state-spinner" style="margin:10px auto;"></div>
+                </div>
+                <form class="reply-form" data-reply-form="${d._id}" style="display:flex;gap:10px;margin-top:10px;">
+                  <input type="text" class="nexus-input" placeholder="Write a response..." required style="padding:8px 14px;font-size:13px;">
+                  <button type="submit" class="btn-nexus btn-nexus-primary" style="padding:8px 16px;font-size:13px;flex-shrink:0;">
+                    Reply
+                  </button>
+                </form>
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        // Like buttons
+        stream.querySelectorAll('[data-like-id]').forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.likeId;
+            try {
+              const res = await api.post(`/discussions/${id}/like`, {});
+              const countEl = document.getElementById(`like-count-${id}`);
+              if (countEl) countEl.textContent = res.likes;
+              btn.classList.toggle('liked', res.isLiked);
+            } catch (e) {
+              showToast(e.message, 'error');
+            }
+          };
+        });
+
+        // Toggle replies
+        stream.querySelectorAll('[data-toggle-replies]').forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.toggleReplies;
+            const tray = document.getElementById(`tray-${id}`);
+            if (tray.style.display === 'none') {
+              tray.style.display = 'flex';
+              loadReplies(id);
+            } else {
+              tray.style.display = 'none';
+            }
+          };
+        });
+
+        // Reply form submission
+        stream.querySelectorAll('[data-reply-form]').forEach(form => {
+          form.onsubmit = async (e) => {
+            e.preventDefault();
+            const id = form.dataset.replyForm;
+            const input = form.querySelector('input');
+            const content = input.value.trim();
+            if (!content) return;
+
+            try {
+              await api.post(`/discussions/${id}/replies`, { content });
+              input.value = '';
+              showToast('Reply published! +5 XP', 'success');
+              await refreshUserXP();
+              await loadReplies(id);
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          };
+        });
+      }
+
+      async function loadReplies(discussionId) {
+        const listEl = document.getElementById(`replies-list-${discussionId}`);
+        if (!listEl) return;
+        try {
+          const res = await api.get(`/discussions/${discussionId}`);
+          const replies = res.replies || [];
+          if (!replies.length) {
+            listEl.innerHTML = '<p style="font-size:12px;color:var(--text-muted);padding:6px 0;">No replies yet. Be the first to answer!</p>';
+            return;
+          }
+          listEl.innerHTML = replies.map(r => `
+            <div class="single-reply">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <strong style="color:var(--cyan-accent);">${r.author?.fullName || 'Peer'}</strong>
+                <span style="color:var(--text-muted);font-size:11px;">${new Date(r.createdAt).toLocaleDateString()}</span>
+              </div>
+              <p style="color:#cbd5e1;">${r.content}</p>
+            </div>
+          `).join('');
+        } catch (err) {
+          listEl.innerHTML = `<p style="color:#ef4444;font-size:12px;">Failed to load replies: ${err.message}</p>`;
+        }
+      }
+
+      // Start Discussion Modal Handler
+      const modal = document.getElementById('disc-modal');
+      document.getElementById('new-discussion-btn').onclick = () => modal.classList.add('active');
+      document.getElementById('disc-modal-close').onclick = () => modal.classList.remove('active');
+      document.getElementById('disc-cancel').onclick = () => modal.classList.remove('active');
+
+      document.getElementById('disc-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('disc-submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Publishing...';
+
+        try {
+          await api.post('/discussions', {
+            title: document.getElementById('post-title').value.trim(),
+            category: document.getElementById('post-category').value,
+            content: document.getElementById('post-content').value.trim()
+          });
+
+          modal.classList.remove('active');
+          document.getElementById('disc-form').reset();
+          showToast('Discussion published! +10 XP', 'success');
+          await refreshUserXP();
+          await fetchDiscussions();
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Publish Discussion';
+          showToast(err.message, 'error');
+        }
+      };
+
+      document.getElementById('disc-search')?.addEventListener('input', () => renderDiscussions(allDiscussions));
+      document.getElementById('disc-category')?.addEventListener('change', () => renderDiscussions(allDiscussions));
+
+      await fetchDiscussions();
+    });
+  </script>
+</body>
+</html>

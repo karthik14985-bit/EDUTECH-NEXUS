@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Details | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .game-details-wrapper {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .game-hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      backdrop-filter: blur(16px);
+      margin-bottom: 28px;
+      position: relative;
+      overflow: hidden;
+    }
+    .game-hero-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .game-badge-strip {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .rules-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      margin-bottom: 28px;
+    }
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .rule-box {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .rule-box-icon {
+      font-size: 20px;
+      color: var(--cyan-accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('games.html', 'Game Challenge Details', 'Review challenge specifications, evaluation metrics, and launch the tournament arena.');
+      if (!layout) return;
+
+      const { pageContent } = layout;
+
+      const params = new URLSearchParams(window.location.search);
+      const gameId = params.get('id');
+      const gameType = (params.get('type') || '').toLowerCase();
+
+      pageContent.innerHTML = `
+        <div class="game-details-wrapper">
+          <div id="gameDetailContainer">
+            <div class="state-container">
+              <div class="state-spinner"></div>
+              <div class="state-title">Loading game details...</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      loadGameDetails(gameId, gameType);
+    });
+
+    async function loadGameDetails(gameId, gameType) {
+      const container = document.getElementById('gameDetailContainer');
+      let game = null;
+
+      if (gameId) {
+        try {
+          const res = await api.get(`/games/${gameId}`);
+          if (res.success && res.game) game = res.game;
+        } catch (e) {
+          console.warn('Game not loaded by ID, checking default challenges:', e);
+        }
+      }
+
+      // Default Challenge Specs if gameId is not in DB or matched by type
+      if (!game) {
+        if (gameType === 'debugging' || (gameId && gameId.includes('debug'))) {
+          game = {
+            _id: gameId || 'debugging-arena',
+            title: 'Debugging Arena: Logic & Syntax Traps',
+            category: 'Debugging Challenge',
+            difficulty: 'Intermediate',
+            duration: '15 Minutes',
+            xpReward: 60,
+            playUrl: 'debugging-game.html',
+            description: 'Step into the technician arena. You will encounter real-world JavaScript code snippets with concealed defects—ranging from off-by-one loops and variable scoping bugs to mutation traps. Correct the code to pass all assertion suites.',
+            rules: [
+              { icon: 'fa-solid fa-bug', title: 'Diagnose Logic Flaws', text: 'Analyze syntax, asynchronous timing, and boundary conditions without changing public signatures.' },
+              { icon: 'fa-solid fa-bolt', title: 'Assertion Verification', text: 'All internal assertion suites must return true before the submission is accepted.' },
+              { icon: 'fa-solid fa-trophy', title: 'XP Rewards', text: 'Earn +60 XP directly added to your global leaderboard profile upon completion.' },
+              { icon: 'fa-solid fa-clock', title: 'Speed Bonus', text: 'Fast completions earn additional precision recognition on the daily leaderboard.' }
+            ]
+          };
+        } else {
+          game = {
+            _id: gameId || 'code-challenge-sprint',
+            title: 'JavaScript Algorithm Sprint',
+            category: 'Code Challenge',
+            difficulty: 'Beginner to Intermediate',
+            duration: '10 Minutes',
+            xpReward: 50,
+            playUrl: 'code-challenge.html',
+            description: 'Write performant, pure algorithmic functions within a live sandboxed code editor. Test cases are executed against your code in real-time, verifying both typical and adversarial edge inputs.',
+            rules: [
+              { icon: 'fa-solid fa-code', title: 'Live Code Execution', text: 'Edit code in the embedded editor and run test cases interactively.' },
+              { icon: 'fa-solid fa-hourglass-half', title: '10-Minute Countdown', text: 'Optimize and submit your solution before time expires.' },
+              { icon: 'fa-solid fa-award', title: 'Verified XP Awards', text: 'Receive +50 XP upon passing all test suites, instantly reflected on the live podium.' },
+              { icon: 'fa-solid fa-shield-halved', title: 'Safe Sandbox', text: 'Code runs in an isolated client-side worker for fast execution and zero latency.' }
+            ]
+          };
+        }
+      }
+
+      const playUrl = game.playUrl || (game.category === 'Debugging Challenge' ? 'debugging-game.html' : 'code-challenge.html');
+
+      container.innerHTML = `
+        <div class="game-hero-card">
+          <div class="game-badge-strip">
+            <span class="nexus-badge badge-purple">${game.category || 'Tech Challenge'}</span>
+            <span class="nexus-badge badge-blue">${game.difficulty || 'All Levels'}</span>
+            <span class="nexus-badge badge-amber"><i class="fa-solid fa-bolt"></i> +${game.xpReward || 50} XP Reward</span>
+          </div>
+
+          <h2 style="font-size:28px;margin-bottom:12px;color:#fff;">${game.title}</h2>
+          <p style="color:var(--text-secondary);font-size:15px;line-height:1.7;margin-bottom:24px;">
+            ${game.description}
+          </p>
+
+          <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+            <a href="${playUrl}${game._id ? '?id=' + game._id : ''}" class="btn-nexus btn-nexus-primary" style="padding:12px 28px;font-size:15px;">
+              <i class="fa-solid fa-play"></i> Play Game Now
+            </a>
+            <a href="games.html" class="btn-nexus btn-nexus-secondary" style="padding:12px 22px;">
+              <i class="fa-solid fa-arrow-left"></i> All Games
+            </a>
+            <a href="leaderboard.html" class="btn-nexus btn-nexus-secondary" style="padding:12px 22px;">
+              <i class="fa-solid fa-trophy" style="color:#fbbf24;"></i> View Leaderboard
+            </a>
+          </div>
+        </div>
+
+        <div class="rules-card">
+          <h3 style="font-size:20px;color:#fff;margin-bottom:8px;"><i class="fa-solid fa-list-check" style="color:var(--cyan-accent);"></i> Challenge Rules & Evaluation</h3>
+          <p style="color:var(--text-secondary);font-size:14px;">Carefully review the requirements before entering the challenge sandbox.</p>
+
+          <div class="rules-grid">
+            ${(game.rules || [
+              { icon: 'fa-solid fa-code', title: 'Automated Testing', text: 'Each problem is validated against test cases with deterministic expected outputs.' },
+              { icon: 'fa-solid fa-bolt', title: 'Real-time XP', text: 'Points are registered instantly in MongoDB, propelling you up the live podium.' },
+              { icon: 'fa-solid fa-clock', title: 'Timer Enforced', text: 'Keep track of the countdown clock to maximize completion scoring.' },
+              { icon: 'fa-solid fa-circle-check', title: 'Fair Play', text: 'Unique completions earn maximum milestone awards and achievement badges.' }
+            ]).map(r => `
+              <div class="rule-box">
+                <i class="${r.icon} rule-box-icon"></i>
+                <div>
+                  <h4 style="font-size:14px;color:#fff;margin-bottom:4px;">${r.title}</h4>
+                  <p style="font-size:12px;color:var(--text-secondary);margin:0;line-height:1.5;">${r.text}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

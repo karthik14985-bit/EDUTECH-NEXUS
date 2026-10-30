@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson Management | EDUTECH NEXUS Admin</title>
+  <meta name="description" content="Manage individual lessons, YouTube links, local video uploads, and sequence for course.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/admin-enhancements.css">
+  <style>
+    .course-header-card {
+      background: linear-gradient(135deg, rgba(18, 36, 59, 0.98), rgba(10, 22, 39, 0.98));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .video-source-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin: 12px 0 16px;
+    }
+    .video-source-card {
+      background: #081626;
+      border: 2px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+    .video-source-card:hover {
+      border-color: #3b82f6;
+      background: rgba(59, 130, 246, 0.05);
+    }
+    .video-source-card.selected {
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.12);
+      box-shadow: 0 0 16px rgba(99, 102, 241, 0.2);
+    }
+    .video-source-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .icon-youtube { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .icon-upload { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .preview-box {
+      margin-top: 14px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 16 / 9;
+      max-height: 260px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line);
+    }
+    .preview-box iframe, .preview-box video {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+      display: none;
+    }
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #10b981);
+      transition: width 0.2s ease;
+    }
+    .lesson-row-card {
+      background: linear-gradient(145deg, rgba(18, 36, 59, 0.95), rgba(14, 28, 48, 0.95));
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .lesson-row-card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateY(-2px);
+    }
+    .lesson-num-badge {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: #38bdf8;
+      min-width: 80px;
+    }
+    .btn-action-sm {
+      padding: 7px 12px;
+      font-size: 11px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <!-- Admin Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="brand">
+        EDUTECH NEXUS
+        <small>ADMIN CONTROL CENTER</small>
+      </div>
+      <nav class="admin-nav">
+        <a href="admin-dashboard.html"><i class="fa-solid fa-chart-pie"></i> &nbsp;Dashboard</a>
+        <a href="admin-students.html"><i class="fa-solid fa-users"></i> &nbsp;Students & Users</a>
+        <a class="active" href="admin-courses.html"><i class="fa-solid fa-book-open"></i> &nbsp;Courses</a>
+        <a href="admin-course-registrations.html"><i class="fa-solid fa-clipboard-user"></i> &nbsp;Course Registrations</a>
+        <a href="admin-certificates.html"><i class="fa-solid fa-certificate"></i> &nbsp;Certificates</a>
+        <a href="admin-internships.html"><i class="fa-solid fa-briefcase"></i> &nbsp;Internships</a>
+        <a href="admin-companies.html"><i class="fa-solid fa-building"></i> &nbsp;Companies & Partners</a>
+        <a href="admin-internship-applications.html"><i class="fa-solid fa-file-signature"></i> &nbsp;Applications Tracking</a>
+        <a href="admin-events.html"><i class="fa-solid fa-calendar-days"></i> &nbsp;Events</a>
+        <a href="admin-games.html"><i class="fa-solid fa-gamepad"></i> &nbsp;Games</a>
+        <a href="admin-discussions.html"><i class="fa-solid fa-comments"></i> &nbsp;Discussions</a>
+        <a href="admin-clubs.html"><i class="fa-solid fa-people-group"></i> &nbsp;Clubs</a>
+        <a href="admin-messages.html"><i class="fa-solid fa-envelope"></i> &nbsp;Messages</a>
+        <a href="admin-leaderboard.html"><i class="fa-solid fa-trophy"></i> &nbsp;Leaderboard</a>
+        <a href="admin-activity.html"><i class="fa-solid fa-clock-rotate-left"></i> &nbsp;User Activity</a>
+        <a href="admin-settings.html"><i class="fa-solid fa-sliders"></i> &nbsp;Settings</a>
+        <a class="logout" href="javascript:void(0)" id="adminLogoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> &nbsp;Logout</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="admin-main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow"><i class="fa-solid fa-shield-halved"></i> EDUTECH NEXUS / CURRICULUM ARCHITECT</div>
+          <h1 id="pageCourseTitle">Course Lessons & Video Delivery</h1>
+          <p id="pageCourseDesc">Loading course curriculum telemetry...</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+          <a href="admin-courses.html" class="btn secondary" style="padding:10px 14px;font-size:12px;">
+            <i class="fa-solid fa-arrow-left"></i> BACK TO COURSES
+          </a>
+          <button class="btn secondary" id="btnTogglePublish" style="padding:10px 14px;font-size:12px;border-color:#10b981;color:#10b981;display:inline-flex;align-items:center;gap:6px;">
+            <i class="fa-solid fa-globe"></i> <span id="publishBtnText">PUBLISH COURSE</span>
+          </button>
+          <button class="btn" id="btnOpenAddLesson" style="padding:10px 16px;font-size:13px;display:inline-flex;align-items:center;gap:6px;">
+            <i class="fa-solid fa-plus"></i> ADD LESSON
+          </button>
+        </div>
+      </header>
+
+      <!-- Course Header Summary Banner (Requirement 4) -->
+      <section class="course-header-card" id="courseSummaryCard">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:280px;">
+            <span class="nexus-badge" id="courseCategoryBadge" style="background:rgba(56,189,248,0.15);color:#38bdf8;margin-bottom:8px;display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;">General Tech</span>
+            <h2 id="summaryCourseName" style="font-family:'Space Grotesk',sans-serif;font-size:22px;color:#fff;margin:6px 0 10px;">--</h2>
+            <p id="summaryCourseDesc" style="color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 14px;max-width:800px;">--</p>
+            <div style="display:flex;gap:16px;font-size:13px;color:#cbd5e1;flex-wrap:wrap;">
+              <span><i class="fa-regular fa-clock" style="color:#a694ff;"></i> <strong id="summaryCourseDuration">--</strong></span>
+              <span><i class="fa-solid fa-bolt" style="color:#fbbf24;"></i> <strong id="summaryCourseXP">--</strong> XP</span>
+              <span><i class="fa-solid fa-signal" style="color:#38bdf8;"></i> <strong id="summaryCourseDifficulty">--</strong></span>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <div style="background:#081626;border:1px solid var(--line);border-radius:10px;padding:12px 18px;text-align:center;">
+              <span style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;">Course Status</span>
+              <strong id="badgeCourseStatus" style="font-size:16px;color:#fbbf24;font-family:'Space Grotesk',sans-serif;display:block;margin-top:4px;">Draft</strong>
+            </div>
+            <div style="background:#081626;border:1px solid var(--line);border-radius:10px;padding:12px 18px;text-align:center;">
+              <span style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;">Lessons Completed</span>
+              <strong id="badgeLessonsProgress" style="font-size:20px;color:#38bdf8;font-family:'Space Grotesk',sans-serif;">0 / 10</strong>
+            </div>
+            <div style="background:#081626;border:1px solid var(--line);border-radius:10px;padding:12px 18px;text-align:center;">
+              <span style="font-size:11px;color:var(--muted);text-transform:uppercase;display:block;">Published</span>
+              <strong id="badgePublishedLessons" style="font-size:20px;color:#34d399;font-family:'Space Grotesk',sans-serif;">0</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Action Bar -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:17px;color:#fff;margin:0;display:flex;align-items:center;gap:8px;">
+          <i class="fa-solid fa-list-check" style="color:#8065ff;"></i> Course Curriculum & Sequential Lessons
+        </h3>
+        <div style="display:flex;gap:10px;">
+          <button class="btn secondary" id="btnOpenReorderModal" style="padding:8px 14px;font-size:12px;">
+            <i class="fa-solid fa-arrows-up-down"></i> REORDER LESSONS
+          </button>
+          <button class="btn" id="btnTopAddLesson" style="padding:8px 14px;font-size:12px;">
+            <i class="fa-solid fa-plus"></i> ADD LESSON
+          </button>
+        </div>
+      </div>
+
+      <!-- Lessons List Container -->
+      <div id="lessonsContainer">
+        <div style="text-align:center;padding:40px;color:var(--muted);">
+          <i class="fa-solid fa-spinner fa-spin"></i> Loading course lessons...
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- ADD / EDIT LESSON MODAL (Requirements 5, 6, 7, 8, 9, 10) -->
+  <div class="modal" id="lessonModal" hidden>
+    <div class="modal-card" style="width:min(780px, 95%);">
+      <div class="modal-head">
+        <h3 id="lessonModalTitle" style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:18px;color:#fff;">
+          <i class="fa-solid fa-video"></i> Add Lesson
+        </h3>
+        <button type="button" id="btnCloseLessonModal">&times;</button>
+      </div>
+
+      <form id="lessonForm" class="modal-body">
+        <input type="hidden" id="lessonFormId">
+        <input type="hidden" id="lessonVideoType" value="youtube">
+        <input type="hidden" id="lessonVideoFileHidden" value="">
+
+        <div class="form-grid">
+          <!-- 1. Lesson Number -->
+          <div>
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              1. Lesson Number *
+            </label>
+            <input type="number" id="lessonNumber" min="1" value="1" required style="width:100%;">
+          </div>
+
+          <!-- 5. Lesson Duration -->
+          <div>
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              5. Lesson Duration
+            </label>
+            <input type="text" id="lessonDuration" value="20 mins" placeholder="e.g. 20 mins" style="width:100%;">
+          </div>
+
+          <!-- 2. Lesson Title -->
+          <div class="full">
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              2. Lesson Title *
+            </label>
+            <input type="text" id="lessonTitle" placeholder="e.g. Introduction to HTML Fundamentals" required style="width:100%;">
+          </div>
+
+          <!-- 3. Lesson Description -->
+          <div class="full">
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              3. Lesson Description
+            </label>
+            <textarea id="lessonDescription" placeholder="Detailed architectural breakdown, concepts, and guided implementation." style="width:100%;min-height:75px;"></textarea>
+          </div>
+
+          <!-- 4. Learning Objectives -->
+          <div class="full">
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              4. Learning Objectives
+            </label>
+            <textarea id="lessonObjectives" placeholder="Understand DOM structure&#10;Write semantic HTML tags&#10;Implement responsive containers" style="width:100%;min-height:70px;"></textarea>
+            <div class="field-hint">Enter key bullet points separated by newlines or commas.</div>
+          </div>
+
+          <!-- 6. Lesson XP -->
+          <div>
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              6. Lesson XP
+            </label>
+            <input type="number" id="lessonXP" value="50" min="10" step="10" style="width:100%;">
+          </div>
+
+          <!-- 9. Lesson Status -->
+          <div>
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              9. Lesson Status
+            </label>
+            <select id="lessonStatus" style="width:100%;">
+              <option value="published">Published (Active)</option>
+              <option value="draft">Draft (Hidden)</option>
+            </select>
+          </div>
+
+          <!-- 7. Video Source Selection Cards (Requirement 5: EXACTLY TWO PRIMARY OPTIONS) -->
+          <div class="full">
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              7. Video Source *
+            </label>
+            <div class="video-source-cards">
+              <!-- OPTION 1: YouTube -->
+              <div class="video-source-card selected" id="cardSourceYoutube">
+                <div class="video-source-icon icon-youtube">
+                  <i class="fa-brands fa-youtube"></i>
+                </div>
+                <div>
+                  <strong style="color:#fff;display:block;font-size:14px;">YouTube Video Link</strong>
+                  <span style="font-size:11px;color:var(--muted);">Stream via YouTube embed player</span>
+                </div>
+              </div>
+
+              <!-- OPTION 2: Upload Device -->
+              <div class="video-source-card" id="cardSourceUpload">
+                <div class="video-source-icon icon-upload">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div>
+                  <strong style="color:#fff;display:block;font-size:14px;">Upload Video From Device</strong>
+                  <span style="font-size:11px;color:var(--muted);">Direct MP4/WebM hosting</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. VIDEO INPUT GROUP: OPTION 1 (YOUTUBE) -->
+          <div class="full" id="groupYoutubeInput">
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              8. YouTube Video URL *
+            </label>
+            <input type="url" id="lessonYoutubeUrl" placeholder="https://www.youtube.com/watch?v=VIDEO_ID or https://youtu.be/VIDEO_ID" style="width:100%;">
+            <div class="field-hint" id="ytIdExtractionHint">Supports standard, youtu.be, and shorts links.</div>
+
+            <!-- YouTube Video Live Preview (Requirement 6) -->
+            <div class="preview-box" id="ytPreviewBox" style="display:none;margin-top:12px;">
+              <iframe id="ytPreviewIframe" src="" allowfullscreen></iframe>
+            </div>
+          </div>
+
+          <!-- 8. VIDEO INPUT GROUP: OPTION 2 (UPLOAD FROM DEVICE) -->
+          <div class="full" id="groupUploadInput" style="display:none;">
+            <label style="display:block;font-size:12px;color:#b9c8dc;margin-bottom:5px;font-weight:600;">
+              8. Select & Upload Video File (.mp4, .webm, .mov) *
+            </label>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <input type="file" id="lessonVideoFileInput" accept=".mp4,.webm,.mov,video/*" style="flex:1;min-width:240px;background:#081626;padding:8px;border-radius:6px;border:1px solid var(--line);">
+              <button type="button" class="btn" id="btnUploadDeviceVideo" style="padding:9px 16px;font-size:12px;">
+                <i class="fa-solid fa-upload"></i> Upload Video
+              </button>
+            </div>
+
+            <!-- Upload Progress Bar (Requirement 7) -->
+            <div class="progress-bar-container" id="uploadProgressBarContainer">
+              <div class="progress-bar-fill" id="uploadProgressBarFill"></div>
+            </div>
+            <div id="uploadStatusText" style="font-size:12px;color:var(--muted);margin-top:6px;"></div>
+
+            <!-- HTML5 Video Preview (Requirement 7) -->
+            <div class="preview-box" id="localPreviewBox" style="display:none;margin-top:12px;">
+              <video id="localPreviewVideo" controls playsinline style="width:100%;height:100%;">
+                <source id="localPreviewSource" src="" type="video/mp4">
+              </video>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--line);padding-top:16px;flex-wrap:wrap;">
+          <button type="button" class="btn secondary" id="btnCancelLessonModal">CANCEL</button>
+          <button type="button" class="btn" id="btnSaveAndAddNext" style="background:#059669;border-color:#059669;">
+            <i class="fa-solid fa-forward-step"></i> SAVE & ADD NEXT LESSON
+          </button>
+          <button type="submit" class="btn" id="btnSaveLesson">
+            <i class="fa-solid fa-floppy-disk"></i> SAVE LESSON
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- REORDER LESSONS MODAL (Requirement 4) -->
+  <div class="modal" id="reorderModal" hidden>
+    <div class="modal-card" style="width:min(650px, 95%);">
+      <div class="modal-head">
+        <h3 style="margin:0;font-family:'Space Grotesk',sans-serif;font-size:18px;color:#fff;">
+          <i class="fa-solid fa-arrows-up-down"></i> Reorder Course Lessons
+        </h3>
+        <button type="button" id="btnCloseReorderModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--muted);margin:0 0 16px;">
+          Use the Up (▲) and Down (▼) buttons to adjust the learning sequence. Students can view every lesson; completion is recorded in sequence.
+        </p>
+        <div id="reorderLessonsList" style="display:flex;flex-direction:column;gap:8px;max-height:400px;overflow-y:auto;">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--line);padding-top:16px;">
+        <button type="button" class="btn secondary" id="btnCancelReorder">CANCEL</button>
+        <button type="button" class="btn" id="btnSaveReorder">
+          <i class="fa-solid fa-check"></i> SAVE NEW ORDER
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE LESSON MODAL (Requirement 11) -->
+  <div class="modal" id="deleteLessonModal" hidden>
+    <div class="modal-card" style="width:min(500px, 95%);">
+      <div class="modal-head">
+        <h3 style="margin:0;font-family:'Space Grotesk',sans-serif;color:#f43f5e;font-size:18px;">
+          <i class="fa-solid fa-trash"></i> Delete Lesson Permanently?
+        </h3>
+        <button type="button" id="btnCloseDeleteLessonModal">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="danger-box" id="deleteLessonPromptText">
+          Are you sure you want to permanently delete this lesson?
+        </div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin:0 0 16px;">
+          The lesson will be permanently removed from MongoDB, lesson sequences will be recalculated, and its video cleaned up if unreferenced. Students will no longer see or access this lesson.
+        </p>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;border-top:1px solid var(--line);padding-top:16px;">
+        <button type="button" class="btn secondary" id="btnCancelDeleteLesson">CANCEL</button>
+        <button type="button" class="btn danger" id="btnConfirmDeleteLesson">
+          <i class="fa-solid fa-trash"></i> DELETE PERMANENTLY
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" style="display:none;"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // 1. Auth Guard
+      const isAuth = auth.isAuthenticated && auth.isAuthenticated();
+      const user = auth.getUser && auth.getUser();
+      if (!isAuth || (user && user.role !== 'admin')) {
+        window.location.replace('admin-login.html');
+        return;
+      }
+
+      document.getElementById('adminLogoutBtn')?.addEventListener('click', () => {
+        auth.logout();
+        window.location.href = 'admin-login.html';
+      });
+
+      // Extract courseId from URL query param
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('courseId');
+      if (!courseId) {
+        alert('Missing courseId parameter. Returning to Courses list.');
+        window.location.href = 'admin-courses.html';
+        return;
+      }
+
+      // State
+      let currentCourse = null;
+      let courseLessons = [];
+      let pendingDeleteLessonId = null;
+      let reorderBuffer = [];
+
+      // Toast Helper
+      function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = `toast ${isError ? 'error' : ''}`;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3500);
+      }
+
+      // Extract YouTube ID Helper
+      function extractYtId(input) {
+        if (!input) return '';
+        const str = String(input).trim();
+        const match = str.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/i);
+        if (match && match[1]) return match[1];
+        if (/^[\w-]{11}$/.test(str)) return str;
+        return '';
+      }
+
+      // Load Course & Lessons
+      async function loadCourseAndLessons() {
+        const container = document.getElementById('lessonsContainer');
+        container.innerHTML = `
+          <div style="text-align:center;padding:40px;color:var(--muted);">
+            <i class="fa-solid fa-spinner fa-spin"></i> Loading course curriculum from MongoDB...
+          </div>
+        `;
+
+        try {
+          const res = await api.get(`/admin/courses/${courseId}/lessons`);
+          currentCourse = res.course || {};
+          courseLessons = res.lessons || [];
+
+          // Sort lessons by order
+          courseLessons.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0));
+
+          renderCourseHeader();
+          renderLessonsList();
+        } catch (err) {
+          container.innerHTML = `
+            <div style="text-align:center;padding:40px;color:#f43f5e;">
+              <i class="fa-solid fa-triangle-exclamation"></i> Error loading curriculum: ${err.message}
+            </div>
+          `;
+          showToast(err.message, true);
+        }
+      }
+
+      function renderCourseHeader() {
+        document.getElementById('pageCourseTitle').textContent = `${currentCourse.title || 'Course'} — Lessons Management`;
+        document.getElementById('pageCourseDesc').textContent = currentCourse.description || 'Full curriculum control.';
+        document.getElementById('summaryCourseName').textContent = currentCourse.title || '--';
+        document.getElementById('summaryCourseDesc').textContent = currentCourse.description || 'No description provided.';
+        document.getElementById('summaryCourseDuration').textContent = currentCourse.duration || '30 Days';
+        document.getElementById('summaryCourseXP').textContent = currentCourse.xpReward || currentCourse.xp || 500;
+        document.getElementById('summaryCourseDifficulty').textContent = currentCourse.difficulty || 'Beginner';
+        document.getElementById('courseCategoryBadge').textContent = currentCourse.category || 'General Technology';
+
+        const total = courseLessons.length;
+        const target = currentCourse.totalLessons || 10;
+        const pubCount = courseLessons.filter(l => l.isPublished !== false && l.status !== 'draft' && l.status !== 'inactive').length;
+        if (document.getElementById('badgeLessonsProgress')) document.getElementById('badgeLessonsProgress').textContent = `${total} / ${target}`;
+        if (document.getElementById('badgePublishedLessons')) document.getElementById('badgePublishedLessons').textContent = pubCount;
+
+        const isPublished = currentCourse.status === 'published';
+        const statusBadge = document.getElementById('badgeCourseStatus');
+        if (statusBadge) {
+          statusBadge.textContent = isPublished ? 'Published' : 'Draft';
+          statusBadge.style.color = isPublished ? '#34d399' : '#fbbf24';
+        }
+
+        const pubBtn = document.getElementById('btnTogglePublish');
+        const pubText = document.getElementById('publishBtnText');
+        if (pubBtn && pubText) {
+          if (isPublished) {
+            pubText.textContent = 'UNPUBLISH COURSE';
+            pubBtn.style.color = '#fbbf24';
+            pubBtn.style.borderColor = '#fbbf24';
+            pubBtn.title = 'Revert course back to draft mode';
+          } else {
+            pubText.textContent = 'PUBLISH COURSE';
+            pubBtn.style.color = '#10b981';
+            pubBtn.style.borderColor = '#10b981';
+            pubBtn.title = 'Publish course to make it visible to students';
+          }
+        }
+      }
+
+      function renderLessonsList() {
+        const container = document.getElementById('lessonsContainer');
+        if (!courseLessons.length) {
+          container.innerHTML = `
+            <div style="background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:40px 20px;text-align:center;color:var(--muted);">
+              <i class="fa-solid fa-film" style="font-size:32px;margin-bottom:12px;display:block;color:#8065ff;"></i>
+              <strong style="color:#fff;font-size:16px;display:block;margin-bottom:6px;">No Lessons Created Yet</strong>
+              <p style="margin:0 0 16px;">This course has 0 lessons. Click "ADD LESSON" below to add Lesson 1 with a YouTube link or local video.</p>
+              <button class="btn" onclick="document.getElementById('btnOpenAddLesson').click()">
+                <i class="fa-solid fa-plus"></i> ADD LESSON 1
+              </button>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = courseLessons.map((l, idx) => {
+          const num = l.lessonNumber || (idx + 1);
+          const vType = (l.videoType || '').toLowerCase();
+          const ytId = l.youtubeVideoId || extractYtId(l.videoUrl);
+          const localFile = l.videoFile || (vType === 'local' ? l.videoUrl : '');
+          const isPub = l.isPublished !== false && l.status !== 'draft' && l.status !== 'inactive';
+
+          // Video Source Badge (Requirement 4)
+          let videoBadgeHtml = '';
+          if (vType === 'local' && localFile) {
+            videoBadgeHtml = `
+              <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.15);color:#34d399;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
+                <i class="fa-solid fa-file-video"></i> Local Video
+              </span>
+            `;
+          } else if (ytId || vType === 'youtube') {
+            videoBadgeHtml = `
+              <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(239,68,68,0.15);color:#f87171;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
+                <i class="fa-brands fa-youtube"></i> YouTube (${ytId || 'Link'})
+              </span>
+            `;
+          } else {
+            videoBadgeHtml = `
+              <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(148,163,184,0.15);color:#94a3b8;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">
+                <i class="fa-solid fa-circle-question"></i> Video Not Added
+              </span>
+            `;
+          }
+
+          return `
+            <div class="lesson-row-card">
+              <div style="display:flex;align-items:center;gap:16px;flex:1;">
+                <div class="lesson-num-badge">
+                  Lesson ${num}
+                </div>
+                <div style="flex:1;">
+                  <strong style="color:#fff;font-size:15px;display:block;">${l.title}</strong>
+                  <div style="font-size:12px;color:var(--muted);margin-top:4px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+                    ${videoBadgeHtml}
+                    <span><i class="fa-regular fa-clock"></i> ${l.duration || '20 mins'}</span>
+                    <span><i class="fa-solid fa-bolt" style="color:#fbbf24;"></i> +${l.xp || 50} XP</span>
+                    <span style="color:${isPub ? '#34d399' : '#fbbf24'};font-weight:600;">
+                      ${isPub ? '✓ Published' : 'Draft'}
+                    </span>
+                    ${localFile ? `<code style="font-size:11px;color:#94a3b8;">${localFile}</code>` : ''}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons (Requirement 4: EDIT, CHANGE VIDEO, DELETE) -->
+              <div style="display:flex;gap:8px;align-items:center;">
+                <!-- EDIT LESSON -->
+                <button type="button" class="btn-action-sm btn-edit-lesson" data-id="${l._id}" style="background:#1b3352;color:#38bdf8;" title="Edit Lesson Details">
+                  <i class="fa-solid fa-pen-to-square"></i> EDIT
+                </button>
+
+                <!-- CHANGE VIDEO -->
+                <button type="button" class="btn-action-sm btn-change-video" data-id="${l._id}" style="background:#1e293b;color:#a694ff;" title="Change Video Source">
+                  <i class="fa-solid fa-video"></i> CHANGE VIDEO
+                </button>
+
+                <!-- DELETE LESSON -->
+                <button type="button" class="btn-action-sm btn-delete-lesson" data-id="${l._id}" data-num="${num}" data-title="${l.title.replace(/"/g, '&quot;')}" style="background:rgba(244,63,94,0.15);color:#f43f5e;" title="Permanently Delete Lesson">
+                  <i class="fa-solid fa-trash"></i> DELETE
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        attachLessonEvents();
+      }
+
+      function attachLessonEvents() {
+        document.querySelectorAll('.btn-edit-lesson').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const lessonId = btn.getAttribute('data-id');
+            const lesson = courseLessons.find(l => String(l._id) === String(lessonId));
+            if (lesson) openLessonModal(lesson);
+          });
+        });
+
+        document.querySelectorAll('.btn-change-video').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const lessonId = btn.getAttribute('data-id');
+            const lesson = courseLessons.find(l => String(l._id) === String(lessonId));
+            if (lesson) {
+              openLessonModal(lesson);
+              // Smooth scroll to video section
+              document.getElementById('cardSourceYoutube').scrollIntoView({ behavior: 'smooth' });
+            }
+          });
+        });
+
+        document.querySelectorAll('.btn-delete-lesson').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const lessonId = btn.getAttribute('data-id');
+            const num = btn.getAttribute('data-num');
+            const title = btn.getAttribute('data-title');
+            openDeleteLessonModal(lessonId, num, title);
+          });
+        });
+      }
+
+      // VIDEO SOURCE SELECTOR (Requirement 5)
+      const cardSourceYoutube = document.getElementById('cardSourceYoutube');
+      const cardSourceUpload = document.getElementById('cardSourceUpload');
+      const groupYoutubeInput = document.getElementById('groupYoutubeInput');
+      const groupUploadInput = document.getElementById('groupUploadInput');
+      const lessonVideoType = document.getElementById('lessonVideoType');
+
+      function setVideoSourceType(type) {
+        if (type === 'youtube') {
+          lessonVideoType.value = 'youtube';
+          cardSourceYoutube.classList.add('selected');
+          cardSourceUpload.classList.remove('selected');
+          groupYoutubeInput.style.display = 'block';
+          groupUploadInput.style.display = 'none';
+        } else {
+          lessonVideoType.value = 'local';
+          cardSourceUpload.classList.add('selected');
+          cardSourceYoutube.classList.remove('selected');
+          groupUploadInput.style.display = 'block';
+          groupYoutubeInput.style.display = 'none';
+        }
+      }
+
+      cardSourceYoutube.addEventListener('click', () => setVideoSourceType('youtube'));
+      cardSourceUpload.addEventListener('click', () => setVideoSourceType('local'));
+
+      // YouTube Live Validator & Embedded Preview (Requirement 6)
+      const ytInput = document.getElementById('lessonYoutubeUrl');
+      const ytPreviewBox = document.getElementById('ytPreviewBox');
+      const ytPreviewIframe = document.getElementById('ytPreviewIframe');
+      const ytIdExtractionHint = document.getElementById('ytIdExtractionHint');
+
+      function updateYtPreview() {
+        const id = extractYtId(ytInput.value);
+        if (id) {
+          ytPreviewIframe.src = `https://www.youtube.com/embed/${id}?rel=0`;
+          ytPreviewBox.style.display = 'block';
+          ytIdExtractionHint.innerHTML = `<span style="color:#10b981;font-weight:700;">✓ Detected YouTube Video ID: ${id}</span>`;
+        } else {
+          ytPreviewIframe.src = '';
+          ytPreviewBox.style.display = 'none';
+          ytIdExtractionHint.innerHTML = 'Enter a valid YouTube URL to generate video preview.';
+        }
+      }
+      ytInput.addEventListener('input', updateYtPreview);
+
+      // Local Video Upload with Real Progress Bar (Requirement 7)
+      const fileInput = document.getElementById('lessonVideoFileInput');
+      const btnUploadDeviceVideo = document.getElementById('btnUploadDeviceVideo');
+      const progressContainer = document.getElementById('uploadProgressBarContainer');
+      const progressBarFill = document.getElementById('uploadProgressBarFill');
+      const uploadStatusText = document.getElementById('uploadStatusText');
+      const localPreviewBox = document.getElementById('localPreviewBox');
+      const localPreviewVideo = document.getElementById('localPreviewVideo');
+      const localPreviewSource = document.getElementById('localPreviewSource');
+      const lessonVideoFileHidden = document.getElementById('lessonVideoFileHidden');
+
+      btnUploadDeviceVideo.addEventListener('click', () => {
+        if (!fileInput.files || !fileInput.files[0]) {
+          showToast('Please select a video file first (.mp4, .webm, .mov).', true);
+          return;
+        }
+
+        const file = fileInput.files[0];
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+
+        const formData = new FormData();
+        formData.append('video', file);
+
+        progressContainer.style.display = 'block';
+        progressBarFill.style.width = '0%';
+        uploadStatusText.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Uploading ${file.name} (${fileSizeMB} MB)...`;
+        btnUploadDeviceVideo.disabled = true;
+
+        const token = localStorage.getItem('nexus_token') || sessionStorage.getItem('nexus_token');
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `${window.EDUTECH_API_URL}/admin/upload-video`, true);
+        if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+        xhr.upload.onprogress = (e) => {
+          if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressBarFill.style.width = `${percent}%`;
+            uploadStatusText.innerHTML = `Uploading: ${percent}% (${(e.loaded/(1024*1024)).toFixed(1)} / ${fileSizeMB} MB)`;
+          }
+        };
+
+        xhr.onload = () => {
+          btnUploadDeviceVideo.disabled = false;
+          try {
+            const res = JSON.parse(xhr.responseText);
+            if (xhr.status >= 200 && xhr.status < 300 && res.success) {
+              const videoPath = res.videoUrl || res.videoFile;
+              lessonVideoFileHidden.value = videoPath;
+              progressBarFill.style.width = '100%';
+              uploadStatusText.innerHTML = `<span style="color:#10b981;font-weight:700;"><i class="fa-solid fa-circle-check"></i> Video uploaded successfully: ${videoPath}</span>`;
+              showToast('Video uploaded successfully.');
+
+              // Set preview
+              localPreviewSource.src = videoPath;
+              localPreviewVideo.src = videoPath;
+              localPreviewVideo.load();
+              localPreviewBox.style.display = 'block';
+            } else {
+              throw new Error(res.message || 'Upload failed');
+            }
+          } catch (err) {
+            uploadStatusText.innerHTML = `<span style="color:#f43f5e;"><i class="fa-solid fa-triangle-exclamation"></i> Upload failed: ${err.message}</span>`;
+            showToast(err.message, true);
+          }
+        };
+
+        xhr.onerror = () => {
+          btnUploadDeviceVideo.disabled = false;
+          uploadStatusText.innerHTML = '<span style="color:#f43f5e;">Upload network error.</span>';
+          showToast('Network error during video upload.', true);
+        };
+
+        xhr.send(formData);
+      });
+
+      // Show file info on select
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) {
+          const file = fileInput.files[0];
+          const mb = (file.size / (1024 * 1024)).toFixed(1);
+          uploadStatusText.innerHTML = `Selected: <strong>${file.name}</strong> (${mb} MB). Click "Upload Video" to stream from server.`;
+        }
+      });
+
+      // ADD / EDIT LESSON MODAL LOGIC
+      const lessonModal = document.getElementById('lessonModal');
+      const lessonForm = document.getElementById('lessonForm');
+
+      function openLessonModal(lesson = null) {
+        lessonForm.reset();
+        ytPreviewBox.style.display = 'none';
+        localPreviewBox.style.display = 'none';
+        progressContainer.style.display = 'none';
+        uploadStatusText.innerHTML = '';
+
+        const modalTitle = document.getElementById('lessonModalTitle');
+        const formId = document.getElementById('lessonFormId');
+
+        if (lesson) {
+          const num = lesson.lessonNumber || lesson.order || 1;
+          modalTitle.innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Edit Lesson ${num}: ${lesson.title}`;
+          formId.value = lesson._id;
+          document.getElementById('lessonNumber').value = num;
+          document.getElementById('lessonTitle').value = lesson.title || '';
+          document.getElementById('lessonDescription').value = lesson.description || '';
+          document.getElementById('lessonObjectives').value = (lesson.learningObjectives || lesson.objectives || []).join('\n');
+          document.getElementById('lessonDuration').value = lesson.duration || '20 mins';
+          document.getElementById('lessonXP').value = lesson.xp || 50;
+          document.getElementById('lessonStatus').value = (lesson.isPublished !== false && lesson.status !== 'draft') ? 'published' : 'draft';
+
+          const vType = (lesson.videoType || '').toLowerCase();
+          if (vType === 'local') {
+            setVideoSourceType('local');
+            const fileVal = lesson.videoFile || lesson.videoUrl || '';
+            lessonVideoFileHidden.value = fileVal;
+            if (fileVal) {
+              uploadStatusText.innerHTML = `Current Local Video: <code>${fileVal}</code>`;
+              localPreviewSource.src = fileVal;
+              localPreviewVideo.src = fileVal;
+              localPreviewVideo.load();
+              localPreviewBox.style.display = 'block';
+            }
+          } else {
+            setVideoSourceType('youtube');
+            const ytVal = lesson.youtubeVideoId ? `https://www.youtube.com/watch?v=${lesson.youtubeVideoId}` : (lesson.videoUrl || '');
+            document.getElementById('lessonYoutubeUrl').value = ytVal;
+            updateYtPreview();
+          }
+        } else {
+          modalTitle.innerHTML = '<i class="fa-solid fa-video"></i> Add Individual Lesson';
+          formId.value = '';
+          const nextNum = courseLessons.length + 1;
+          document.getElementById('lessonNumber').value = nextNum;
+          document.getElementById('lessonDuration').value = '20 mins';
+          document.getElementById('lessonXP').value = 50;
+          document.getElementById('lessonStatus').value = 'published';
+          lessonVideoFileHidden.value = '';
+          setVideoSourceType('youtube');
+        }
+
+        lessonModal.hidden = false;
+        document.getElementById('lessonTitle').focus();
+      }
+
+      document.getElementById('btnOpenAddLesson').addEventListener('click', () => openLessonModal(null));
+      document.getElementById('btnTopAddLesson').addEventListener('click', () => openLessonModal(null));
+      document.getElementById('btnCloseLessonModal').addEventListener('click', () => lessonModal.hidden = true);
+      document.getElementById('btnCancelLessonModal').addEventListener('click', () => lessonModal.hidden = true);
+
+      // SAVE LESSON SUBMIT HANDLER (Requirements 8, 9)
+      async function handleSaveLesson(andAddNext = false) {
+        const lessonId = document.getElementById('lessonFormId').value;
+        const isEditing = Boolean(lessonId);
+
+        const vType = lessonVideoType.value;
+        const title = document.getElementById('lessonTitle').value.trim();
+        const num = Number(document.getElementById('lessonNumber').value) || 1;
+        const isDraft = document.getElementById('lessonStatus').value === 'draft';
+
+        if (!title) {
+          showToast('Lesson Title is required.', true);
+          document.getElementById('lessonTitle').focus();
+          return false;
+        }
+
+        let youtubeVideoId = '';
+        let videoUrl = '';
+        let videoFile = '';
+
+        if (vType === 'youtube') {
+          const ytUrl = document.getElementById('lessonYoutubeUrl').value.trim();
+          youtubeVideoId = extractYtId(ytUrl);
+          if (!youtubeVideoId && !isDraft) {
+            showToast('A valid YouTube Video URL is required for YouTube lessons.', true);
+            return false;
+          }
+          videoUrl = youtubeVideoId ? `https://www.youtube.com/watch?v=${youtubeVideoId}` : ytUrl;
+        } else {
+          videoFile = lessonVideoFileHidden.value.trim();
+          if (!videoFile && !isDraft) {
+            showToast('Please upload a video file from your device first.', true);
+            return false;
+          }
+          videoUrl = videoFile;
+        }
+
+        const payload = {
+          lessonNumber: num,
+          order: num,
+          title,
+          description: document.getElementById('lessonDescription').value.trim(),
+          learningObjectives: document.getElementById('lessonObjectives').value.trim(),
+          duration: document.getElementById('lessonDuration').value.trim() || '20 mins',
+          xp: Number(document.getElementById('lessonXP').value) || 50,
+          videoType: vType,
+          videoUrl,
+          videoFile,
+          youtubeVideoId,
+          isPublished: !isDraft,
+          status: isDraft ? 'draft' : 'published'
+        };
+
+        const submitBtn = document.getElementById('btnSaveLesson');
+        const nextBtn = document.getElementById('btnSaveAndAddNext');
+        const activeBtn = andAddNext ? nextBtn : submitBtn;
+        const origText = activeBtn ? activeBtn.innerHTML : 'Save';
+
+        try {
+          if (submitBtn) submitBtn.disabled = true;
+          if (nextBtn) nextBtn.disabled = true;
+          if (activeBtn) activeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+          if (isEditing) {
+            await api.put(`/admin/courses/${courseId}/lessons/${lessonId}`, payload);
+            showToast('Lesson updated successfully.');
+          } else {
+            await api.post(`/admin/courses/${courseId}/lessons`, payload);
+            showToast('Lesson saved successfully.');
+          }
+
+          await loadCourseAndLessons();
+
+          if (andAddNext) {
+            lessonForm.reset();
+            document.getElementById('lessonFormId').value = '';
+            document.getElementById('lessonModalTitle').innerHTML = '<i class="fa-solid fa-video"></i> Add Individual Lesson';
+            const nextNum = courseLessons.length + 1;
+            document.getElementById('lessonNumber').value = nextNum;
+            document.getElementById('lessonDuration').value = '20 mins';
+            document.getElementById('lessonXP').value = 50;
+            document.getElementById('lessonStatus').value = 'published';
+            lessonVideoFileHidden.value = '';
+            setVideoSourceType('youtube');
+            ytPreviewBox.style.display = 'none';
+            localPreviewBox.style.display = 'none';
+            progressContainer.style.display = 'none';
+            uploadStatusText.innerHTML = '';
+            document.getElementById('lessonTitle').focus();
+            showToast(`Lesson saved. Ready to enter Lesson #${nextNum}.`);
+          } else {
+            lessonModal.hidden = true;
+          }
+          return true;
+        } catch (err) {
+          showToast(err.message, true);
+          return false;
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+          if (nextBtn) nextBtn.disabled = false;
+          if (activeBtn) activeBtn.innerHTML = origText;
+        }
+      }
+
+      lessonForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        handleSaveLesson(false);
+      });
+
+      document.getElementById('btnSaveAndAddNext').addEventListener('click', (e) => {
+        e.preventDefault();
+        handleSaveLesson(true);
+      });
+
+      // PUBLISH / UNPUBLISH COURSE BUTTON (Section 10)
+      const btnTogglePublish = document.getElementById('btnTogglePublish');
+      if (btnTogglePublish) {
+        btnTogglePublish.addEventListener('click', async () => {
+          const isCurrentlyPublished = currentCourse.status === 'published';
+          const origText = btnTogglePublish.innerHTML;
+
+          if (isCurrentlyPublished) {
+            if (!confirm(`Are you sure you want to unpublish "${currentCourse.title}"? Students will no longer see it in the active course catalog.`)) {
+              return;
+            }
+            try {
+              btnTogglePublish.disabled = true;
+              btnTogglePublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Unpublishing...';
+              await api.post(`/admin/courses/${courseId}/unpublish`);
+              showToast('Course reverted to Draft successfully.');
+              await loadCourseAndLessons();
+            } catch (err) {
+              showToast(err.message, true);
+            } finally {
+              btnTogglePublish.disabled = false;
+              btnTogglePublish.innerHTML = origText;
+            }
+          } else {
+            // Client-side pre-publication check (Section 10)
+            if (!currentCourse.title || !currentCourse.title.trim()) {
+              showToast('Course title is required before publishing.', true);
+              return;
+            }
+            if (courseLessons.length === 0) {
+              showToast('Cannot publish course without any lessons. Please add at least 1 lesson first.', true);
+              return;
+            }
+
+            const targetTotal = currentCourse.totalLessons || 0;
+            if (targetTotal > 0 && courseLessons.length < targetTotal) {
+              showToast(`Cannot publish incomplete course. Lessons completed: ${courseLessons.length} / ${targetTotal}. Please create all ${targetTotal} lessons before publishing.`, true);
+              return;
+            }
+
+            // Check every lesson's video source
+            for (let i = 0; i < courseLessons.length; i++) {
+              const l = courseLessons[i];
+              const num = l.lessonNumber || (i + 1);
+              const vType = (l.videoType || '').toLowerCase();
+              let hasVideo = false;
+              if (vType === 'youtube') {
+                hasVideo = Boolean(l.youtubeVideoId || l.youtubeUrl || l.videoUrl);
+              } else {
+                hasVideo = Boolean(l.videoFile || l.videoUrl || l.videoStorageKey);
+              }
+              if (!hasVideo) {
+                showToast(`Lesson #${num} ("${l.title}") is missing a valid video source. Complete all lessons before publishing.`, true);
+                return;
+              }
+            }
+
+            try {
+              btnTogglePublish.disabled = true;
+              btnTogglePublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
+              await api.post(`/admin/courses/${courseId}/publish`);
+              showToast('Course published successfully! Visible to students.');
+              await loadCourseAndLessons();
+            } catch (err) {
+              showToast(err.message, true);
+            } finally {
+              btnTogglePublish.disabled = false;
+              btnTogglePublish.innerHTML = origText;
+            }
+          }
+        });
+      }
+
+      // REORDER LESSONS MODAL LOGIC (Requirement 4 & 18)
+      const reorderModal = document.getElementById('reorderModal');
+      const reorderContainer = document.getElementById('reorderLessonsList');
+
+      function openReorderModal() {
+        if (!courseLessons.length) {
+          showToast('No lessons available to reorder.', true);
+          return;
+        }
+
+        reorderBuffer = [...courseLessons];
+        renderReorderList();
+        reorderModal.hidden = false;
+      }
+
+      function renderReorderList() {
+        reorderContainer.innerHTML = reorderBuffer.map((l, idx) => `
+          <div style="background:#081626;border:1px solid var(--line);border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-weight:700;color:#38bdf8;font-size:14px;width:30px;">#${idx + 1}</span>
+              <strong style="color:#fff;font-size:14px;">${l.title}</strong>
+            </div>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="btn secondary" data-order-up="${idx}" style="padding:4px 8px;font-size:11px;" ${idx === 0 ? 'disabled style="opacity:0.3;"' : ''}>
+                ▲
+              </button>
+              <button type="button" class="btn secondary" data-order-down="${idx}" style="padding:4px 8px;font-size:11px;" ${idx === reorderBuffer.length - 1 ? 'disabled style="opacity:0.3;"' : ''}>
+                ▼
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+        reorderContainer.querySelectorAll('[data-order-up]').forEach(b => {
+          b.onclick = () => {
+            const i = Number(b.dataset.orderUp);
+            if (i > 0) {
+              const temp = reorderBuffer[i - 1];
+              reorderBuffer[i - 1] = reorderBuffer[i];
+              reorderBuffer[i] = temp;
+              renderReorderList();
+            }
+          };
+        });
+
+        reorderContainer.querySelectorAll('[data-order-down]').forEach(b => {
+          b.onclick = () => {
+            const i = Number(b.dataset.orderDown);
+            if (i < reorderBuffer.length - 1) {
+              const temp = reorderBuffer[i + 1];
+              reorderBuffer[i + 1] = reorderBuffer[i];
+              reorderBuffer[i] = temp;
+              renderReorderList();
+            }
+          };
+        });
+      }
+
+      document.getElementById('btnOpenReorderModal').addEventListener('click', openReorderModal);
+      document.getElementById('btnCloseReorderModal').addEventListener('click', () => reorderModal.hidden = true);
+      document.getElementById('btnCancelReorder').addEventListener('click', () => reorderModal.hidden = true);
+
+      document.getElementById('btnSaveReorder').addEventListener('click', async () => {
+        const btn = document.getElementById('btnSaveReorder');
+        const origText = btn.innerHTML;
+        try {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+          const lessonIds = reorderBuffer.map(l => l._id);
+          await api.put(`/admin/courses/${courseId}/reorder-lessons`, { lessonIds });
+          showToast('Lessons reordered successfully.');
+          reorderModal.hidden = true;
+          await loadCourseAndLessons();
+        } catch (err) {
+          showToast(err.message, true);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = origText;
+        }
+      });
+
+      // DELETE LESSON CONFIRMATION MODAL LOGIC (Requirement 11)
+      const deleteLessonModal = document.getElementById('deleteLessonModal');
+
+      function openDeleteLessonModal(lessonId, num, title) {
+        pendingDeleteLessonId = lessonId;
+        document.getElementById('deleteLessonPromptText').textContent = 
+          `Are you sure you want to permanently delete Lesson ${num}: "${title}"?`;
+        deleteLessonModal.hidden = false;
+      }
+
+      document.getElementById('btnCloseDeleteLessonModal').addEventListener('click', () => deleteLessonModal.hidden = true);
+      document.getElementById('btnCancelDeleteLesson').addEventListener('click', () => deleteLessonModal.hidden = true);
+
+      document.getElementById('btnConfirmDeleteLesson').addEventListener('click', async () => {
+        if (!pendingDeleteLessonId) return;
+        const btn = document.getElementById('btnConfirmDeleteLesson');
+        const origText = btn.innerHTML;
+        try {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+          await api.delete(`/admin/courses/${courseId}/lessons/${pendingDeleteLessonId}`);
+          showToast('Lesson deleted permanently.');
+          deleteLessonModal.hidden = true;
+          pendingDeleteLessonId = null;
+          await loadCourseAndLessons();
+        } catch (err) {
+          showToast(err.message, true);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = origText;
+        }
+      });
+
+      // Initial Load
+      await loadCourseAndLessons();
+    });
+  </script>
+</body>
+</html>

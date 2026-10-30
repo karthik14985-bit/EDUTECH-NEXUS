@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses Catalog | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 26px;
+    }
+    .course-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition-normal);
+      backdrop-filter: blur(14px);
+    }
+    .course-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--border-glow);
+      box-shadow: var(--shadow-glow);
+    }
+    .course-thumb-wrapper {
+      position: relative;
+      height: 180px;
+      overflow: hidden;
+      background: #0f172a;
+    }
+    .course-thumb {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .course-card:hover .course-thumb {
+      transform: scale(1.05);
+    }
+    .course-badge-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+    }
+    .course-xp-overlay {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+    }
+    .course-body {
+      padding: 22px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .course-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+    .course-meta-row span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .course-title {
+      font-size: 19px;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+    .course-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .course-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 16px;
+      margin-top: auto;
+    }
+    .instructor-name {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('courses.html', 'Certificate Courses', 'Develop high-demand industry skills, complete practical lessons, and earn verified credentials.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <a href="certificate.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-award" style="color:#fbbf24;"></i> My Certificates
+        </a>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="toolbar-section">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="course-search" class="nexus-input" placeholder="Search courses by title, category, or skills...">
+          </div>
+          <div class="filter-group">
+            <select id="category-filter" class="nexus-select" style="min-width:180px;">
+              <option value="all">All Categories</option>
+              <option value="Artificial Intelligence">Artificial Intelligence</option>
+              <option value="Web Development">Web Development</option>
+              <option value="Programming">Programming</option>
+            </select>
+            <select id="difficulty-filter" class="nexus-select" style="min-width:150px;">
+              <option value="all">All Levels</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="courses-grid" id="courses-grid">
+          <div class="state-container" style="grid-column: 1 / -1;">
+            <div class="state-spinner"></div>
+            <div class="state-title">Loading Available Courses...</div>
+          </div>
+        </div>
+      `;
+
+      let allCourses = [];
+
+      async function fetchCourses() {
+        try {
+          const res = await api.get('/courses');
+          allCourses = res.courses || [];
+          renderCourses(allCourses);
+        } catch (error) {
+          document.getElementById('courses-grid').innerHTML = `
+            <div class="state-container" style="grid-column: 1 / -1;">
+              <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="state-title">Unable to Load Courses</div>
+              <p class="state-desc">${error.message || 'Please check your connection and try again.'}</p>
+            </div>
+          `;
+        }
+      }
+
+      function renderCourses(list) {
+        const grid = document.getElementById('courses-grid');
+        if (!grid) return;
+
+        const search = (document.getElementById('course-search')?.value || '').toLowerCase().trim();
+        const cat = document.getElementById('category-filter')?.value || 'all';
+        const diff = document.getElementById('difficulty-filter')?.value || 'all';
+
+        const filtered = list.filter(c => {
+          const matchSearch = !search || c.title.toLowerCase().includes(search) || (c.description || '').toLowerCase().includes(search) || (c.category || '').toLowerCase().includes(search);
+          const matchCat = cat === 'all' || c.category === cat;
+          const matchDiff = diff === 'all' || c.difficulty === diff || c.level === diff;
+          return matchSearch && matchCat && matchDiff;
+        });
+
+        if (!filtered.length) {
+          grid.innerHTML = `
+            <div class="state-container" style="grid-column: 1 / -1;">
+              <div class="state-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+              <div class="state-title">No Courses Match Your Criteria</div>
+              <p class="state-desc">Try clearing your filters or check back later as new curriculums are added.</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = filtered.map(course => {
+          const thumb = course.thumbnail || course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80';
+          const lessonsCount = course.lessons ? course.lessons.length : (course.lessonCount || 7);
+          const difficulty = course.difficulty || course.level || 'Beginner';
+          const diffBadge = difficulty === 'Advanced' ? 'badge-rose' : difficulty === 'Intermediate' ? 'badge-blue' : 'badge-green';
+
+          return `
+            <article class="course-card">
+              <div class="course-thumb-wrapper">
+                <img src="${thumb}" alt="${course.title}" class="course-thumb" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80'">
+                <div class="course-badge-overlay">
+                  <span class="nexus-badge ${diffBadge}">${difficulty}</span>
+                </div>
+                <div class="course-xp-overlay">
+                  <span class="nexus-badge badge-purple"><i class="fa-solid fa-bolt"></i> +${course.xpReward || 100} XP</span>
+                </div>
+              </div>
+
+              <div class="course-body">
+                <div>
+                  <div class="course-meta-row">
+                    <span><i class="fa-regular fa-clock"></i> ${course.duration || '6 weeks'}</span>
+                    <span><i class="fa-solid fa-book-bookmark"></i> ${lessonsCount} Lessons</span>
+                    <span><i class="fa-solid fa-tag"></i> ${course.category || 'Tech'}</span>
+                  </div>
+
+                  <h3 class="course-title">${course.title}</h3>
+                  <p class="course-desc">${course.description}</p>
+
+                  ${course.isEnrolled && course.enrollment ? `
+                    <div style="margin: 12px 0 16px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); padding: 10px 14px; border-radius: var(--radius-sm);">
+                      <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600; margin-bottom:6px;">
+                        <span style="color:#38bdf8;"><i class="fa-solid fa-chart-line"></i> Enrolled Progress</span>
+                        <span style="color:#a78bfa;">${course.enrollment.progress}%</span>
+                      </div>
+                      <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
+                        <div style="width:${course.enrollment.progress}%; height:100%; background:linear-gradient(90deg, #6366f1, #38bdf8); border-radius:3px;"></div>
+                      </div>
+                      <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">
+                        ${course.enrollment.completedLessons?.length || 0} of ${lessonsCount} Lessons Completed
+                        ${course.enrollment.quizPassed ? ' • <span style="color:#10b981;font-weight:700;">Quiz Passed ✓</span>' : ''}
+                      </div>
+                    </div>
+                  ` : ''}
+                </div>
+
+                <div class="course-footer">
+                  <div class="instructor-name">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                    <span>${course.instructor || 'EDUTECH Faculty'}</span>
+                  </div>
+                  <div style="display:flex;gap:8px;align-items:center;">
+                    <a href="course-details.html?id=${course._id}" id="view-course-${course._id}" class="btn-nexus btn-nexus-primary" style="padding:9px 18px;font-size:13px;font-weight:700;letter-spacing:0.5px;">
+                      VIEW COURSE <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      // Filter event listeners
+      document.getElementById('course-search')?.addEventListener('input', () => renderCourses(allCourses));
+      document.getElementById('category-filter')?.addEventListener('change', () => renderCourses(allCourses));
+      document.getElementById('difficulty-filter')?.addEventListener('change', () => renderCourses(allCourses));
+
+      await fetchCourses();
+    });
+  </script>
+</body>
+</html>

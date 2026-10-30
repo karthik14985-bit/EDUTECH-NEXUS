@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .profile-hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      backdrop-filter: blur(16px);
+    }
+    .profile-avatar-lg {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--purple-primary), var(--blue-electric));
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .profile-avatar-lg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-grid-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .profile-field-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 14px;
+    }
+    .profile-field-row:last-child {
+      border-bottom: none;
+    }
+    @media (max-width: 800px) {
+      .profile-grid-sections {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('myprofile.html', 'Student Profile', 'Manage your academic details, contact credentials, skills portfolio, and platform achievements.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <button class="btn-nexus btn-nexus-primary" id="edit-profile-btn">
+          <i class="fa-solid fa-user-pen"></i> Edit Profile
+        </button>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="state-container" id="profile-loader">
+          <div class="state-spinner"></div>
+          <div class="state-title">Loading Profile Records...</div>
+        </div>
+
+        <div id="profile-display" style="display:none;">
+          <!-- Profile Hero Card -->
+          <div class="profile-hero-card">
+            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+              <div class="profile-avatar-lg" id="profile-avatar-wrap">
+                <span id="profile-avatar-letter">U</span>
+              </div>
+              <div>
+                <h2 id="disp-fullname" style="font-size:26px;margin-bottom:4px;">Student Name</h2>
+                <div style="color:var(--cyan-accent);font-size:14px;font-weight:600;margin-bottom:6px;">
+                  @<span id="disp-username">username</span> · <span id="disp-studentId" style="color:var(--text-muted);">REG-001</span>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <span class="nexus-badge badge-purple" id="disp-level-badge">Level 1</span>
+                  <span class="nexus-badge badge-blue" id="disp-xp-badge"><i class="fa-solid fa-bolt"></i> 0 XP</span>
+                  <span class="nexus-badge badge-green" id="disp-role-badge">Verified Student</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <p id="disp-bio" style="max-width:400px;font-size:13px;color:var(--text-secondary);font-style:italic;">
+                No bio provided yet.
+              </p>
+            </div>
+          </div>
+
+          <!-- Statistics Badges Row -->
+          <div class="stats-grid" style="margin-bottom:28px;">
+            <div class="stat-metric-card">
+              <div class="stat-icon-wrapper purple"><i class="fa-solid fa-graduation-cap"></i></div>
+              <div class="stat-info">
+                <h3 id="stat-courses-count">0</h3>
+                <p>Enrolled Courses</p>
+              </div>
+            </div>
+            <div class="stat-metric-card">
+              <div class="stat-icon-wrapper green"><i class="fa-solid fa-award"></i></div>
+              <div class="stat-info">
+                <h3 id="stat-certs-count">0</h3>
+                <p>Certificates Earned</p>
+              </div>
+            </div>
+            <div class="stat-metric-card">
+              <div class="stat-icon-wrapper blue"><i class="fa-solid fa-calendar-check"></i></div>
+              <div class="stat-info">
+                <h3 id="stat-events-count">0</h3>
+                <p>Events Joined</p>
+              </div>
+            </div>
+            <div class="stat-metric-card">
+              <div class="stat-icon-wrapper amber"><i class="fa-solid fa-gamepad"></i></div>
+              <div class="stat-info">
+                <h3 id="stat-games-count">0</h3>
+                <p>Games Attempted</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Academic and Personal Info Grid -->
+          <div class="profile-grid-sections">
+            <div class="glass-panel" style="padding:26px;">
+              <h3 style="font-size:18px;margin-bottom:16px;"><i class="fa-solid fa-id-card" style="color:var(--cyan-accent);"></i> Academic Credentials</h3>
+              <div class="profile-field-row">
+                <span style="color:var(--text-muted);">College / University:</span>
+                <strong id="disp-college" style="color:#fff;">-</strong>
+              </div>
+              <div class="profile-field-row">
+                <span style="color:var(--text-muted);">Department:</span>
+                <strong id="disp-department" style="color:#fff;">-</strong>
+              </div>
+              <div class="profile-field-row">
+                <span style="color:var(--text-muted);">Academic Year:</span>
+                <strong id="disp-year" style="color:#fff;">-</strong>
+              </div>
+              <div class="profile-field-row">
+                <span style="color:var(--text-muted);">Register / Student ID:</span>
+                <strong id="disp-regno" style="color:var(--cyan-accent);">-</strong>
+              </div>
+              <div class="profile-field-row">
+                <span style="color:var(--text-muted);">State & City:</span>
+                <strong id="disp-location" style="color:#fff;">-</strong>
+              </div>
+            </div>
+
+            <div class="glass-panel" style="padding:26px;">
+              <h3 style="font-size:18px;margin-bottom:16px;"><i class="fa-solid fa-address-book" style="color:#a78bfa;"></i> Contact & Skills</h3>
+              <div class="profile-field-row">
+                <span style="color:var(--text-muted);">Email Address:</span>
+                <strong id="disp-email" style="color:#fff;">-</strong>
+              </div>
+              <div class="profile-field-row">
+                <span style="color:var(--text-muted);">Phone Number:</span>
+                <strong id="disp-phone" style="color:#fff;">-</strong>
+              </div>
+              <div style="margin-top:16px;">
+                <span style="color:var(--text-muted);font-size:13px;display:block;margin-bottom:8px;">Skills Portfolio:</span>
+                <div id="disp-skills-tags" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div class="modal-overlay" id="edit-modal">
+          <div class="modal-dialog">
+            <div class="modal-header">
+              <h3 style="font-size:18px;">Edit Profile Information</h3>
+              <button class="modal-close" id="edit-modal-close">&times;</button>
+            </div>
+            <form id="edit-profile-form" class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="edit-fullname" class="nexus-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Profile Image URL</label>
+                <input type="url" id="edit-avatar" class="nexus-input" placeholder="https://example.com/avatar.jpg">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">Phone Number</label>
+                  <input type="text" id="edit-phone" class="nexus-input" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Year of Study</label>
+                  <select id="edit-year" class="nexus-select">
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">College Name</label>
+                  <input type="text" id="edit-college" class="nexus-input" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Department</label>
+                  <input type="text" id="edit-department" class="nexus-input" required>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                  <label class="form-label">State</label>
+                  <input type="text" id="edit-state" class="nexus-input">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">City</label>
+                  <input type="text" id="edit-city" class="nexus-input">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Skills (Comma-separated)</label>
+                <input type="text" id="edit-skills" class="nexus-input" placeholder="Python, React, Node.js, MongoDB">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Bio</label>
+                <textarea id="edit-bio" class="nexus-textarea" rows="3" placeholder="Tell other scholars about your interests and aspirations..."></textarea>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;">
+                <button type="button" class="btn-nexus btn-nexus-secondary" id="edit-cancel">Cancel</button>
+                <button type="submit" class="btn-nexus btn-nexus-primary" id="edit-save-btn">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      let userProfile = null;
+
+      async function loadProfile() {
+        try {
+          const res = await api.get('/users/profile');
+          userProfile = res.user;
+
+          document.getElementById('profile-loader').style.display = 'none';
+          document.getElementById('profile-display').style.display = 'block';
+
+          // Set Elements
+          document.getElementById('disp-fullname').textContent = userProfile.fullName || 'Student';
+          document.getElementById('disp-username').textContent = userProfile.username || 'student';
+          document.getElementById('disp-studentId').textContent = userProfile.registerNumber || userProfile.studentId || '-';
+          document.getElementById('disp-level-badge').textContent = `Level ${userProfile.level || 1}`;
+          document.getElementById('disp-xp-badge').innerHTML = `<i class="fa-solid fa-bolt"></i> ${userProfile.xp || 0} XP`;
+          document.getElementById('disp-bio').textContent = userProfile.bio || 'Passionate student technologist at EDUTECH NEXUS.';
+
+          if (userProfile.profileImageUrl) {
+            document.getElementById('profile-avatar-wrap').innerHTML = `<img src="${userProfile.profileImageUrl}" alt="Avatar">`;
+          } else {
+            document.getElementById('profile-avatar-letter').textContent = userProfile.fullName?.[0]?.toUpperCase() || 'U';
+          }
+
+          document.getElementById('disp-college').textContent = userProfile.college || '-';
+          document.getElementById('disp-department').textContent = userProfile.department || '-';
+          document.getElementById('disp-year').textContent = `${userProfile.year || '3'} Year`;
+          document.getElementById('disp-regno').textContent = userProfile.registerNumber || userProfile.studentId || '-';
+          document.getElementById('disp-location').textContent = `${userProfile.city || 'Chennai'}, ${userProfile.state || 'Tamil Nadu'}`;
+
+          document.getElementById('disp-email').textContent = userProfile.email || '-';
+          document.getElementById('disp-phone').textContent = userProfile.phone || '-';
+
+          const skillsContainer = document.getElementById('disp-skills-tags');
+          const skillsList = userProfile.skills || [];
+          if (skillsList.length) {
+            skillsContainer.innerHTML = skillsList.map(s => `<span class="skill-tag" style="font-size:12px;padding:4px 10px;">${s}</span>`).join('');
+          } else {
+            skillsContainer.innerHTML = '<span style="color:var(--text-muted);font-size:13px;">No skills added yet. Click Edit Profile to add skills.</span>';
+          }
+
+          if (userProfile.stats) {
+            document.getElementById('stat-courses-count').textContent = userProfile.stats.coursesEnrolled || 0;
+            document.getElementById('stat-certs-count').textContent = userProfile.stats.certificatesEarned || 0;
+            document.getElementById('stat-events-count').textContent = userProfile.stats.eventsParticipated || 0;
+            document.getElementById('stat-games-count').textContent = userProfile.stats.gamesPlayed || 0;
+          }
+        } catch (err) {
+          document.getElementById('profile-loader').innerHTML = `
+            <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i></div>
+            <div class="state-title">Error Loading Profile</div>
+            <p class="state-desc">${err.message}</p>
+          `;
+        }
+      }
+
+      // Edit Modal Handlers
+      const editModal = document.getElementById('edit-modal');
+      document.getElementById('edit-profile-btn').onclick = () => {
+        if (!userProfile) return;
+        document.getElementById('edit-fullname').value = userProfile.fullName || '';
+        document.getElementById('edit-avatar').value = userProfile.profileImageUrl || '';
+        document.getElementById('edit-phone').value = userProfile.phone || '';
+        document.getElementById('edit-year').value = userProfile.year || '3';
+        document.getElementById('edit-college').value = userProfile.college || '';
+        document.getElementById('edit-department').value = userProfile.department || '';
+        document.getElementById('edit-state').value = userProfile.state || 'Tamil Nadu';
+        document.getElementById('edit-city').value = userProfile.city || 'Chennai';
+        document.getElementById('edit-skills').value = (userProfile.skills || []).join(', ');
+        document.getElementById('edit-bio').value = userProfile.bio || '';
+
+        editModal.classList.add('active');
+      };
+
+      document.getElementById('edit-modal-close').onclick = () => editModal.classList.remove('active');
+      document.getElementById('edit-cancel').onclick = () => editModal.classList.remove('active');
+
+      document.getElementById('edit-profile-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const saveBtn = document.getElementById('edit-save-btn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+        try {
+          const payload = {
+            fullName: document.getElementById('edit-fullname').value.trim(),
+            profileImageUrl: document.getElementById('edit-avatar').value.trim(),
+            phone: document.getElementById('edit-phone').value.trim(),
+            year: document.getElementById('edit-year').value,
+            college: document.getElementById('edit-college').value.trim(),
+            department: document.getElementById('edit-department').value.trim(),
+            state: document.getElementById('edit-state').value.trim(),
+            city: document.getElementById('edit-city').value.trim(),
+            skills: document.getElementById('edit-skills').value,
+            bio: document.getElementById('edit-bio').value.trim()
+          };
+
+          await api.put('/users/profile', payload);
+          editModal.classList.remove('active');
+          showToast('Profile updated successfully!', 'success');
+          await loadProfile();
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Save Changes';
+        } catch (err) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = 'Save Changes';
+          showToast(err.message || 'Failed to update profile', 'error');
+        }
+      };
+
+      await loadProfile();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technical Events | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .events-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 26px;
+    }
+    .event-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      backdrop-filter: blur(14px);
+      transition: var(--transition-normal);
+    }
+    .event-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-glow);
+      box-shadow: var(--shadow-glow);
+    }
+    .event-image-wrap {
+      height: 180px;
+      position: relative;
+      background: #0f172a;
+    }
+    .event-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .event-badge-top {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+    }
+    .event-xp-top {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+    }
+    .event-body {
+      padding: 22px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .event-date-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 13px;
+      color: var(--cyan-accent);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('events.html', 'Technical Events', 'Participate in collegiate hackathons, technical workshops, coding tournaments, and statewide challenges.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <button class="btn-nexus btn-nexus-secondary" id="my-events-btn">
+          <i class="fa-solid fa-calendar-check"></i> Registered Events
+        </button>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="toolbar-section">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="event-search" class="nexus-input" placeholder="Search events by title, organizer, or venue...">
+          </div>
+          <div class="filter-group">
+            <select id="category-filter" class="nexus-select">
+              <option value="all">All Categories</option>
+              <option value="Hackathons">Hackathons</option>
+              <option value="Workshops">Workshops</option>
+              <option value="Coding Competitions">Coding Competitions</option>
+              <option value="Government/Industry Events">Government/Industry Events</option>
+              <option value="Student Technology Events">Student Technology Events</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="events-grid" id="events-grid">
+          <div class="state-container" style="grid-column:1/-1;">
+            <div class="state-spinner"></div>
+            <div class="state-title">Loading Technical Events...</div>
+          </div>
+        </div>
+
+        <!-- My Registered Events Modal -->
+        <div class="modal-overlay" id="my-events-modal">
+          <div class="modal-dialog" style="max-width:650px;">
+            <div class="modal-header">
+              <h3 style="font-size:18px;">My Event Registrations</h3>
+              <button class="modal-close" id="events-modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="my-events-content">
+              <div class="state-spinner"></div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      let allEvents = [];
+
+      async function fetchEvents() {
+        try {
+          const res = await api.get('/events');
+          allEvents = res.events || [];
+          renderEvents(allEvents);
+        } catch (err) {
+          document.getElementById('events-grid').innerHTML = `
+            <div class="state-container" style="grid-column:1/-1;">
+              <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+              <div class="state-title">Unable to Load Events</div>
+              <p class="state-desc">${err.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      function renderEvents(list) {
+        const grid = document.getElementById('events-grid');
+        if (!grid) return;
+
+        const search = (document.getElementById('event-search')?.value || '').toLowerCase().trim();
+        const cat = document.getElementById('category-filter')?.value || 'all';
+
+        const filtered = list.filter(e => {
+          const matchSearch = !search || e.title.toLowerCase().includes(search) || (e.description || '').toLowerCase().includes(search) || (e.organizer || '').toLowerCase().includes(search);
+          const matchCat = cat === 'all' || e.category === cat;
+          return matchSearch && matchCat;
+        });
+
+        if (!filtered.length) {
+          grid.innerHTML = `
+            <div class="state-container" style="grid-column:1/-1;">
+              <div class="state-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+              <div class="state-title">No Events Found</div>
+              <p class="state-desc">Try clearing search filters to see upcoming hackathons and workshops.</p>
+            </div>
+          `;
+          return;
+        }
+
+        grid.innerHTML = filtered.map(e => {
+          const img = e.eventImage || e.image || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80';
+          const isExt = e.isExternal === true;
+
+          return `
+            <article class="event-card">
+              <div class="event-image-wrap">
+                <img src="${img}" alt="${e.title}" class="event-img" onerror="this.src='https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=800&q=80'">
+                <div class="event-badge-top">
+                  ${isExt ? '<span class="nexus-badge badge-amber"><i class="fa-solid fa-arrow-up-right-from-square"></i> External Event</span>' : `<span class="nexus-badge badge-purple">${e.category || 'Tech Event'}</span>`}
+                </div>
+                <div class="event-xp-top">
+                  <span class="nexus-badge badge-green"><i class="fa-solid fa-bolt"></i> +${e.xpReward || 50} XP</span>
+                </div>
+              </div>
+
+              <div class="event-body">
+                <div>
+                  <div class="event-date-row">
+                    <span><i class="fa-regular fa-calendar"></i> ${new Date(e.date).toLocaleDateString()}</span>
+                    <span><i class="fa-regular fa-clock"></i> ${e.time || '10:00 AM'}</span>
+                    <span><i class="fa-solid fa-location-dot"></i> ${e.mode || 'Hybrid'}</span>
+                  </div>
+
+                  <h3 style="font-size:18px;margin-bottom:8px;">${e.title}</h3>
+                  <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                    ${e.description}
+                  </p>
+
+                  <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">
+                    <i class="fa-solid fa-user-tie"></i> Organizer: <strong>${e.organizer || 'EDUTECH NEXUS'}</strong>
+                  </div>
+                </div>
+
+                <div style="border-top:1px solid var(--border-subtle);padding-top:14px;display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:12px;color:var(--text-muted);">
+                    <i class="fa-solid fa-users"></i> ${e.participants?.length || 0} Registered
+                  </span>
+                  <a href="event-details.html?id=${e._id}" class="btn-nexus btn-nexus-primary" style="padding:8px 16px;font-size:13px;">
+                    View Details <i class="fa-solid fa-arrow-right"></i>
+                  </a>
+                </div>
+              </div>
+            </article>
+          `;
+        }).join('');
+      }
+
+      // My Registered Events Handler
+      const myEventsBtn = document.getElementById('my-events-btn');
+      const eventsModal = document.getElementById('my-events-modal');
+      const modalContent = document.getElementById('my-events-content');
+
+      myEventsBtn.onclick = async () => {
+        eventsModal.classList.add('active');
+        modalContent.innerHTML = '<div class="state-spinner" style="margin:20px auto;"></div>';
+        try {
+          const res = await api.get('/events/my-events');
+          const regs = res.registrations || [];
+          if (!regs.length) {
+            modalContent.innerHTML = '<p class="state-desc" style="text-align:center;padding:20px;">You are not registered for any events yet.</p>';
+            return;
+          }
+
+          modalContent.innerHTML = `
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              ${regs.map(r => `
+                <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border-subtle);padding:14px;border-radius:var(--radius-sm);display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <div style="font-weight:600;font-size:15px;">${r.event?.title || 'Technical Event'}</div>
+                    <div style="font-size:12px;color:var(--text-secondary);">${r.event?.venue || 'Virtual'} · ${new Date(r.event?.date || r.registrationDate).toLocaleDateString()}</div>
+                  </div>
+                  <span class="nexus-badge badge-green">Registered</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        } catch (err) {
+          modalContent.innerHTML = `<p style="color:#ef4444;text-align:center;">Failed to load registered events: ${err.message}</p>`;
+        }
+      };
+
+      document.getElementById('events-modal-close').onclick = () => {
+        eventsModal.classList.remove('active');
+      };
+
+      document.getElementById('event-search')?.addEventListener('input', () => renderEvents(allEvents));
+      document.getElementById('category-filter')?.addEventListener('change', () => renderEvents(allEvents));
+
+      await fetchEvents();
+    });
+  </script>
+</body>
+</html>

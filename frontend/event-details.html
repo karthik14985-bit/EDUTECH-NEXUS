@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Event Details | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .event-details-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 32px;
+      align-items: flex-start;
+    }
+    .event-hero-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 26px;
+      backdrop-filter: blur(16px);
+    }
+    .event-hero-banner-img {
+      width: 100%;
+      height: 260px;
+      object-fit: cover;
+    }
+    .event-meta-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      position: sticky;
+      top: 96px;
+    }
+    @media (max-width: 900px) {
+      .event-details-layout {
+        grid-template-columns: 1fr;
+      }
+      .event-meta-box {
+        position: static;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('events.html', 'Event Information', 'Review venue details, agenda, rules, and register your participation.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const eventId = urlParams.get('id');
+
+      headerActions.innerHTML = `
+        <a href="events.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-arrow-left"></i> All Events
+        </a>
+      `;
+
+      if (!eventId) {
+        pageContent.innerHTML = `
+          <div class="state-container">
+            <div class="state-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+            <div class="state-title">No Event Specified</div>
+            <p class="state-desc">Select an event from the events page to review information.</p>
+            <a href="events.html" class="btn-nexus btn-nexus-primary" style="margin-top:16px;">View Events</a>
+          </div>
+        `;
+        return;
+      }
+
+      pageContent.innerHTML = `
+        <div class="state-container" id="details-loader">
+          <div class="state-spinner"></div>
+          <div class="state-title">Loading Event Schedule...</div>
+        </div>
+        <div class="event-details-layout" id="event-layout" style="display:none;"></div>
+      `;
+
+      try {
+        const res = await api.get(`/events/${eventId}`);
+        if (!res.success || !res.event) throw new Error(res.message || 'Event not found');
+
+        const event = res.event;
+        const img = event.eventImage || event.image || 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80';
+        const isExt = event.isExternal === true;
+
+        document.getElementById('details-loader').style.display = 'none';
+        const layoutGrid = document.getElementById('event-layout');
+        layoutGrid.style.display = 'grid';
+
+        layoutGrid.innerHTML = `
+          <!-- Main Left Column -->
+          <div>
+            <div class="event-hero-card">
+              <img src="${img}" alt="${event.title}" class="event-hero-banner-img" onerror="this.src='https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80'">
+              <div style="padding:28px;">
+                <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                  <span class="nexus-badge badge-purple">${event.category || 'Technology'}</span>
+                  <span class="nexus-badge badge-blue"><i class="fa-solid fa-location-dot"></i> ${event.mode || 'Hybrid'}</span>
+                  <span class="nexus-badge badge-green"><i class="fa-solid fa-bolt"></i> +${event.xpReward || 50} XP Participation</span>
+                  ${isExt ? '<span class="nexus-badge badge-amber"><i class="fa-solid fa-arrow-up-right-from-square"></i> External Event</span>' : ''}
+                </div>
+
+                <h2 style="font-size:26px;margin-bottom:12px;">${event.title}</h2>
+                <div style="color:var(--text-secondary);font-size:15px;line-height:1.7;">
+                  ${event.description}
+                </div>
+              </div>
+            </div>
+
+            ${isExt ? `
+              <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.3);border-radius:var(--radius-md);padding:18px;margin-bottom:24px;font-size:13px;color:#fde68a;">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <strong>External Event Notice</strong>
+                <p style="margin-top:4px;color:var(--text-secondary);">
+                  ${event.externalDisclaimer || 'This event is organized by an external collegiate partner. Official registration may take place on their external website.'}
+                </p>
+                ${event.registrationLink ? `
+                  <a href="${event.registrationLink}" target="_blank" rel="noopener" class="btn-nexus btn-nexus-secondary" style="margin-top:12px;font-size:13px;display:inline-flex;">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Official Registration Portal
+                  </a>
+                ` : ''}
+              </div>
+            ` : ''}
+
+            <div class="glass-panel" style="padding:26px;margin-bottom:24px;">
+              <h3 style="font-size:19px;margin-bottom:12px;"><i class="fa-solid fa-user-check" style="color:var(--cyan-accent);"></i> Eligibility & Guidelines</h3>
+              <p style="color:var(--text-secondary);font-size:15px;line-height:1.7;">
+                ${event.eligibility || 'Open to all enrolled students with verified registration number.'}
+              </p>
+            </div>
+          </div>
+
+          <!-- Sticky Sidebar Right Column -->
+          <div>
+            <div class="event-meta-box">
+              <h3 style="font-size:19px;margin-bottom:18px;">Event Information</h3>
+
+              <div style="border-bottom:1px solid var(--border-subtle);padding-bottom:16px;margin-bottom:18px;font-size:13px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px;color:var(--text-secondary);">
+                  <span>Date:</span>
+                  <strong style="color:#fff;">${new Date(event.date).toLocaleDateString()}</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px;color:var(--text-secondary);">
+                  <span>Time:</span>
+                  <strong style="color:#fff;">${event.time || '10:00 AM'}</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px;color:var(--text-secondary);">
+                  <span>Venue:</span>
+                  <strong style="color:#fff;">${event.venue || 'Virtual'}</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:12px;color:var(--text-secondary);">
+                  <span>Deadline:</span>
+                  <strong style="color:var(--amber-accent);">${new Date(event.registrationDeadline || Date.now() + 10 * 86400000).toLocaleDateString()}</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;color:var(--text-secondary);">
+                  <span>Organizer:</span>
+                  <strong style="color:#fff;">${event.organizer || 'EDUTECH NEXUS'}</strong>
+                </div>
+              </div>
+
+              <button class="btn-nexus btn-nexus-primary" id="event-reg-btn" style="width:100%;padding:14px;font-size:15px;">
+                <i class="fa-solid fa-calendar-plus"></i> Register for Event (+50 XP)
+              </button>
+            </div>
+          </div>
+        `;
+
+        const regBtn = document.getElementById('event-reg-btn');
+        if (regBtn) {
+          regBtn.onclick = async () => {
+            const originalText = regBtn.innerHTML;
+            regBtn.disabled = true;
+            regBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Registering...';
+
+            try {
+              const r = await api.post(`/events/${event._id}/register`, {});
+              showToast(r.message || 'Successfully registered for event! +50 XP awarded.', 'success');
+              await refreshUserXP();
+              regBtn.innerHTML = '<i class="fa-solid fa-check"></i> Registered';
+            } catch (err) {
+              regBtn.disabled = false;
+              regBtn.innerHTML = originalText;
+              showToast(err.message || 'Event registration failed', 'error');
+            }
+          };
+        }
+
+      } catch (err) {
+        document.getElementById('details-loader').innerHTML = `
+          <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i></div>
+          <div class="state-title">Error Loading Event</div>
+          <p class="state-desc">${err.message}</p>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

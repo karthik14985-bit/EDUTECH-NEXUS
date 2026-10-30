@@ -1,0 +1,2 @@
+const mongoose = require('mongoose');
+module.exports = mongoose.model('Club', new mongoose.Schema({ name: { type: String, required: true }, description: String, category: String, leader: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], maxMembers: Number, activities: [String], image: String, status: { type: String, default: 'active' } }, { timestamps: true }));

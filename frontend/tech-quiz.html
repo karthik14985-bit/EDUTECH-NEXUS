@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tech Quiz | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .quiz-container-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .quiz-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .timer-badge {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #fca5a5;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .progress-track-quiz {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .progress-fill-quiz {
+      height: 100%;
+      background: linear-gradient(90deg, var(--purple-primary), var(--cyan-accent));
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    .question-box {
+      margin-bottom: 28px;
+    }
+    .question-support {
+      display: grid;
+      gap: 14px;
+      margin-top: 16px;
+      color: var(--text-secondary);
+    }
+    .question-support pre {
+      overflow-x: auto;
+      padding: 16px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: #020617;
+      color: #a5f3fc;
+      font: 14px/1.6 Consolas, 'Courier New', monospace;
+      white-space: pre-wrap;
+    }
+    .scenario-table-wrap {
+      max-width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+    }
+    .scenario-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 360px;
+      font-size: 13px;
+    }
+    .scenario-table caption {
+      padding: 10px 12px;
+      text-align: left;
+      color: #fff;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .scenario-table th, .scenario-table td {
+      padding: 9px 12px;
+      border-top: 1px solid var(--border-subtle);
+      text-align: left;
+      white-space: nowrap;
+    }
+    .scenario-table th {
+      color: var(--cyan-accent);
+    }
+    .question-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.5;
+      margin-top: 10px;
+    }
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .option-card {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: var(--transition-normal);
+      font-size: 15px;
+      color: var(--text-main);
+      font-family: inherit;
+      text-align: left;
+    }
+    .option-card:hover:not(:disabled) {
+      background: rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.4);
+      transform: translateX(4px);
+    }
+    .option-card:disabled {
+      cursor: default;
+      opacity: 1;
+    }
+    .option-card.correct {
+      background: rgba(16, 185, 129, 0.18);
+      border-color: #10b981;
+      color: #d1fae5;
+    }
+    .option-card.incorrect {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: #ef4444;
+      color: #fee2e2;
+    }
+    .option-letter {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+      flex-shrink: 0;
+      color: var(--text-secondary);
+    }
+    .option-card.correct .option-letter {
+      background: #047857;
+      color: #fff;
+      border-color: #10b981;
+    }
+    .option-card.incorrect .option-letter {
+      background: #b91c1c;
+      color: #fff;
+      border-color: #ef4444;
+    }
+    .answer-feedback {
+      display: none;
+      padding: 16px 18px;
+      margin: -10px 0 24px;
+      border-radius: var(--radius-md);
+      line-height: 1.6;
+    }
+    .answer-feedback.correct {
+      display: block;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.55);
+      color: #d1fae5;
+    }
+    .answer-feedback.incorrect {
+      display: block;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.55);
+      color: #fee2e2;
+    }
+    .quiz-footer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .score-summary-card {
+      text-align: center;
+      padding: 30px;
+    }
+    .score-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 14px;
+      margin: 24px 0;
+    }
+    .score-stat-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 16px 12px;
+    }
+    .score-stat-box .stat-val {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .score-stat-box .stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    @media (max-width: 600px) {
+      .score-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('games.html', 'Tech Quiz Challenge', 'Test your knowledge across programming languages, web standards, and computer science fundamentals.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <a href="games.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-arrow-left"></i> Exit Quiz
+        </a>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="state-container" id="quiz-loader">
+          <div class="state-spinner"></div>
+          <div class="state-title">Loading game questions...</div>
+        </div>
+
+        <div class="quiz-container-card" id="quiz-card" style="display:none;">
+          <div class="quiz-header-bar">
+            <div>
+              <span class="nexus-badge badge-purple" id="question-category">Category</span>
+              <span class="nexus-badge badge-blue" style="margin-left:8px;" id="question-counter">Question 1 of 10</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div style="font-size:13px;color:var(--text-secondary);display:flex;flex-wrap:wrap;gap:10px;">
+                <span>Score: <strong id="live-score" style="color:#6ee7b7;">0%</strong></span>
+                <span>Correct: <strong id="live-correct" style="color:#6ee7b7;">0</strong></span>
+                <span>Incorrect: <strong id="live-incorrect" style="color:#fca5a5;">0</strong></span>
+              </div>
+              <div class="timer-badge" id="quiz-timer">
+                <i class="fa-regular fa-clock"></i> <span id="timer-text">10:00</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-track-quiz" role="progressbar" aria-label="Quiz question progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="progress-fill-quiz" id="quiz-progress-bar" style="width:0%;"></div>
+          </div>
+
+          <div class="question-box">
+            <div style="font-size:13px;color:var(--cyan-accent);text-transform:uppercase;font-weight:700;letter-spacing:0.5px;" id="question-num-text">QUESTION 1</div>
+            <h2 class="question-title" id="question-text">Loading question...</h2>
+            <div class="question-support" id="question-support"></div>
+          </div>
+
+          <div class="options-grid" id="options-container" role="group" aria-label="Answer options"></div>
+          <div class="answer-feedback" id="answer-feedback" role="status" aria-live="polite"></div>
+
+          <div class="quiz-footer-actions">
+            <div id="answer-progress" aria-live="polite" style="color:var(--text-secondary);font-size:13px;">Choose an answer to continue.</div>
+            <div style="display:flex;gap:12px;">
+              <button id="next-btn" class="btn-nexus btn-nexus-primary" style="display:none;">
+                Next Question <i class="fa-solid fa-arrow-right"></i>
+              </button>
+              <button id="submit-btn" class="btn-nexus btn-nexus-glow" style="display:none;">
+                <i class="fa-solid fa-chart-column"></i> View Results
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result View -->
+        <div class="quiz-container-card" id="result-card" style="display:none;">
+          <div class="score-summary-card">
+            <div style="width:72px;height:72px;border-radius:50%;background:rgba(16,185,129,0.15);border:2px solid #10b981;color:#10b981;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px;">
+              <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h2 style="font-size:26px;color:#fff;margin-bottom:6px;">Tech Quiz Completed!</h2>
+            <p style="color:var(--text-secondary);font-size:14px;">Your results have been submitted and saved to MongoDB.</p>
+
+            <div class="score-stats-grid">
+              <div class="score-stat-box">
+                <div class="stat-val" id="res-total">10</div>
+                <div class="stat-label">Total Questions</div>
+              </div>
+              <div class="score-stat-box">
+                <div class="stat-val" id="res-correct" style="color:#34d399;">8</div>
+                <div class="stat-label">Correct Answers</div>
+              </div>
+              <div class="score-stat-box">
+                <div class="stat-val" id="res-incorrect" style="color:#fca5a5;">2</div>
+                <div class="stat-label">Incorrect Answers</div>
+              </div>
+              <div class="score-stat-box">
+                <div class="stat-val" id="res-score" style="color:#38bdf8;">80%</div>
+                <div class="stat-label">Score Percentage</div>
+              </div>
+              <div class="score-stat-box">
+                <div class="stat-val" id="res-xp" style="color:#fbbf24;">+80</div>
+                <div class="stat-label">XP Earned</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:14px;justify-content:center;margin-top:28px;flex-wrap:wrap;">
+              <a href="leaderboard.html" class="btn-nexus btn-nexus-primary" style="padding:12px 24px;">
+                <i class="fa-solid fa-trophy"></i> View Leaderboard
+              </a>
+              <button onclick="window.location.reload()" class="btn-nexus btn-nexus-secondary" style="padding:12px 24px;">
+                <i class="fa-solid fa-rotate-right"></i> Retake Quiz
+              </button>
+              <a href="games.html" class="btn-nexus btn-nexus-secondary" style="padding:12px 24px;">
+                All Games
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+
+      const requestedGameId = new URLSearchParams(window.location.search).get('id') || 'tech-quiz';
+      const newAttemptId = () => window.crypto?.randomUUID
+        ? window.crypto.randomUUID()
+        : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+      let gameData = null;
+      let questions = [];
+      let currentIndex = 0;
+      let attemptId = newAttemptId();
+      let userAnswers = {};
+      let answerFeedback = {};
+      let timerSeconds = 600;
+      let timerInterval = null;
+      let answerInFlight = false;
+      let submitInFlight = false;
+      let timeExpired = false;
+
+      try {
+        const res = await api.get(`/games/${encodeURIComponent(requestedGameId)}/questions`);
+        if (!res.success || !res.questions || !res.questions.length) {
+          throw new Error(res.message || 'No questions are available for this game.');
+        }
+
+        gameData = res.game;
+        questions = res.questions;
+        timerSeconds = Number(gameData.timeLimit) || timerSeconds;
+        await api.post(`/games/${encodeURIComponent(gameData._id)}/start`, { attemptId });
+
+        document.title = `${gameData.title || 'Tech Quiz'} | EDUTECH NEXUS`;
+        document.querySelector('#result-card h2').textContent = `${gameData.title || 'Game'} Completed!`;
+        document.querySelector('#result-card .score-summary-card > p').textContent = 'Your verified results have been saved.';
+        document.getElementById('quiz-loader').style.display = 'none';
+        document.getElementById('quiz-card').style.display = 'block';
+        renderQuestion(0);
+        startTimer();
+      } catch (err) {
+        const loader = document.getElementById('quiz-loader');
+        loader.replaceChildren();
+        const message = document.createElement('p');
+        message.className = 'state-desc';
+        message.textContent = err.message || 'Unable to load game questions.';
+        loader.append(message);
+        const backLink = document.createElement('a');
+        backLink.href = 'games.html';
+        backLink.className = 'btn-nexus btn-nexus-primary';
+        backLink.style.marginTop = '16px';
+        backLink.textContent = 'Back to Games';
+        loader.append(backLink);
+      }
+
+      function startTimer() {
+        const timerText = document.getElementById('timer-text');
+        const updateTimer = () => {
+          timerText.textContent = `${String(Math.floor(timerSeconds / 60)).padStart(2, '0')}:${String(timerSeconds % 60).padStart(2, '0')}`;
+        };
+        updateTimer();
+        timerInterval = setInterval(() => {
+          timerSeconds--;
+          updateTimer();
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timeExpired = true;
+            document.getElementById('answer-progress').textContent = 'Time is up. Finalizing your answers...';
+            if (!answerInFlight) submitQuiz();
+          }
+        }, 1000);
+      }
+
+      function renderQuestion(index) {
+        currentIndex = index;
+        const question = questions[index];
+        const total = questions.length;
+        const feedback = answerFeedback[question._id];
+        const progressPercent = Math.round(((index + 1) / total) * 100);
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackBox = document.getElementById('answer-feedback');
+        const nextButton = document.getElementById('next-btn');
+        const submitButton = document.getElementById('submit-btn');
+
+        document.getElementById('quiz-progress-bar').style.width = `${progressPercent}%`;
+        document.querySelector('.progress-track-quiz').setAttribute('aria-valuenow', String(progressPercent));
+        document.getElementById('question-category').textContent = question.category || gameData.category || 'Technology';
+        document.getElementById('question-counter').textContent = `Question ${index + 1} of ${total}`;
+        document.getElementById('question-num-text').textContent = `QUESTION ${index + 1}`;
+        document.getElementById('question-text').textContent = question.question;
+        const correctCount = Object.values(answerFeedback).filter(result => result.isCorrect).length;
+        const incorrectCount = Object.values(answerFeedback).filter(result => !result.isCorrect).length;
+        document.getElementById('live-score').textContent = `${Math.round((correctCount / total) * 100)}%`;
+        document.getElementById('live-correct').textContent = String(correctCount);
+        document.getElementById('live-incorrect').textContent = String(incorrectCount);
+        document.getElementById('answer-progress').textContent = feedback
+          ? 'Answer locked. Review the feedback, then continue.'
+          : 'Choose an answer to continue.';
+
+        renderQuestionSupport(question);
+        optionsContainer.replaceChildren();
+        (question.options || []).forEach((option, optionIndex) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'option-card';
+          button.dataset.optIndex = String(optionIndex);
+          button.disabled = Boolean(feedback);
+          button.setAttribute('aria-pressed', String(feedback?.selectedIndex === optionIndex));
+          if (feedback?.correctIndex === optionIndex) button.classList.add('correct');
+          if (feedback?.selectedIndex === optionIndex && !feedback.isCorrect) button.classList.add('incorrect');
+
+          const letter = document.createElement('span');
+          letter.className = 'option-letter';
+          letter.textContent = ['A', 'B', 'C', 'D'][optionIndex] || String(optionIndex + 1);
+          const text = document.createElement('span');
+          text.style.flex = '1';
+          text.textContent = option;
+          button.append(letter, text);
+          button.addEventListener('click', () => selectAnswer(question, optionIndex));
+          optionsContainer.append(button);
+        });
+
+        feedbackBox.className = 'answer-feedback';
+        feedbackBox.textContent = '';
+        if (feedback) {
+          feedbackBox.classList.add(feedback.isCorrect ? 'correct' : 'incorrect');
+          const title = document.createElement('strong');
+          title.textContent = feedback.isCorrect ? 'Correct Answer!' : 'Incorrect Answer!';
+          feedbackBox.append(title);
+          if (feedback.explanation) {
+            const explanation = document.createElement('p');
+            explanation.style.margin = '6px 0 0';
+            explanation.textContent = feedback.explanation;
+            feedbackBox.append(explanation);
+          }
+        }
+
+        nextButton.style.display = index < total - 1 && feedback ? 'inline-flex' : 'none';
+        submitButton.style.display = index === total - 1 && feedback ? 'inline-flex' : 'none';
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fa-solid fa-chart-column"></i> View Results';
+      }
+
+      function renderQuestionSupport(question) {
+        const support = document.getElementById('question-support');
+        support.replaceChildren();
+
+        if (question.codeSnippet) {
+          const code = document.createElement('pre');
+          code.textContent = question.codeSnippet;
+          support.append(code);
+        }
+
+        const scenario = question.sqlScenario;
+        if (!scenario) return;
+
+        const appendTable = (title, columns, rows) => {
+          if (!columns?.length) return;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'scenario-table-wrap';
+          const table = document.createElement('table');
+          table.className = 'scenario-table';
+          const caption = document.createElement('caption');
+          caption.textContent = title;
+          table.append(caption);
+          const header = document.createElement('tr');
+          columns.forEach(column => {
+            const cell = document.createElement('th');
+            cell.scope = 'col';
+            cell.textContent = column;
+            header.append(cell);
+          });
+          const thead = document.createElement('thead');
+          thead.append(header);
+          table.append(thead);
+
+          if (rows?.length) {
+            const tbody = document.createElement('tbody');
+            rows.forEach(row => {
+              const tableRow = document.createElement('tr');
+              row.forEach(value => {
+                const cell = document.createElement('td');
+                cell.textContent = String(value ?? '');
+                tableRow.append(cell);
+              });
+              tbody.append(tableRow);
+            });
+            table.append(tbody);
+          }
+          wrapper.append(table);
+          support.append(wrapper);
+        };
+
+        (scenario.tables || []).forEach(table => appendTable(
+          `Sample table: ${table.name}`,
+          table.columns || [],
+          table.rows || []
+        ));
+        if (scenario.expectedColumns?.length) {
+          appendTable('Expected query result', scenario.expectedColumns, scenario.expectedRows || []);
+        }
+      }
+
+      async function selectAnswer(question, selectedIndex) {
+        if (answerInFlight || answerFeedback[question._id]) return;
+        answerInFlight = true;
+        document.querySelectorAll('#options-container .option-card').forEach(button => {
+          button.disabled = true;
+        });
+
+        try {
+          const result = await api.post(`/games/${encodeURIComponent(gameData._id)}/answer`, {
+            attemptId,
+            questionId: question._id,
+            selectedIndex
+          });
+          if (!result.success) throw new Error(result.message || 'Unable to validate this answer.');
+          userAnswers[question._id] = result.selectedIndex;
+          answerFeedback[question._id] = result;
+          renderQuestion(currentIndex);
+        } catch (err) {
+          document.querySelectorAll('#options-container .option-card').forEach(button => {
+            button.disabled = false;
+          });
+          if (window.showToast) showToast(err.message || 'Unable to validate this answer.', 'error');
+          else alert(err.message || 'Unable to validate this answer.');
+        } finally {
+          answerInFlight = false;
+          if (timeExpired) submitQuiz();
+        }
+      }
+
+      document.getElementById('next-btn').onclick = () => {
+        if (!answerFeedback[questions[currentIndex]._id]) return;
+        if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+      };
+      document.getElementById('submit-btn').onclick = submitQuiz;
+
+      async function submitQuiz() {
+        if (submitInFlight) return;
+        submitInFlight = true;
+        if (timerInterval) clearInterval(timerInterval);
+
+        const submitButton = document.getElementById('submit-btn');
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Calculating Results...';
+
+        try {
+          const result = await api.post(`/games/${encodeURIComponent(gameData._id)}/submit`, {
+            attemptId,
+            answers: userAnswers,
+            timeTaken: Math.max(0, Number(gameData.timeLimit || 600) - timerSeconds)
+          });
+          if (!result.success) throw new Error(result.message || 'Unable to submit this game.');
+
+          document.getElementById('quiz-card').style.display = 'none';
+          document.getElementById('result-card').style.display = 'block';
+          document.getElementById('res-total').textContent = result.totalQuestions || questions.length;
+          document.getElementById('res-correct').textContent = result.correctCount ?? 0;
+          document.getElementById('res-incorrect').textContent = result.wrongCount ?? (questions.length - (result.correctCount ?? 0));
+          document.getElementById('res-score').textContent = `${result.score ?? result.percentage ?? 0}%`;
+          document.getElementById('res-xp').textContent = `+${result.xpEarned || 0}`;
+
+          if (window.showToast) showToast(`Game complete! +${result.xpEarned || 0} XP awarded.`, 'success');
+        } catch (err) {
+          submitInFlight = false;
+          submitButton.disabled = false;
+          if (timeExpired) submitButton.style.display = 'inline-flex';
+          submitButton.innerHTML = '<i class="fa-solid fa-chart-column"></i> View Results';
+          if (window.showToast) showToast(err.message || 'Error submitting game.', 'error');
+          else alert(err.message || 'Error submitting game.');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

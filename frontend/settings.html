@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('settings.html', 'Account Settings', 'Manage your security credentials, notification preferences, and account controls.');
+      if (!layout) return;
+
+      const { pageContent } = layout;
+
+      pageContent.innerHTML = `
+        <div style="max-width:800px;display:flex;flex-direction:column;gap:28px;">
+          <!-- Password Change Card (Section 22) -->
+          <div class="glass-panel" style="padding:28px;">
+            <h3 style="font-size:19px;margin-bottom:6px;"><i class="fa-solid fa-lock" style="color:var(--cyan-accent);"></i> Change Password</h3>
+            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">
+              Enter your current password to verify identity, followed by a secure new password (min. 8 characters).
+            </p>
+
+            <form id="password-form">
+              <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" id="current-password" class="nexus-input" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">New Password</label>
+                <input type="password" id="new-password" class="nexus-input" minlength="8" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirm New Password</label>
+                <input type="password" id="confirm-new-password" class="nexus-input" minlength="8" required>
+              </div>
+              <button type="submit" class="btn-nexus btn-nexus-primary" id="change-pass-btn">
+                Update Password
+              </button>
+            </form>
+          </div>
+
+          <!-- Notification Settings -->
+          <div class="glass-panel" style="padding:28px;">
+            <h3 style="font-size:19px;margin-bottom:6px;"><i class="fa-solid fa-bell" style="color:#a78bfa;"></i> Notification Preferences</h3>
+            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">
+              Control alerts for hackathon deadlines, lesson milestones, and new club activities.
+            </p>
+
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+                <span style="font-size:14px;">Technical Event Reminders</span>
+                <input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--purple-primary);">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+                <span style="font-size:14px;">Course Milestone & Certificate Eligibility Alerts</span>
+                <input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--purple-primary);">
+              </label>
+              <label style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+                <span style="font-size:14px;">Peer Discussion Replies & Mentions</span>
+                <input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--purple-primary);">
+              </label>
+            </div>
+          </div>
+
+          <!-- Danger Zone -->
+          <div class="glass-panel" style="padding:28px;border-color:rgba(239,68,68,0.3);">
+            <h3 style="font-size:19px;color:#ef4444;margin-bottom:6px;"><i class="fa-solid fa-triangle-exclamation"></i> Account Controls</h3>
+            <p style="color:var(--text-secondary);font-size:13px;margin-bottom:20px;">
+              Perform sign out or request permanent account deletion.
+            </p>
+
+            <div style="display:flex;gap:14px;flex-wrap:wrap;">
+              <button class="btn-nexus btn-nexus-secondary" onclick="auth.logout();">
+                <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+              </button>
+              <button class="btn-nexus btn-nexus-danger" id="delete-req-btn">
+                <i class="fa-solid fa-trash-can"></i> Request Account Deletion
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Password Change Handler
+      document.getElementById('password-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const cur = document.getElementById('current-password').value;
+        const newP = document.getElementById('new-password').value;
+        const conf = document.getElementById('confirm-new-password').value;
+
+        if (newP !== conf) {
+          showToast('New passwords do not match', 'error');
+          return;
+        }
+
+        const btn = document.getElementById('change-pass-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Updating...';
+
+        try {
+          await api.post('/auth/change-password', {
+            currentPassword: cur,
+            newPassword: newP
+          });
+          document.getElementById('password-form').reset();
+          showToast('Password updated successfully!', 'success');
+          btn.disabled = false;
+          btn.innerHTML = 'Update Password';
+        } catch (err) {
+          btn.disabled = false;
+          btn.innerHTML = 'Update Password';
+          showToast(err.message || 'Failed to update password', 'error');
+        }
+      };
+
+      document.getElementById('delete-req-btn').onclick = () => {
+        if (confirm('Are you sure you want to request account deletion? An administrator will review your request.')) {
+          showToast('Account deletion request submitted to administration.', 'info');
+        }
+      };
+    });
+  </script>
+</body>
+</html>

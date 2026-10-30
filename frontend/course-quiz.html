@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Final Course Quiz | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .quiz-container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding-bottom: 60px;
+    }
+    .quiz-header-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      margin-bottom: 30px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-card);
+      position: relative;
+      overflow: hidden;
+    }
+    .quiz-header-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--cyan-accent), var(--purple-accent));
+    }
+    .question-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 22px;
+      backdrop-filter: blur(16px);
+      transition: border-color var(--transition-fast);
+    }
+    .question-card:hover {
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+    .question-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--cyan-accent);
+      background: rgba(56, 189, 248, 0.12);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    .question-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #f8fafc;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .options-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      user-select: none;
+    }
+    .option-label:hover {
+      background: rgba(30, 41, 59, 0.8);
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+    .option-label input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #64748b;
+      border-radius: 50%;
+      outline: none;
+      transition: all 0.2s ease;
+      position: relative;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .option-label input[type="radio"]:checked {
+      border-color: var(--cyan-accent);
+      background: var(--cyan-accent);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+    }
+    .option-label.selected {
+      border-color: var(--cyan-accent);
+      background: rgba(56, 189, 248, 0.08);
+    }
+    .option-letter {
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 13px;
+      width: 18px;
+    }
+    .option-text {
+      font-size: 14px;
+      color: var(--text-primary);
+      flex: 1;
+    }
+    .quiz-result-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card);
+      display: none;
+    }
+    .quiz-result-card.pass {
+      border-color: rgba(16, 185, 129, 0.6);
+      box-shadow: 0 0 35px rgba(16, 185, 129, 0.2);
+    }
+    .quiz-result-card.fail {
+      border-color: rgba(239, 68, 68, 0.6);
+      box-shadow: 0 0 35px rgba(239, 68, 68, 0.2);
+    }
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      border: 4px solid;
+    }
+    .score-circle.pass {
+      border-color: #10b981;
+      color: #10b981;
+      background: rgba(16, 185, 129, 0.1);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.3);
+    }
+    .score-circle.fail {
+      border-color: #ef4444;
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('courseId');
+
+      if (!courseId) {
+        window.location.href = 'courses.html';
+        return;
+      }
+
+      const layout = await renderStudentLayout('courses.html', 'Final Course Assessment', 'Complete the 10-question final quiz with 70% or higher to earn your verified credential and XP.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <a href="course-learning.html?courseId=${courseId}" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-arrow-left"></i> Return to Learning Page
+        </a>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="quiz-container">
+          <!-- Quiz Setup / Header Card -->
+          <div class="quiz-header-card" id="quiz-header-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+              <div>
+                <span class="nexus-badge badge-blue" style="margin-bottom:10px;" id="quiz-course-tag">Technical Assessment</span>
+                <h1 style="font-size:24px;margin-bottom:6px;" id="quiz-course-title">Loading Course Assessment...</h1>
+                <p style="color:var(--text-secondary);font-size:14px;">Answer all 10 multiple-choice questions. Passing score is <strong>70%</strong>.</p>
+              </div>
+              <div style="display:flex;gap:20px;text-align:right;">
+                <div style="background:rgba(15,23,42,0.6);padding:10px 18px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);">
+                  <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Questions</div>
+                  <div style="font-size:18px;font-weight:700;color:var(--cyan-accent);" id="questions-count-display">10</div>
+                </div>
+                <div style="background:rgba(15,23,42,0.6);padding:10px 18px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);">
+                  <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Passing Mark</div>
+                  <div style="font-size:18px;font-weight:700;color:#10b981;">70%</div>
+                </div>
+                <div style="background:rgba(15,23,42,0.6);padding:10px 18px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);">
+                  <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Reward</div>
+                  <div style="font-size:18px;font-weight:700;color:#fbbf24;">+100 XP</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quiz Loading State -->
+          <div id="quiz-loading-state" class="state-container">
+            <div class="state-spinner"></div>
+            <div class="state-title">Loading Quiz Questions...</div>
+          </div>
+
+          <!-- Quiz Form Container -->
+          <form id="quiz-form" style="display:none;">
+            <div id="questions-list"></div>
+
+            <div style="margin-top:30px;display:flex;justify-content:flex-end;gap:16px;align-items:center;">
+              <span id="answered-indicator" style="font-size:14px;color:var(--text-muted);">0 / 10 answered</span>
+              <button type="submit" id="submit-quiz-btn" class="btn-nexus btn-nexus-primary" style="padding:14px 32px;font-size:16px;">
+                <i class="fa-solid fa-paper-plane"></i> Submit Quiz
+              </button>
+            </div>
+          </form>
+
+          <!-- Result Card -->
+          <div class="quiz-result-card" id="quiz-result-card"></div>
+        </div>
+      `;
+
+      let quizData = null;
+      const letters = ['A', 'B', 'C', 'D'];
+
+      async function fetchQuiz() {
+        try {
+          const res = await api.get(`/courses/${courseId}/quiz`);
+          if (!res.success || !res.quiz) {
+            throw new Error(res.message || 'Quiz not found for this course.');
+          }
+
+          quizData = res.quiz;
+          document.getElementById('quiz-course-title').innerText = res.courseTitle || 'Final Course Quiz';
+          document.getElementById('quiz-course-tag').innerText = `Passing score: ${quizData.passPercentage || 70}%`;
+          document.getElementById('questions-count-display').innerText = quizData.questions.length;
+
+          renderQuestions(quizData.questions);
+        } catch (err) {
+          document.getElementById('quiz-loading-state').innerHTML = `
+            <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i></div>
+            <div class="state-title">Unable to Load Quiz</div>
+            <p class="state-desc">${err.message}</p>
+            <a href="course-learning.html?courseId=${courseId}" class="btn-nexus btn-nexus-secondary" style="margin-top:16px;">
+              Back to Learning Room
+            </a>
+          `;
+        }
+      }
+
+      function renderQuestions(questions) {
+        const list = document.getElementById('questions-list');
+        list.innerHTML = questions.map((q, idx) => {
+          return `
+            <div class="question-card" id="q-card-${idx}">
+              <div class="question-badge">Question ${idx + 1} of ${questions.length}</div>
+              <div class="question-title">${q.question}</div>
+              <div class="options-grid">
+                ${q.options.map((opt, optIdx) => `
+                  <label class="option-label" data-q="${idx}" data-opt="${optIdx}">
+                    <input type="radio" name="question_${idx}" value="${optIdx}" required>
+                    <span class="option-letter">${letters[optIdx] || optIdx + 1}.</span>
+                    <span class="option-text">${opt}</span>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById('quiz-loading-state').style.display = 'none';
+        document.getElementById('quiz-form').style.display = 'block';
+
+        // Add selection interactions
+        document.querySelectorAll('.option-label').forEach(label => {
+          label.addEventListener('click', () => {
+            const qIdx = label.dataset.q;
+            document.querySelectorAll(`.option-label[data-q="${qIdx}"]`).forEach(l => l.classList.remove('selected'));
+            label.classList.add('selected');
+            updateAnsweredCount();
+          });
+        });
+      }
+
+      function updateAnsweredCount() {
+        const answered = document.querySelectorAll('#quiz-form input[type="radio"]:checked').length;
+        const total = quizData ? quizData.questions.length : 10;
+        document.getElementById('answered-indicator').innerText = `${answered} / ${total} answered`;
+      }
+
+      // Handle Quiz Submission
+      const form = document.getElementById('quiz-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const answers = [];
+        quizData.questions.forEach((q, idx) => {
+          const selected = form.querySelector(`input[name="question_${idx}"]:checked`);
+          answers.push({
+            questionIndex: idx,
+            selectedOption: selected ? parseInt(selected.value, 10) : -1
+          });
+        });
+
+        const submitBtn = document.getElementById('submit-quiz-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Grading Quiz...';
+
+        try {
+          const res = await api.post(`/courses/${courseId}/quiz/submit`, { answers });
+          if (!res.success) throw new Error(res.message || 'Submission failed');
+
+          renderResult(res);
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Quiz';
+          showToast(err.message || 'Submission failed', 'error');
+        }
+      });
+
+      function renderResult(result) {
+        document.getElementById('quiz-header-card').style.display = 'none';
+        document.getElementById('quiz-form').style.display = 'none';
+
+        const resultCard = document.getElementById('quiz-result-card');
+        resultCard.style.display = 'block';
+
+        if (result.passed) {
+          resultCard.className = 'quiz-result-card pass';
+          resultCard.innerHTML = `
+            <div class="score-circle pass">
+              <div style="font-size:32px;font-weight:800;">${result.percentage}%</div>
+              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;">${result.score}/${result.totalQuestions}</div>
+            </div>
+            <div style="display:inline-block;padding:6px 16px;background:rgba(16,185,129,0.15);color:#10b981;font-weight:700;border-radius:20px;font-size:13px;margin-bottom:12px;">
+              <i class="fa-solid fa-circle-check"></i> ASSESSMENT PASSED
+            </div>
+            <h2 style="font-size:28px;margin-bottom:8px;color:#fff;">CONGRATULATIONS!</h2>
+            <p style="color:var(--text-secondary);font-size:16px;max-width:560px;margin:0 auto 20px;">
+              You have successfully completed <strong>${result.courseTitle || 'the course'}</strong> with an impressive score of <strong>${result.percentage}%</strong>!
+            </p>
+
+            <div style="display:flex;justify-content:center;gap:24px;margin-bottom:30px;flex-wrap:wrap;">
+              <div style="background:rgba(15,23,42,0.6);padding:14px 24px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);">
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Quiz Score</div>
+                <div style="font-size:20px;font-weight:800;color:#10b981;">${result.percentage}%</div>
+              </div>
+              <div style="background:rgba(15,23,42,0.6);padding:14px 24px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);">
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Course Progress</div>
+                <div style="font-size:20px;font-weight:800;color:var(--cyan-accent);">100%</div>
+              </div>
+              <div style="background:rgba(15,23,42,0.6);padding:14px 24px;border-radius:var(--radius-md);border:1px solid var(--border-subtle);">
+                <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;">Quiz XP Earned</div>
+                <div style="font-size:20px;font-weight:800;color:#fbbf24;">+100 XP</div>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;">
+              <button id="claim-cert-btn" class="btn-nexus btn-nexus-primary" style="padding:14px 32px;font-size:16px;">
+                <i class="fa-solid fa-award"></i> CLAIM CERTIFICATE
+              </button>
+              <a href="courses.html" class="btn-nexus btn-nexus-secondary" style="padding:14px 24px;font-size:15px;">
+                Back to Courses
+              </a>
+            </div>
+          `;
+
+          document.getElementById('claim-cert-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('claim-cert-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Claiming Certificate...';
+
+            try {
+              const claimRes = await api.post('/certificates/claim', { courseId });
+              showToast('Certificate successfully issued! +200 XP awarded.', 'success');
+              if (typeof refreshUserXP === 'function') await refreshUserXP();
+              window.location.href = 'certificate.html';
+            } catch (err) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fa-solid fa-award"></i> CLAIM CERTIFICATE';
+              showToast(err.message || 'Failed to claim certificate', 'error');
+            }
+          });
+
+        } else {
+          resultCard.className = 'quiz-result-card fail';
+          resultCard.innerHTML = `
+            <div class="score-circle fail">
+              <div style="font-size:32px;font-weight:800;">${result.percentage}%</div>
+              <div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;">${result.score}/${result.totalQuestions}</div>
+            </div>
+            <div style="display:inline-block;padding:6px 16px;background:rgba(239,68,68,0.15);color:#ef4444;font-weight:700;border-radius:20px;font-size:13px;margin-bottom:12px;">
+              <i class="fa-solid fa-triangle-exclamation"></i> ASSESSMENT NOT PASSED
+            </div>
+            <h2 style="font-size:26px;margin-bottom:8px;color:#fff;">Score Below Required Mark</h2>
+            <p style="color:var(--text-secondary);font-size:15px;max-width:540px;margin:0 auto 24px;">
+              You need <strong>70% or above</strong> to complete the course and claim your verified Certificate of Completion.
+            </p>
+
+            <div style="display:flex;justify-content:center;gap:14px;flex-wrap:wrap;">
+              <button id="retake-quiz-btn" class="btn-nexus btn-nexus-primary" style="padding:12px 28px;font-size:15px;">
+                <i class="fa-solid fa-rotate-right"></i> RETAKE QUIZ
+              </button>
+              <a href="course-learning.html?courseId=${courseId}" class="btn-nexus btn-nexus-secondary" style="padding:12px 24px;font-size:15px;">
+                Review Course Lessons
+              </a>
+            </div>
+          `;
+
+          document.getElementById('retake-quiz-btn').addEventListener('click', () => {
+            // Reset form
+            form.reset();
+            document.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+            document.getElementById('quiz-result-card').style.display = 'none';
+            document.getElementById('quiz-header-card').style.display = 'block';
+            document.getElementById('quiz-form').style.display = 'block';
+            const submitBtn = document.getElementById('submit-quiz-btn');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Quiz';
+            updateAnsweredCount();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          });
+        }
+      }
+
+      await fetchQuiz();
+    });
+  </script>
+</body>
+</html>

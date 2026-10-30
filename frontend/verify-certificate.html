@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Certificate | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .verify-page-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+    }
+    .verify-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      width: 100%;
+      max-width: 600px;
+      backdrop-filter: blur(20px);
+      box-shadow: var(--shadow-card);
+      text-align: center;
+    }
+    .et-badge-logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, #0ea5e9, #6366f1);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -2px;
+      color: #ffffff;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+    }
+    .verification-result {
+      margin-top: 28px;
+      padding: 24px;
+      border-radius: var(--radius-md);
+      text-align: left;
+      border: 1px solid var(--border-medium);
+      background: rgba(15, 23, 42, 0.7);
+    }
+    .verification-result.valid {
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.15);
+    }
+    .verification-result.invalid {
+      border-color: rgba(239, 68, 68, 0.5);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.15);
+    }
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 14px;
+    }
+    .result-row:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-bg">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+  </div>
+
+  <div class="verify-page-wrap">
+    <div style="margin-bottom:20px;text-align:center;">
+      <a href="courses.html" style="text-decoration:none;display:inline-flex;align-items:center;gap:12px;">
+        <div class="sidebar-logo-icon">ET</div>
+        <h2 style="font-size:22px;color:#fff;">EDUTECH NEXUS</h2>
+      </a>
+    </div>
+
+    <div class="verify-box">
+      <div class="et-badge-logo">ET</div>
+      <h1 style="font-size:24px;margin-bottom:8px;">Certificate Verification Portal</h1>
+      <p style="color:var(--text-secondary);font-size:14px;margin-bottom:24px;">
+        Validate the authenticity of an EDUTECH NEXUS course completion credential directly from MongoDB records.
+      </p>
+
+      <form id="verify-form" style="display:flex;gap:10px;margin-bottom:10px;">
+        <input type="text" id="cert-id-input" class="nexus-input" placeholder="e.g. EN-CERT-2026-A8F39K" style="text-transform:uppercase;font-weight:600;letter-spacing:1px;" required>
+        <button type="submit" class="btn-nexus btn-nexus-primary" style="flex-shrink:0;">
+          <i class="fa-solid fa-check"></i> VERIFY
+        </button>
+      </form>
+
+      <div id="verify-output"></div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <a href="certificate.html" style="color:var(--text-secondary);font-size:13px;text-decoration:none;margin-right:20px;">
+        <i class="fa-solid fa-award"></i> My Certificates
+      </a>
+      <a href="courses.html" style="color:var(--text-secondary);font-size:13px;text-decoration:none;">
+        <i class="fa-solid fa-arrow-left"></i> Back to Courses
+      </a>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryId = urlParams.get('id');
+      const input = document.getElementById('cert-id-input');
+      const form = document.getElementById('verify-form');
+      const output = document.getElementById('verify-output');
+
+      async function verify(id) {
+        if (!id) return;
+        output.innerHTML = `
+          <div class="state-container" style="padding:20px;">
+            <div class="state-spinner"></div>
+            <div class="state-title" style="font-size:15px;">Searching MongoDB Records...</div>
+          </div>
+        `;
+
+        try {
+          const res = await api.get(`/certificates/verify/${encodeURIComponent(id.trim().toUpperCase())}`);
+          if (res.success && res.verified) {
+            output.innerHTML = `
+              <div class="verification-result valid">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                  <i class="fa-solid fa-circle-check" style="color:#10b981;font-size:26px;"></i>
+                  <div>
+                    <h3 style="font-size:18px;color:#10b981;font-weight:700;">VALID CERTIFICATE ✓</h3>
+                    <div style="font-size:12px;color:var(--text-secondary);">Authentic record verified in EDUTECH NEXUS database</div>
+                  </div>
+                </div>
+
+                <div class="result-row">
+                  <span style="color:var(--text-muted);">Student Name:</span>
+                  <strong style="color:#fff;">${res.studentName}</strong>
+                </div>
+                <div class="result-row">
+                  <span style="color:var(--text-muted);">Course:</span>
+                  <strong style="color:var(--cyan-accent);">${res.courseName}</strong>
+                </div>
+                <div class="result-row">
+                  <span style="color:var(--text-muted);">Completion Date:</span>
+                  <span style="color:#fff;">${new Date(res.completionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                </div>
+                <div class="result-row">
+                  <span style="color:var(--text-muted);">Certificate ID:</span>
+                  <strong style="color:#fbbf24;font-family:var(--font-heading);">${res.certificateId}</strong>
+                </div>
+                ${res.quizScore !== undefined ? `
+                <div class="result-row">
+                  <span style="color:var(--text-muted);">Quiz Score:</span>
+                  <strong style="color:#10b981;">${res.quizScore}%</strong>
+                </div>` : ''}
+              </div>
+            `;
+          }
+        } catch (err) {
+          output.innerHTML = `
+            <div class="verification-result invalid">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <i class="fa-solid fa-circle-xmark" style="color:#ef4444;font-size:26px;"></i>
+                <div>
+                  <h3 style="font-size:18px;color:#ef4444;font-weight:700;">INVALID CERTIFICATE</h3>
+                  <p style="font-size:13px;color:var(--text-secondary);margin-top:4px;">
+                    ${err.message || 'No official record matches this Certificate ID.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        verify(input.value);
+      });
+
+      if (queryId) {
+        input.value = queryId;
+        verify(queryId);
+      }
+    });
+  </script>
+</body>
+</html>

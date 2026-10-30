@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Challenge | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .ide-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 24px;
+      align-items: stretch;
+      min-height: calc(100vh - 200px);
+    }
+    .problem-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(16px);
+      overflow-y: auto;
+    }
+    .editor-panel {
+      background: #020617;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    }
+    .editor-topbar {
+      background: #0b1329;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .code-editor-area {
+      flex: 1;
+      width: 100%;
+      min-height: 320px;
+      background: #020617;
+      color: #38bdf8;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 20px;
+      border: none;
+      resize: none;
+      outline: none;
+    }
+    .timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      border-radius: 20px;
+      color: #fca5a5;
+      font-weight: 700;
+      font-family: var(--font-heading);
+    }
+    .test-cases-panel {
+      background: #090e1a;
+      border-top: 1px solid var(--border-subtle);
+      padding: 18px 20px;
+    }
+    .test-result-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      .ide-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('games.html', 'Code Challenge Arena', 'Complete the JavaScript algorithmic problem, run test cases, and submit for score and XP.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="timer-badge" id="timer-display">
+            <i class="fa-regular fa-clock"></i> <span id="timer-text">10:00</span>
+          </div>
+          <a href="games.html" class="btn-nexus btn-nexus-secondary">
+            <i class="fa-solid fa-arrow-left"></i> Exit Game
+          </a>
+        </div>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="state-container" id="game-loader">
+          <div class="state-spinner"></div>
+          <div class="state-title">Loading Coding Challenge...</div>
+        </div>
+
+        <div class="ide-layout" id="ide-container" style="display:none;">
+          <!-- Left Problem Panel -->
+          <div class="problem-panel">
+            <div>
+              <div style="display:flex;gap:8px;margin-bottom:12px;">
+                <span class="nexus-badge badge-purple">JavaScript</span>
+                <span class="nexus-badge badge-green">String & Array</span>
+                <span class="nexus-badge badge-amber"><i class="fa-solid fa-bolt"></i> +50 XP Reward</span>
+              </div>
+              <h2 id="problem-title" style="font-size:22px;margin-bottom:12px;">Loading...</h2>
+              <div id="problem-desc" style="color:var(--text-secondary);font-size:14px;line-height:1.7;margin-bottom:20px;"></div>
+
+              <h4 style="font-size:15px;margin-bottom:8px;color:#fff;">Example Test Inputs:</h4>
+              <div id="test-preview" style="font-size:13px;color:var(--text-muted);background:rgba(0,0,0,0.3);padding:12px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);font-family:monospace;"></div>
+            </div>
+
+            <div style="border-top:1px solid var(--border-subtle);padding-top:16px;margin-top:20px;">
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Scoring Guidelines:</div>
+              <p style="font-size:12px;color:var(--text-secondary);">
+                All test cases must pass for full score. +20 XP awarded for submission attempt, +50 XP for passing all test assertions.
+              </p>
+            </div>
+          </div>
+
+          <!-- Right Code Editor Panel -->
+          <div class="editor-panel">
+            <div class="editor-topbar">
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);">
+                <i class="fa-brands fa-js" style="color:#f7df1e;"></i>
+                <span>solution.js</span>
+              </div>
+              <button class="btn-nexus btn-nexus-secondary" id="reset-code-btn" style="padding:4px 12px;font-size:12px;">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+              </button>
+            </div>
+
+            <textarea id="code-input" class="code-editor-area" spellcheck="false"></textarea>
+
+            <div class="test-cases-panel">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <h4 style="font-size:14px;color:#fff;">Test Cases & Output</h4>
+                <div style="display:flex;gap:10px;">
+                  <button class="btn-nexus btn-nexus-glow" id="submit-code-btn" style="padding:8px 20px;">
+                    <i class="fa-solid fa-play"></i> Run Tests & Submit
+                  </button>
+                </div>
+              </div>
+              <div id="test-results-output">
+                <p style="font-size:13px;color:var(--text-muted);">Click "Run Tests & Submit" to evaluate your solution.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      let activeGame = null;
+      let initialStarterCode = '';
+
+      // Timer Logic (10 minutes countdown)
+      let timeRemaining = 600;
+      const timerInterval = setInterval(() => {
+        timeRemaining--;
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('timer-text').textContent = '00:00';
+          showToast('Time limit expired! You can still submit for evaluation.', 'info');
+          return;
+        }
+        const mins = Math.floor(timeRemaining / 60);
+        const secs = timeRemaining % 60;
+        const timeEl = document.getElementById('timer-text');
+        if (timeEl) timeEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }, 1000);
+
+      window.addEventListener('beforeunload', () => clearInterval(timerInterval));
+
+      try {
+        const gamesRes = await api.get('/games');
+        const codeGames = (gamesRes.games || []).filter(g => g.gameType === 'code-challenge');
+        activeGame = codeGames[0];
+
+        if (!activeGame) {
+          // Fallback fetch first game
+          activeGame = gamesRes.games?.[0];
+        }
+
+        if (!activeGame) throw new Error('No coding challenges currently available.');
+
+        document.getElementById('game-loader').style.display = 'none';
+        document.getElementById('ide-container').style.display = 'grid';
+
+        document.getElementById('problem-title').textContent = activeGame.title;
+        document.getElementById('problem-desc').textContent = activeGame.description;
+
+        initialStarterCode = activeGame.starterCode || `function solution(str) {\n  // Your code here\n  return str.replace(/[^a-zA-Z0-9]/g, '').split('').reverse().join('');\n}`;
+        document.getElementById('code-input').value = initialStarterCode;
+
+        const testPreview = document.getElementById('test-preview');
+        if (activeGame.testCases && activeGame.testCases.length) {
+          testPreview.innerHTML = activeGame.testCases.map((tc, idx) => `Test ${idx + 1}: input = ${tc.input || '""'} -> expected = ${tc.expectedOutput}`).join('<br>');
+        }
+
+        document.getElementById('reset-code-btn').onclick = () => {
+          document.getElementById('code-input').value = initialStarterCode;
+        };
+
+        const submitBtn = document.getElementById('submit-code-btn');
+        submitBtn.onclick = async () => {
+          const code = document.getElementById('code-input').value;
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Running Tests...';
+
+          try {
+            const result = await api.post('/games/code-challenge/run', {
+              gameId: activeGame._id,
+              code
+            });
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-play"></i> Run Tests & Submit';
+
+            const outputEl = document.getElementById('test-results-output');
+            const passBadge = result.passedAll ? '<span class="nexus-badge badge-green">Passed All Tests</span>' : '<span class="nexus-badge badge-rose">Partial / Failed</span>';
+
+            let resultsHtml = `
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <strong>Score: ${result.score}% (${result.passedCount}/${result.totalCount} passed)</strong>
+                <div>${passBadge} <span class="nexus-badge badge-purple">+${result.xpAwarded} XP Earned</span></div>
+              </div>
+            `;
+
+            (result.results || []).forEach((r, idx) => {
+              resultsHtml += `
+                <div class="test-result-pill" style="border-left: 4px solid ${r.passed ? '#10b981' : '#ef4444'};">
+                  <span>${r.passed ? '<i class="fa-solid fa-check" style="color:#10b981;"></i>' : '<i class="fa-solid fa-xmark" style="color:#ef4444;"></i>'} Test ${idx + 1}: ${r.description || ''}</span>
+                  <span style="font-family:monospace;font-size:12px;color:${r.passed ? '#6ee7b7' : '#fca5a5'};">${r.passed ? 'PASSED' : `Got: ${r.actual}`}</span>
+                </div>
+              `;
+            });
+
+            outputEl.innerHTML = resultsHtml;
+            await refreshUserXP();
+            showToast(`Challenge evaluated! Score: ${result.score}% (+${result.xpAwarded} XP)`, result.passedAll ? 'success' : 'info');
+          } catch (err) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fa-solid fa-play"></i> Run Tests & Submit';
+            showToast(err.message || 'Execution error', 'error');
+          }
+        };
+
+      } catch (err) {
+        document.getElementById('game-loader').innerHTML = `
+          <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i></div>
+          <div class="state-title">Error Loading Challenge</div>
+          <p class="state-desc">${err.message}</p>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Internships | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .applications-table-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-card);
+      overflow-x: auto;
+    }
+    .status-tracker-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      font-size: 11px;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .status-Applied {
+      background: rgba(148, 163, 184, 0.15);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      color: #cbd5e1;
+    }
+    .status-Under-Review, .status-UnderReview {
+      background: rgba(56, 189, 248, 0.15);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #38bdf8;
+    }
+    .status-Shortlisted {
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.35);
+      color: #c084fc;
+    }
+    .status-Interview {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fbbf24;
+    }
+    .status-Selected {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      color: #34d399;
+    }
+    .status-Rejected {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #f87171;
+    }
+    .status-Completed {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #818cf8;
+    }
+    .app-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .app-card-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: var(--transition-normal);
+    }
+    .app-card-item:hover {
+      border-color: var(--border-glow);
+      transform: translateY(-3px);
+    }
+    .timeline-steps {
+      display: flex;
+      justify-content: space-between;
+      margin: 18px 0;
+      position: relative;
+    }
+    .timeline-steps::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      height: 2px;
+      background: var(--border-subtle);
+      z-index: 1;
+    }
+    .timeline-step {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      width: 60px;
+      text-align: center;
+    }
+    .timeline-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #0f172a;
+      border: 2px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      margin-bottom: 6px;
+      color: var(--text-muted);
+    }
+    .timeline-step.active .timeline-dot {
+      border-color: var(--cyan-accent);
+      background: var(--cyan-accent);
+      color: #0f172a;
+      box-shadow: 0 0 10px var(--cyan-accent);
+    }
+    .timeline-step.passed .timeline-dot {
+      border-color: #10b981;
+      background: #10b981;
+      color: #fff;
+    }
+    .timeline-step.active span {
+      color: var(--cyan-accent);
+      font-weight: 600;
+    }
+    .timeline-step.passed span {
+      color: #10b981;
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('my-internships.html', 'My Internship Applications', 'Track the real-time review, evaluation, and selection status of your applications.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <a href="internship.html" class="btn-nexus btn-nexus-primary">
+          <i class="fa-solid fa-plus"></i> Browse More Opportunities
+        </a>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="state-container" id="apps-loader">
+          <div class="state-spinner"></div>
+          <div class="state-title">Loading Your Applications...</div>
+        </div>
+
+        <div id="apps-view" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+            <div style="font-size:14px;color:var(--text-secondary);">
+              Showing <strong id="apps-count" style="color:#fff;">0</strong> submitted internship applications
+            </div>
+            <button id="refresh-apps-btn" class="btn-nexus btn-nexus-secondary" style="font-size:12px;padding:6px 14px;">
+              <i class="fa-solid fa-arrows-rotate"></i> Refresh Status
+            </button>
+          </div>
+
+          <div class="app-card-grid" id="apps-grid"></div>
+        </div>
+      `;
+
+      const statusOrder = ['Applied', 'Under Review', 'Shortlisted', 'Interview', 'Selected'];
+
+      function getTimelineHtml(status) {
+        if (status === 'Rejected') {
+          return `
+            <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:var(--radius-sm);padding:10px 14px;font-size:12px;color:#fca5a5;margin:14px 0;display:flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-circle-xmark"></i> Application not selected during this recruitment cycle.
+            </div>
+          `;
+        }
+
+        const currentIndex = statusOrder.indexOf(status);
+        return `
+          <div class="timeline-steps">
+            ${statusOrder.map((step, idx) => {
+              const isPassed = currentIndex > idx;
+              const isActive = currentIndex === idx;
+              const stateClass = isPassed ? 'passed' : isActive ? 'active' : '';
+              return `
+                <div class="timeline-step ${stateClass}">
+                  <div class="timeline-dot">
+                    ${isPassed ? '<i class="fa-solid fa-check"></i>' : (idx + 1)}
+                  </div>
+                  <span>${step}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      async function loadApplications() {
+        try {
+          const res = await api.get('/internships/my-applications');
+          const apps = res.applications || res.registrations || [];
+
+          document.getElementById('apps-loader').style.display = 'none';
+          const view = document.getElementById('apps-view');
+          view.style.display = 'block';
+
+          document.getElementById('apps-count').textContent = apps.length;
+          const grid = document.getElementById('apps-grid');
+
+          if (!apps.length) {
+            grid.innerHTML = `
+              <div class="state-container" style="grid-column:1/-1;">
+                <div class="state-icon"><i class="fa-solid fa-folder-open"></i></div>
+                <div class="state-title">No Applications Submitted</div>
+                <p class="state-desc">You have not registered or applied for any internships yet.</p>
+                <a href="internship.html" class="btn-nexus btn-nexus-primary" style="margin-top:16px;">
+                  Explore Opportunities
+                </a>
+              </div>
+            `;
+            return;
+          }
+
+          grid.innerHTML = apps.map(app => {
+            const rawStatus = app.status || 'Applied';
+            const statusClass = `status-${rawStatus.replace(/\s+/g, '-')}`;
+            const companyName = app.internshipId?.company || app.internship?.company || app.company || 'Company';
+            const title = app.internshipId?.title || app.internship?.title || 'Internship';
+            const appId = app.applicationId || `EN-INT-${String(app._id).slice(-5).toUpperCase()}`;
+            const appliedDate = new Date(app.appliedAt || app.applicationDate || app.createdAt).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric'
+            });
+
+            return `
+              <div class="app-card-item">
+                <div>
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:8px;">
+                    <div>
+                      <div style="font-size:12px;color:var(--cyan-accent);font-family:var(--font-heading);letter-spacing:0.5px;margin-bottom:2px;">
+                        ${appId}
+                      </div>
+                      <h3 style="font-size:18px;color:#fff;margin-bottom:4px;">${title}</h3>
+                      <div style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+                        <i class="fa-solid fa-building"></i> ${companyName}
+                      </div>
+                    </div>
+                    <span class="status-badge ${statusClass}">
+                      <i class="fa-solid fa-circle-dot" style="font-size:8px;"></i> ${rawStatus}
+                    </span>
+                  </div>
+
+                  <!-- Visual Progress Steps -->
+                  ${getTimelineHtml(rawStatus)}
+
+                  <div style="border-top:1px solid var(--border-subtle);padding-top:14px;margin-top:14px;font-size:12px;display:flex;flex-direction:column;gap:6px;color:var(--text-secondary);">
+                    <div style="display:flex;justify-content:space-between;">
+                      <span>Applied Date:</span>
+                      <strong style="color:#fff;">${appliedDate}</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                      <span>Applicant Name:</span>
+                      <strong style="color:#fff;">${app.fullName || currentUser.fullName}</strong>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;">
+                      <span>Contact Email:</span>
+                      <span>${app.email || currentUser.email}</span>
+                    </div>
+                    ${app.resumeUrl ? `
+                      <div style="display:flex;justify-content:space-between;margin-top:4px;">
+                        <span>Resume:</span>
+                        <a href="${app.resumeUrl}" target="_blank" style="color:var(--cyan-accent);text-decoration:none;">
+                          <i class="fa-solid fa-file-pdf"></i> View Submitted Resume
+                        </a>
+                      </div>
+                    ` : ''}
+                  </div>
+                </div>
+
+                <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border-subtle);display:flex;justify-content:space-between;align-items:center;">
+                  <span style="font-size:11px;color:var(--text-muted);">
+                    Last updated: ${new Date(app.updatedAt || app.appliedAt || Date.now()).toLocaleDateString()}
+                  </span>
+                  ${app.internshipId ? `
+                    <a href="internship-details.html?id=${app.internshipId._id || app.internshipId}" class="btn-nexus btn-nexus-secondary" style="font-size:12px;padding:6px 12px;">
+                      View Posting <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                  ` : ''}
+                </div>
+              </div>
+            `;
+          }).join('');
+        } catch (err) {
+          document.getElementById('apps-loader').innerHTML = `
+            <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i></div>
+            <div class="state-title">Error Loading Applications</div>
+            <p class="state-desc">${err.message}</p>
+          `;
+        }
+      }
+
+      document.getElementById('refresh-apps-btn')?.addEventListener('click', () => {
+        loadApplications();
+        showToast('Application statuses refreshed.', 'info');
+      });
+
+      await loadApplications();
+    });
+  </script>
+</body>
+</html>

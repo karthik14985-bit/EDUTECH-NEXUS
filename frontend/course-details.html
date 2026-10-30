@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Details | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .details-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 32px;
+      align-items: flex-start;
+    }
+    .course-hero-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+    .course-hero-img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+    }
+    .course-hero-content {
+      padding: 28px;
+    }
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      margin-bottom: 28px;
+    }
+    .lesson-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: var(--transition-fast);
+      border-radius: var(--radius-sm);
+    }
+    .lesson-item-row:last-child {
+      border-bottom: none;
+    }
+    .lesson-item-row:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .lesson-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .lesson-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--cyan-accent);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .sticky-enroll-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      position: sticky;
+      top: 96px;
+    }
+    .access-notice-box {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-top: 18px;
+      font-size: 13px;
+      color: #7dd3fc;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(7, 13, 30, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 9999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal-card {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      width: 100%;
+      max-width: 650px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 30px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 14px;
+    }
+    .modal-header h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px;
+      color: #ffffff;
+    }
+    .modal-close-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .modal-close-btn:hover { color: #fff; }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    .modal-grid .full-col {
+      grid-column: span 2;
+    }
+    @media (max-width: 600px) {
+      .modal-grid { grid-template-columns: 1fr; }
+      .modal-grid .full-col { grid-column: span 1; }
+    }
+    .modal-group {
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-group label {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .modal-input, .modal-select {
+      height: 42px;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 0 12px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+    }
+    .modal-input:focus, .modal-select:focus {
+      border-color: #6366f1;
+    }
+    .modal-input.is-invalid, .modal-select.is-invalid {
+      border-color: #f87171 !important;
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+
+  <!-- COURSE REGISTRATION MODAL -->
+  <div id="courseRegModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <h2>Course Registration</h2>
+          <p style="font-size:13px;color:#94a3b8;margin-top:2px;" id="modalCourseTitle">Complete participant details for certificate verification</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeCourseModal()">&times;</button>
+      </div>
+
+      <div id="modalAlert" style="display:none;padding:10px 14px;border-radius:8px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#fca5a5;font-size:13px;margin-bottom:16px;"></div>
+
+      <form id="courseRegForm" novalidate>
+        <div class="modal-grid">
+          <!-- 1. Full Name -->
+          <div class="modal-group">
+            <label for="crFullName">Full Name *</label>
+            <input type="text" id="crFullName" class="modal-input" required>
+          </div>
+
+          <!-- 2. Age -->
+          <div class="modal-group">
+            <label for="crAge">Age *</label>
+            <input type="number" id="crAge" class="modal-input" min="10" max="100" required>
+          </div>
+
+          <!-- 3. User Type -->
+          <div class="modal-group full-col">
+            <label for="crUserType">User Type *</label>
+            <select id="crUserType" class="modal-select" onchange="toggleModalUserType(this.value)" required>
+              <option value="student">Student</option>
+              <option value="staff">Staff / Faculty</option>
+              <option value="worker">Worker / Industry Professional</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <!-- CONDITIONAL: STUDENT -->
+          <div id="crStudentFields" style="display:contents;">
+            <div class="modal-group">
+              <label for="crStudentInst">College / Institution Name *</label>
+              <input type="text" id="crStudentInst" class="modal-input cr-cond">
+            </div>
+            <div class="modal-group">
+              <label for="crStudentDept">Department *</label>
+              <input type="text" id="crStudentDept" class="modal-input cr-cond" placeholder="e.g. Computer Science">
+            </div>
+            <div class="modal-group">
+              <label for="crStudentYear">Academic Year *</label>
+              <select id="crStudentYear" class="modal-select cr-cond">
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+                <option value="PG">Postgraduate</option>
+              </select>
+            </div>
+            <div class="modal-group">
+              <label for="crStudentReg">Register Number *</label>
+              <input type="text" id="crStudentReg" class="modal-input cr-cond" placeholder="e.g. 71772101001">
+            </div>
+          </div>
+
+          <!-- CONDITIONAL: STAFF -->
+          <div id="crStaffFields" style="display:none;">
+            <div class="modal-group">
+              <label for="crStaffInst">Institution Name *</label>
+              <input type="text" id="crStaffInst" class="modal-input cr-cond" disabled>
+            </div>
+            <div class="modal-group">
+              <label for="crStaffDept">Department *</label>
+              <input type="text" id="crStaffDept" class="modal-input cr-cond" disabled>
+            </div>
+            <div class="modal-group full-col">
+              <label for="crStaffDesig">Designation *</label>
+              <input type="text" id="crStaffDesig" class="modal-input cr-cond" placeholder="e.g. Assistant Professor" disabled>
+            </div>
+          </div>
+
+          <!-- CONDITIONAL: WORKER -->
+          <div id="crWorkerFields" style="display:none;">
+            <div class="modal-group">
+              <label for="crWorkerCompany">Company Name *</label>
+              <input type="text" id="crWorkerCompany" class="modal-input cr-cond" disabled>
+            </div>
+            <div class="modal-group">
+              <label for="crWorkerRole">Job Role / Designation *</label>
+              <input type="text" id="crWorkerRole" class="modal-input cr-cond" placeholder="e.g. Software Engineer" disabled>
+            </div>
+          </div>
+
+          <!-- CONDITIONAL: OTHER -->
+          <div id="crOtherFields" style="display:none;">
+            <div class="modal-group">
+              <label for="crOtherOrg">Organization / Company *</label>
+              <input type="text" id="crOtherOrg" class="modal-input cr-cond" disabled>
+            </div>
+            <div class="modal-group">
+              <label for="crOtherOcc">Occupation *</label>
+              <input type="text" id="crOtherOcc" class="modal-input cr-cond" placeholder="e.g. Independent Learner" disabled>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="modal-group">
+            <label for="crCity">City</label>
+            <input type="text" id="crCity" class="modal-input" placeholder="e.g. Coimbatore">
+          </div>
+          <div class="modal-group">
+            <label for="crState">State</label>
+            <input type="text" id="crState" class="modal-input" value="Tamil Nadu">
+          </div>
+
+          <div class="full-col" style="margin-top:14px;display:flex;gap:12px;justify-content:flex-end;">
+            <button type="button" class="btn-nexus btn-nexus-secondary" onclick="closeCourseModal()">Cancel</button>
+            <button type="submit" class="btn-nexus btn-nexus-primary" id="modalSubmitBtn">
+              <i class="fa-solid fa-check"></i> Confirm 30-Day Registration
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    let currentCourse = null;
+    let currentUserProfile = null;
+
+    function closeCourseModal() {
+      document.getElementById('courseRegModal').style.display = 'none';
+      document.getElementById('modalAlert').style.display = 'none';
+    }
+
+    function toggleModalUserType(type) {
+      const blocks = {
+        student: document.getElementById('crStudentFields'),
+        staff: document.getElementById('crStaffFields'),
+        worker: document.getElementById('crWorkerFields'),
+        other: document.getElementById('crOtherFields')
+      };
+
+      Object.keys(blocks).forEach(k => {
+        const el = blocks[k];
+        if (el) {
+          if (k === type) {
+            el.style.display = 'contents';
+            el.querySelectorAll('.cr-cond').forEach(inp => inp.disabled = false);
+          } else {
+            el.style.display = 'none';
+            el.querySelectorAll('.cr-cond').forEach(inp => inp.disabled = true);
+          }
+        }
+      });
+    }
+
+    function openCourseModal() {
+      if (!currentCourse) return;
+      document.getElementById('modalCourseTitle').textContent = `Enrolling in: ${currentCourse.title}`;
+
+      // Pre-fill from current user profile
+      const user = currentUserProfile || auth.getUser() || {};
+      document.getElementById('crFullName').value = user.fullName || '';
+      document.getElementById('crAge').value = user.age || 20;
+
+      const uType = user.userType || 'student';
+      document.getElementById('crUserType').value = uType;
+      toggleModalUserType(uType);
+
+      // Student fields
+      document.getElementById('crStudentInst').value = user.institution || user.college || '';
+      document.getElementById('crStudentDept').value = user.department || '';
+      document.getElementById('crStudentYear').value = user.year || '3';
+      document.getElementById('crStudentReg').value = user.registerNumber || user.studentId || '';
+
+      // Staff fields
+      document.getElementById('crStaffInst').value = user.institution || user.college || '';
+      document.getElementById('crStaffDept').value = user.department || '';
+      document.getElementById('crStaffDesig').value = user.designation || '';
+
+      // Worker fields
+      document.getElementById('crWorkerCompany').value = user.company || '';
+      document.getElementById('crWorkerRole').value = user.designation || '';
+
+      // Other fields
+      document.getElementById('crOtherOrg').value = user.institution || user.company || '';
+      document.getElementById('crOtherOcc').value = user.occupation || '';
+
+      // Location
+      document.getElementById('crCity').value = user.city || '';
+      document.getElementById('crState').value = user.state || 'Tamil Nadu';
+
+      document.getElementById('courseRegModal').style.display = 'flex';
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const courseRegModal = document.getElementById('courseRegModal');
+      const layout = await renderStudentLayout('courses.html', 'Course Details', 'Comprehensive syllabus overview, instructor details, and registration access.');
+      if (!layout) return;
+      if (courseRegModal) document.body.appendChild(courseRegModal);
+
+      const { pageContent, headerActions } = layout;
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('id') || urlParams.get('courseId');
+
+      headerActions.innerHTML = `
+        <a href="courses.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-arrow-left"></i> All Courses
+        </a>
+      `;
+
+      if (!courseId) {
+        pageContent.innerHTML = `
+          <div class="state-container">
+            <div class="state-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+            <div class="state-title">No Course Selected</div>
+            <p class="state-desc">Please select a course from the catalog to view details.</p>
+            <a href="courses.html" class="btn-nexus btn-nexus-primary" style="margin-top:16px;">View Catalog</a>
+          </div>
+        `;
+        return;
+      }
+
+      pageContent.innerHTML = `
+        <div class="state-container" id="details-loader">
+          <div class="state-spinner"></div>
+          <div class="state-title">Loading Course Curriculum...</div>
+        </div>
+        <div class="details-layout" id="details-body" style="display:none;"></div>
+      `;
+
+      try {
+        // Fetch current user details for pre-filling
+        try {
+          const meRes = await api.get('/auth/me');
+          if (meRes.success && meRes.user) currentUserProfile = meRes.user;
+        } catch (_) {}
+
+        const res = await api.get(`/courses/${courseId}`);
+        if (!res.success || !res.course) throw new Error(res.message || 'Course not found');
+
+        currentCourse = res.course;
+        const enrollment = res.enrollment;
+        const isEnrolled = !!enrollment;
+        const isExpired = enrollment?.isExpired || false;
+
+        const thumb = currentCourse.thumbnail || currentCourse.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80';
+        const lessons = currentCourse.lessons || [];
+
+        const detailsBody = document.getElementById('details-body');
+        document.getElementById('details-loader').style.display = 'none';
+        detailsBody.style.display = 'grid';
+
+        // Format dates
+        const regDateStr = enrollment?.registrationDate ? new Date(enrollment.registrationDate).toLocaleDateString() : '';
+        const expDateStr = enrollment?.expiryDate ? new Date(enrollment.expiryDate).toLocaleDateString() : '';
+
+        detailsBody.innerHTML = `
+          <!-- Main Left Column -->
+          <div>
+            <div class="course-hero-banner">
+              <img src="${thumb}" alt="${currentCourse.title}" class="course-hero-img" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80'">
+              <div class="course-hero-content">
+                <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+                  <span class="nexus-badge badge-purple">${currentCourse.category || 'Technology'}</span>
+                  <span class="nexus-badge badge-blue">${currentCourse.difficulty || currentCourse.level || 'Beginner'}</span>
+                  <span class="nexus-badge badge-green"><i class="fa-solid fa-bolt"></i> +${currentCourse.xpReward || 100} XP Reward</span>
+                </div>
+                <h2 style="font-size:26px;margin-bottom:12px;">${currentCourse.title}</h2>
+                <p style="color:var(--text-secondary);font-size:15px;line-height:1.7;">${currentCourse.description}</p>
+              </div>
+            </div>
+
+            <!-- What You Will Learn -->
+            ${currentCourse.whatYouWillLearn && currentCourse.whatYouWillLearn.length ? `
+              <div class="info-card">
+                <h3 style="font-size:18px;margin-bottom:14px;"><i class="fa-solid fa-bullseye" style="color:#38bdf8;"></i> What Students Will Learn</h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;">
+                  ${currentCourse.whatYouWillLearn.map(item => `
+                    <div style="display:flex;align-items:flex-start;gap:8px;font-size:14px;color:#cbd5e1;">
+                      <i class="fa-solid fa-circle-check" style="color:#34d399;margin-top:3px;"></i>
+                      <span>${item}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Course Requirements -->
+            ${currentCourse.requirements && currentCourse.requirements.length ? `
+              <div class="info-card">
+                <h3 style="font-size:18px;margin-bottom:14px;"><i class="fa-solid fa-list-ul" style="color:#a855f7;"></i> Course Prerequisites & Requirements</h3>
+                <ul style="padding-left:20px;color:#cbd5e1;font-size:14px;line-height:1.8;">
+                  ${currentCourse.requirements.map(req => `<li>${req}</li>`).join('')}
+                </ul>
+              </div>
+            ` : ''}
+
+            <!-- Lessons Syllabus -->
+            <div class="info-card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h3 style="font-size:20px;"><i class="fa-solid fa-list-check" style="color:var(--cyan-accent);"></i> Course Curriculum (${lessons.length} Lessons)</h3>
+                <span class="nexus-badge badge-blue">${currentCourse.duration || '8 weeks'}</span>
+              </div>
+
+              <div id="lessons-list">
+                ${lessons.map((lesson, idx) => {
+                  const isCompleted = enrollment?.completedLessons?.includes(String(lesson._id || idx + 1));
+                  return `
+                    <div class="lesson-item-row">
+                      <div class="lesson-left">
+                        <div class="lesson-number" style="${isCompleted ? 'background:#10b981;color:#fff;border-color:#10b981;' : ''}">
+                          ${isCompleted ? '<i class="fa-solid fa-check"></i>' : idx + 1}
+                        </div>
+                        <div>
+                          <div style="font-weight:600;font-size:15px;color:var(--text-main);">${lesson.title}</div>
+                          <div style="font-size:12px;color:var(--text-muted);">${lesson.description || 'Hands-on guided practice and code examples.'}</div>
+                        </div>
+                      </div>
+                      <div style="font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;">
+                        <i class="fa-regular fa-clock"></i> ${lesson.duration || '20 mins'}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Sticky Enrollment Right Column -->
+          <div>
+            <div class="sticky-enroll-card">
+              <h3 style="font-size:20px;margin-bottom:16px;">Enrollment Access</h3>
+
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--text-secondary);">
+                  <span>Total Lessons:</span>
+                  <strong style="color:var(--text-main);">${lessons.length} Lessons</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--text-secondary);">
+                  <span>Course Duration:</span>
+                  <strong style="color:var(--text-main);">${currentCourse.duration || '6 weeks'}</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--text-secondary);">
+                  <span>Difficulty Level:</span>
+                  <strong style="color:#38bdf8;">${currentCourse.difficulty || 'Beginner'}</strong>
+                </div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--text-secondary);">
+                  <span>XP Reward:</span>
+                  <strong style="color:#fbbf24;"><i class="fa-solid fa-bolt"></i> +${currentCourse.xp || currentCourse.xpReward || 500} XP</strong>
+                </div>
+                ${isEnrolled ? `
+                  <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;color:var(--text-secondary);">
+                    <span>Enrollment Status:</span>
+                    <strong style="color:#10b981;">Enrolled</strong>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary);">
+                    <span>Course Progress:</span>
+                    <strong style="color:#a78bfa;">${enrollment.progress || 0}%</strong>
+                  </div>
+                ` : ''}
+              </div>
+
+              ${isEnrolled ? `
+                <div style="margin-bottom:20px;">
+                  <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+                    <span>Your Learning Progress:</span>
+                    <strong>${enrollment.progress || 0}% Complete</strong>
+                  </div>
+                  <div class="progress-track" style="height:8px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;">
+                    <div class="progress-fill" style="width:${enrollment.progress || 0}%;height:100%;background:linear-gradient(90deg,#6366f1,#38bdf8);"></div>
+                  </div>
+                  <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;">
+                    ${enrollment.completedLessons?.length || 0} of ${lessons.length} Lessons Completed
+                    ${enrollment.quizPassed ? ' • <span style="color:#10b981;font-weight:700;">Quiz Passed ✓</span>' : ''}
+                  </div>
+                </div>
+              ` : ''}
+
+              <button id="start-course-btn" class="btn-nexus btn-nexus-primary" onclick="handleStartCourseClick()" ${isExpired ? 'disabled title="Course access has expired"' : ''} style="width:100%;padding:14px;font-size:15px;font-weight:800;letter-spacing:1px;display:flex;justify-content:center;align-items:center;gap:10px;">
+                <i class="fa-solid ${isExpired ? 'fa-lock' : 'fa-play'}"></i> ${isExpired ? 'COURSE CLOSED' : 'START COURSE'}
+              </button>
+
+              <div class="access-notice-box" style="margin-top:16px;">
+                <i class="fa-solid fa-graduation-cap" style="font-size:16px;margin-top:2px;"></i>
+                <div>
+                  <strong>Complete Learning Path</strong>
+                  <p style="margin-top:2px;font-size:12px;opacity:0.9;">Watch sequential video lessons, complete checkpoints, pass the final quiz, and claim your verified EDUTECH NEXUS certificate.</p>
+                </div>
+              </div>
+
+              <div style="margin-top:24px;border-top:1px solid var(--border-subtle);padding-top:18px;">
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;font-weight:700;">Instructor</div>
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <div class="user-avatar-mini" style="background:#4f46e5;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-chalkboard-user"></i>
+                  </div>
+                  <div>
+                    <div style="font-weight:600;font-size:14px;">${currentCourse.instructor || 'EDUTECH Faculty'}</div>
+                    <div style="font-size:12px;color:var(--text-secondary);">Senior Course Architect</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        // Handle modal submission
+        document.getElementById('courseRegForm').onsubmit = async (e) => {
+          e.preventDefault();
+          const alertBox = document.getElementById('modalAlert');
+          alertBox.style.display = 'none';
+
+          const fullName = document.getElementById('crFullName').value.trim();
+          const age = document.getElementById('crAge').value.trim();
+          const userType = document.getElementById('crUserType').value;
+          const city = document.getElementById('crCity').value.trim();
+          const state = document.getElementById('crState').value.trim();
+
+          if (!fullName) {
+            alertBox.textContent = 'Please enter your full name.';
+            alertBox.style.display = 'block';
+            return;
+          }
+
+          const payload = { fullName, age, userType, city, state };
+
+          if (userType === 'student') {
+            const inst = document.getElementById('crStudentInst').value.trim();
+            const dept = document.getElementById('crStudentDept').value.trim();
+            const yr = document.getElementById('crStudentYear').value.trim();
+            const reg = document.getElementById('crStudentReg').value.trim();
+            if (!inst || !dept || !reg) {
+              alertBox.textContent = 'College name, department, and register number are required for students.';
+              alertBox.style.display = 'block';
+              return;
+            }
+            payload.institution = inst;
+            payload.department = dept;
+            payload.year = yr;
+            payload.registerNumber = reg;
+          } else if (userType === 'staff') {
+            const inst = document.getElementById('crStaffInst').value.trim();
+            const dept = document.getElementById('crStaffDept').value.trim();
+            const desig = document.getElementById('crStaffDesig').value.trim();
+            if (!inst || !dept || !desig) {
+              alertBox.textContent = 'Institution, department, and designation are required for staff.';
+              alertBox.style.display = 'block';
+              return;
+            }
+            payload.institution = inst;
+            payload.department = dept;
+            payload.designation = desig;
+          } else if (userType === 'worker') {
+            const comp = document.getElementById('crWorkerCompany').value.trim();
+            const role = document.getElementById('crWorkerRole').value.trim();
+            if (!comp || !role) {
+              alertBox.textContent = 'Company name and job role are required for workers.';
+              alertBox.style.display = 'block';
+              return;
+            }
+            payload.company = comp;
+            payload.designation = role;
+          } else if (userType === 'other') {
+            const org = document.getElementById('crOtherOrg').value.trim();
+            const occ = document.getElementById('crOtherOcc').value.trim();
+            if (!org || !occ) {
+              alertBox.textContent = 'Organization and occupation are required.';
+              alertBox.style.display = 'block';
+              return;
+            }
+            payload.institution = org;
+            payload.occupation = occ;
+          }
+
+          const submitBtn = document.getElementById('modalSubmitBtn');
+          const origText = submitBtn.innerHTML;
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing Registration...';
+
+          try {
+            const res = await api.post(`/courses/${currentCourse._id}/register`, payload);
+            showToast(res.message || 'Course registration successful! 30 days active.', 'success');
+            closeCourseModal();
+
+            setTimeout(() => {
+              window.location.href = `course-learning.html?courseId=${currentCourse._id}&lessonId=1`;
+            }, 800);
+          } catch (err) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origText;
+            alertBox.textContent = err.message || 'Registration failed. Please check inputs.';
+            alertBox.style.display = 'block';
+          }
+        };
+
+        window.handleStartCourseClick = async function() {
+          if (isExpired) {
+            showToast('This course has closed because its access period has ended.', 'warning');
+            return;
+          }
+
+          const isAuth = auth.isAuthenticated();
+          if (!isAuth) {
+            const courseReturnUrl = `course-details.html?id=${currentCourse._id}`;
+            sessionStorage.setItem('redirect_after_login', courseReturnUrl);
+            window.location.href = `login.html?returnUrl=${encodeURIComponent(courseReturnUrl)}`;
+            return;
+          }
+
+          const btn = document.getElementById('start-course-btn');
+          const originalText = btn ? btn.innerHTML : 'START COURSE';
+          if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enrolling in Course...';
+          }
+
+          try {
+            const res = await api.post(`/courses/${currentCourse._id}/register`, {});
+            if (res.success) {
+              window.location.href = `course-learning.html?courseId=${currentCourse._id}&lessonId=1`;
+            } else {
+              throw new Error(res.message || 'Enrollment failed');
+            }
+          } catch (err) {
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = originalText;
+            }
+            if (window.showToast) showToast(err.message || 'Enrollment failed', 'error');
+            else alert(err.message || 'Enrollment failed');
+          }
+        };
+
+      } catch (err) {
+        document.getElementById('details-loader').innerHTML = `
+          <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i></div>
+          <div class="state-title">Error Loading Course</div>
+          <p class="state-desc">${err.message}</p>
+          <a href="courses.html" class="btn-nexus btn-nexus-primary" style="margin-top:16px;">Back to Courses</a>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>

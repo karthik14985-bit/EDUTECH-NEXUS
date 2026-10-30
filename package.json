@@ -1,0 +1,14 @@
+
+{
+  "name": "edutech-nexus",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install": "npm install --prefix backend",
+    "seed": "npm run seed --prefix backend",
+   "dev": "npm --prefix ./backend run dev",
+    "frontend": "node frontend-server.js",
+    "site": "node frontend-server.js",
+    "start": "node frontend-server.js"
+  }
+}

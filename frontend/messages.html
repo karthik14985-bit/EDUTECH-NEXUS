@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .messages-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 24px;
+      align-items: stretch;
+      min-height: calc(100vh - 220px);
+    }
+    .mail-folders-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .folder-tab-btn {
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: 1px solid transparent;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: var(--transition-fast);
+      font-family: inherit;
+    }
+    .folder-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+    }
+    .folder-tab-btn.active {
+      background: rgba(108, 76, 255, 0.18);
+      border-color: rgba(108, 76, 255, 0.4);
+      color: #fff;
+    }
+
+    .mail-feed-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+    }
+    .message-item-row {
+      padding: 18px;
+      border-bottom: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: var(--transition-fast);
+    }
+    .message-item-row:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .message-item-row.unread {
+      border-left: 3px solid var(--blue-electric);
+      background: rgba(0, 210, 255, 0.03);
+    }
+    @media (max-width: 800px) {
+      .messages-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('messages.html', 'Messaging Center', 'Communicate securely with fellow student scholars, club leaders, and platform administrators.');
+      if (!layout) return;
+
+      const { pageContent, headerActions } = layout;
+
+      headerActions.innerHTML = `
+        <button class="btn-nexus btn-nexus-primary" id="compose-msg-btn">
+          <i class="fa-solid fa-pen-to-square"></i> Compose Message
+        </button>
+      `;
+
+      pageContent.innerHTML = `
+        <div class="messages-layout">
+          <!-- Folders Left -->
+          <div class="mail-folders-card">
+            <button class="folder-tab-btn active" id="tab-inbox">
+              <span><i class="fa-solid fa-inbox" style="margin-right:8px;color:var(--cyan-accent);"></i> Inbox</span>
+              <span class="nexus-badge badge-blue" id="inbox-count">0</span>
+            </button>
+            <button class="folder-tab-btn" id="tab-sent">
+              <span><i class="fa-solid fa-paper-plane" style="margin-right:8px;color:#a78bfa;"></i> Sent</span>
+              <span class="nexus-badge badge-purple" id="sent-count">0</span>
+            </button>
+            <button class="folder-tab-btn" id="tab-unread">
+              <span><i class="fa-regular fa-envelope" style="margin-right:8px;color:#6ee7b7;"></i> Unread</span>
+              <span class="nexus-badge badge-green" id="unread-count">0</span>
+            </button>
+          </div>
+
+          <!-- Feed Right -->
+          <div class="mail-feed-card">
+            <h3 id="feed-title" style="font-size:18px;margin-bottom:16px;">Inbox Messages</h3>
+            <div id="messages-container" style="flex:1;">
+              <div class="state-container">
+                <div class="state-spinner"></div>
+                <div class="state-title">Loading Messages...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compose Modal -->
+        <div class="modal-overlay" id="compose-modal">
+          <div class="modal-dialog">
+            <div class="modal-header">
+              <h3 style="font-size:18px;">Compose Message</h3>
+              <button class="modal-close" id="compose-close">&times;</button>
+            </div>
+            <form id="compose-form" class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Recipient</label>
+                <select id="msg-receiver" class="nexus-select" required>
+                  <option value="">Loading users...</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Subject</label>
+                <input type="text" id="msg-subject" class="nexus-input" placeholder="e.g. Collaboration on Hackathon Project" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea id="msg-body" class="nexus-textarea" rows="5" placeholder="Write your message here..." required></textarea>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;">
+                <button type="button" class="btn-nexus btn-nexus-secondary" id="compose-cancel">Cancel</button>
+                <button type="submit" class="btn-nexus btn-nexus-primary" id="compose-submit-btn">Send Message</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      let allMessages = [];
+      let currentFolder = 'inbox';
+
+      async function fetchMessages() {
+        try {
+          const res = await api.get('/messages');
+          allMessages = res.messages || [];
+          updateCounts();
+          renderFeed();
+        } catch (err) {
+          document.getElementById('messages-container').innerHTML = `
+            <div class="state-container">
+              <p style="color:#ef4444;">Failed to load messages: ${err.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      function updateCounts() {
+        const myId = layout.currentUser._id;
+        const inboxMsgs = allMessages.filter(m => m.receiver?._id === myId || m.receiver === myId);
+        const sentMsgs = allMessages.filter(m => m.sender?._id === myId || m.sender === myId);
+        const unreadMsgs = inboxMsgs.filter(m => !m.read);
+
+        document.getElementById('inbox-count').textContent = inboxMsgs.length;
+        document.getElementById('sent-count').textContent = sentMsgs.length;
+        document.getElementById('unread-count').textContent = unreadMsgs.length;
+      }
+
+      function renderFeed() {
+        const container = document.getElementById('messages-container');
+        const myId = layout.currentUser._id;
+
+        let filtered = [];
+        if (currentFolder === 'inbox') {
+          filtered = allMessages.filter(m => m.receiver?._id === myId || m.receiver === myId);
+          document.getElementById('feed-title').textContent = 'Inbox Messages';
+        } else if (currentFolder === 'sent') {
+          filtered = allMessages.filter(m => m.sender?._id === myId || m.sender === myId);
+          document.getElementById('feed-title').textContent = 'Sent Messages';
+        } else {
+          filtered = allMessages.filter(m => (m.receiver?._id === myId || m.receiver === myId) && !m.read);
+          document.getElementById('feed-title').textContent = 'Unread Messages';
+        }
+
+        if (!filtered.length) {
+          container.innerHTML = `
+            <div class="state-container">
+              <div class="state-icon"><i class="fa-solid fa-envelope-open"></i></div>
+              <div class="state-title">No Messages in this Folder</div>
+              <p class="state-desc">Compose a message to start connecting with peers.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = filtered.map(m => {
+          const isSender = m.sender?._id === myId || m.sender === myId;
+          const otherPerson = isSender ? (m.receiver?.fullName || 'Recipient') : (m.sender?.fullName || 'Sender');
+          const isUnread = !isSender && !m.read;
+
+          return `
+            <div class="message-item-row ${isUnread ? 'unread' : ''}" data-msg-id="${m._id}">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <strong style="color:${isUnread ? '#38bdf8' : '#fff'};font-size:15px;">
+                  ${isSender ? `To: ${otherPerson}` : `From: ${otherPerson}`}
+                </strong>
+                <span style="font-size:12px;color:var(--text-muted);">${new Date(m.createdAt).toLocaleDateString()}</span>
+              </div>
+              <div style="font-weight:600;font-size:14px;color:var(--cyan-accent);">${m.subject || 'No Subject'}</div>
+              <p style="color:var(--text-secondary);font-size:13px;line-height:1.6;margin-top:2px;">${m.message}</p>
+              ${isUnread ? `
+                <button class="btn-nexus btn-nexus-secondary" data-mark-read="${m._id}" style="padding:4px 10px;font-size:11px;width:fit-content;margin-top:6px;">
+                  <i class="fa-solid fa-check"></i> Mark as Read
+                </button>
+              ` : ''}
+            </div>
+          `;
+        }).join('');
+
+        container.querySelectorAll('[data-mark-read]').forEach(b => {
+          b.onclick = async () => {
+            const id = b.dataset.markRead;
+            await api.put(`/messages/${id}/read`, {});
+            fetchMessages();
+          };
+        });
+      }
+
+      // Folder Switching
+      document.getElementById('tab-inbox').onclick = () => {
+        setFolder('inbox', 'tab-inbox');
+      };
+      document.getElementById('tab-sent').onclick = () => {
+        setFolder('sent', 'tab-sent');
+      };
+      document.getElementById('tab-unread').onclick = () => {
+        setFolder('unread', 'tab-unread');
+      };
+
+      function setFolder(folder, btnId) {
+        currentFolder = folder;
+        document.querySelectorAll('.folder-tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(btnId).classList.add('active');
+        renderFeed();
+      }
+
+      // Compose Modal Handler
+      const composeModal = document.getElementById('compose-modal');
+      document.getElementById('compose-msg-btn').onclick = async () => {
+        composeModal.classList.add('active');
+        // Fetch possible receivers
+        try {
+          const uRes = await api.get('/messages/users');
+          const select = document.getElementById('msg-receiver');
+          select.innerHTML = '<option value="">Select a student or administrator...</option>' +
+            (uRes.users || []).map(u => `<option value="${u._id}">${u.fullName} (${u.department || u.role})</option>`).join('');
+        } catch (_) {}
+      };
+
+      document.getElementById('compose-close').onclick = () => composeModal.classList.remove('active');
+      document.getElementById('compose-cancel').onclick = () => composeModal.classList.remove('active');
+
+      document.getElementById('compose-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const submitBtn = document.getElementById('compose-submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending...';
+
+        try {
+          await api.post('/messages', {
+            receiver: document.getElementById('msg-receiver').value,
+            subject: document.getElementById('msg-subject').value.trim(),
+            message: document.getElementById('msg-body').value.trim()
+          });
+
+          composeModal.classList.remove('active');
+          document.getElementById('compose-form').reset();
+          showToast('Message sent successfully!', 'success');
+          await fetchMessages();
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Send Message';
+        } catch (err) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = 'Send Message';
+          showToast(err.message || 'Failed to send message', 'error');
+        }
+      };
+
+      await fetchMessages();
+    });
+  </script>
+</body>
+</html>

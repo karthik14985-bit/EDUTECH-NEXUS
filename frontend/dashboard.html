@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .welcome-banner {
+      background: linear-gradient(135deg, rgba(108, 76, 255, 0.25) 0%, rgba(0, 210, 255, 0.12) 100%);
+      border: 1px solid rgba(108, 76, 255, 0.35);
+      border-radius: var(--radius-lg);
+      padding: 32px 36px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+    .welcome-text h2 {
+      font-size: clamp(22px, 3vw, 28px);
+      margin-bottom: 8px;
+    }
+    .welcome-text p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      max-width: 650px;
+    }
+    .welcome-actions {
+      display: flex;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .section-heading-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .section-heading-row h3 {
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top3-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(16px);
+    }
+    .top3-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .live-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--emerald-accent);
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.12);
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      background: var(--emerald-accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--emerald-accent);
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.2); }
+    }
+
+    .quick-modules-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 10px;
+    }
+    .module-tile {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-decoration: none;
+      color: inherit;
+      transition: var(--transition-normal);
+      min-height: 160px;
+    }
+    .module-tile:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-glow);
+      background: var(--bg-card-hover);
+      box-shadow: var(--shadow-glow);
+    }
+    .module-tile-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .module-tile-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: rgba(108, 76, 255, 0.15);
+      color: var(--cyan-accent);
+      border: 1px solid rgba(108, 76, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('dashboard.html', 'Student Dashboard', 'Your central learning command center and performance overview.');
+      if (!layout) return;
+
+      const { currentUser, pageContent } = layout;
+
+      pageContent.innerHTML = `
+        <!-- Welcome Hero Banner -->
+        <div class="welcome-banner">
+          <div class="welcome-text">
+            <h2>Welcome back, <span class="gradient-text" id="welcomeStudentName">${currentUser.fullName || 'Student'}</span>!</h2>
+            <p>Ready to level up your engineering skills today? Continue your active lessons, participate in technical events, or solve code challenges.</p>
+          </div>
+          <div class="welcome-actions">
+            <a href="courses.html" class="btn-nexus btn-nexus-primary"><i class="fa-solid fa-graduation-cap"></i> My Courses</a>
+            <a href="games.html" class="btn-nexus btn-nexus-secondary"><i class="fa-solid fa-gamepad"></i> Tech Games</a>
+          </div>
+        </div>
+
+        <!-- Metric Statistics Cards (Section 6) -->
+        <div class="stats-grid">
+          <div class="stat-metric-card">
+            <div class="stat-icon-wrapper purple"><i class="fa-solid fa-bolt"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-xp">${currentUser.xp || 0}</h3>
+              <p>Current XP</p>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-icon-wrapper blue"><i class="fa-solid fa-layer-group"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-level">Level ${currentUser.level || 1}</h3>
+              <p>Current Level</p>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-icon-wrapper green"><i class="fa-solid fa-book-open-reader"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-enrolled">0</h3>
+              <p>Courses Enrolled</p>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-icon-wrapper blue"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-completed">0</h3>
+              <p>Courses Completed</p>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-icon-wrapper amber"><i class="fa-solid fa-award"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-certificates">0</h3>
+              <p>Certificates Earned</p>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-icon-wrapper purple"><i class="fa-solid fa-calendar-check"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-events">0</h3>
+              <p>Events Participated</p>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-icon-wrapper green"><i class="fa-solid fa-gamepad"></i></div>
+            <div class="stat-info">
+              <h3 id="stat-game-score">0</h3>
+              <p>Game Score</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 7: LIVE TOP 3 LEADERBOARD (Retrieved from MongoDB, Polling every 15s) -->
+        <div class="top3-section">
+          <div class="top3-header">
+            <div>
+              <h3><i class="fa-solid fa-trophy" style="color:#fbbf24;"></i> Live Top 3 Leaderboard</h3>
+              <p style="color:var(--text-secondary);font-size:14px;margin-top:4px;">Rankings update automatically from live MongoDB database transactions.</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span class="live-indicator"><span class="live-dot"></span> Live Sync (15s)</span>
+              <a href="leaderboard.html" class="btn-nexus btn-nexus-secondary" style="padding:6px 14px;font-size:12px;">Full Leaderboard <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+          </div>
+
+          <div class="podium-container" id="top3-podium">
+            <div class="state-container" style="grid-column:1/-1;">
+              <div class="state-spinner"></div>
+              <div class="state-title">Loading Top 3 Technologists...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Access Modules Grid -->
+        <div class="section-heading-row">
+          <h3><i class="fa-solid fa-compass" style="color:var(--cyan-accent);"></i> Learning & Career Hub</h3>
+        </div>
+
+        <div class="quick-modules-grid">
+          <a href="courses.html" class="module-tile">
+            <div>
+              <div class="module-tile-head">
+                <div class="module-tile-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <span class="nexus-badge badge-purple">+120 XP</span>
+              </div>
+              <h4 style="font-size:17px;margin-bottom:6px;">Certificate Courses</h4>
+              <p style="color:var(--text-secondary);font-size:13px;">Full Stack Development, AI & Machine Learning, and Python curriculums.</p>
+            </div>
+            <span style="color:var(--cyan-accent);font-size:13px;font-weight:600;margin-top:12px;">Browse Catalog →</span>
+          </a>
+
+          <a href="internship.html" class="module-tile">
+            <div>
+              <div class="module-tile-head">
+                <div class="module-tile-icon" style="background:rgba(0,210,255,0.15);color:var(--blue-electric);"><i class="fa-solid fa-briefcase"></i></div>
+                <span class="nexus-badge badge-blue">Career</span>
+              </div>
+              <h4 style="font-size:17px;margin-bottom:6px;">Internships</h4>
+              <p style="color:var(--text-secondary);font-size:13px;">Explore hands-on software opportunities with verified corporate profiles and real applications.</p>
+            </div>
+            <span style="color:var(--cyan-accent);font-size:13px;font-weight:600;margin-top:12px;">View Openings →</span>
+          </a>
+
+          <a href="events.html" class="module-tile">
+            <div>
+              <div class="module-tile-head">
+                <div class="module-tile-icon" style="background:rgba(147,51,234,0.15);color:#c084fc;"><i class="fa-solid fa-calendar-check"></i></div>
+                <span class="nexus-badge badge-purple">Competitions</span>
+              </div>
+              <h4 style="font-size:17px;margin-bottom:6px;">Technical Events</h4>
+              <p style="color:var(--text-secondary);font-size:13px;">Participate in hackathons, webinars, and live coding symposiums to expand your network.</p>
+            </div>
+            <span style="color:var(--cyan-accent);font-size:13px;font-weight:600;margin-top:12px;">Explore Events →</span>
+          </a>
+
+          <a href="games.html" class="module-tile">
+            <div>
+              <div class="module-tile-head">
+                <div class="module-tile-icon" style="background:rgba(16,185,129,0.15);color:var(--emerald-accent);"><i class="fa-solid fa-gamepad"></i></div>
+                <span class="nexus-badge badge-green">+70 XP</span>
+              </div>
+              <h4 style="font-size:17px;margin-bottom:6px;">Tech Games</h4>
+              <p style="color:var(--text-secondary);font-size:13px;">Compete in timed JavaScript Code Challenges and identify bugs in the Debugging Arena.</p>
+            </div>
+            <span style="color:var(--cyan-accent);font-size:13px;font-weight:600;margin-top:12px;">Play Now →</span>
+          </a>
+
+          <a href="discussion.html" class="module-tile">
+            <div>
+              <div class="module-tile-head">
+                <div class="module-tile-icon" style="background:rgba(245,158,11,0.15);color:#fbbf24;"><i class="fa-solid fa-comments"></i></div>
+                <span class="nexus-badge badge-amber">Community</span>
+              </div>
+              <h4 style="font-size:17px;margin-bottom:6px;">Discussion Forum</h4>
+              <p style="color:var(--text-secondary);font-size:13px;">Collaborate with peers, ask technical questions, and share project insights.</p>
+            </div>
+            <span style="color:var(--cyan-accent);font-size:13px;font-weight:600;margin-top:12px;">Join Discussion →</span>
+          </a>
+
+          <a href="clubs.html" class="module-tile">
+            <div>
+              <div class="module-tile-head">
+                <div class="module-tile-icon" style="background:rgba(236,72,153,0.15);color:#f472b6;"><i class="fa-solid fa-users"></i></div>
+                <span class="nexus-badge badge-rose">Student Clubs</span>
+              </div>
+              <h4 style="font-size:17px;margin-bottom:6px;">Student Tech Clubs</h4>
+              <p style="color:var(--text-secondary);font-size:13px;">Connect with specialized clubs in Web Dev, AI, Cloud Computing, and Cyber Security.</p>
+            </div>
+            <span style="color:var(--cyan-accent);font-size:13px;font-weight:600;margin-top:12px;">Explore Clubs →</span>
+          </a>
+        </div>
+        </div>
+      `;
+
+      // Load Real Student Profile Stats from MongoDB
+      async function loadStudentStats() {
+        try {
+          const res = await api.get('/users/profile');
+          if (res.success && res.user) {
+            const u = res.user;
+            document.getElementById('stat-xp').textContent = u.xp || 0;
+            document.getElementById('stat-level').textContent = `Level ${u.level || 1}`;
+            if (u.stats) {
+              document.getElementById('stat-enrolled').textContent = u.stats.coursesEnrolled || 0;
+              document.getElementById('stat-completed').textContent = u.stats.coursesCompleted || 0;
+              document.getElementById('stat-certificates').textContent = u.stats.certificatesEarned || 0;
+              document.getElementById('stat-events').textContent = u.stats.eventsParticipated || 0;
+              document.getElementById('stat-game-score').textContent = u.stats.gamesPlayed || 0;
+            }
+          }
+        } catch (e) {
+          console.error('Failed to load student stats:', e);
+        }
+      }
+
+      // Load Live Top 3 Leaderboard from MongoDB (Section 7)
+      async function fetchTop3() {
+        try {
+          const res = await api.get('/leaderboard/top3');
+          const podium = document.getElementById('top3-podium');
+          if (!podium) return;
+
+          if (!res.success || !res.top3 || !res.top3.length) {
+            podium.innerHTML = '<div class="state-container" style="grid-column:1/-1;"><p class="state-desc">No leaderboard data recorded in MongoDB yet.</p></div>';
+            return;
+          }
+
+          const top3 = res.top3;
+          // Expected display order for podium: Rank 2 (left), Rank 1 (center elevated), Rank 3 (right)
+          const rank1 = top3[0];
+          const rank2 = top3[1];
+          const rank3 = top3[2];
+
+          let html = '';
+
+          // Rank 2 Card
+          if (rank2) {
+            html += `
+              <div class="podium-card rank-2">
+                <span class="podium-badge">🥈</span>
+                <span class="nexus-badge badge-blue" style="margin-bottom:8px;">Rank 2</span>
+                <div class="podium-name">${rank2.name}</div>
+                <div class="podium-dept"><i class="fa-solid fa-graduation-cap"></i> ${rank2.department}</div>
+                <div class="podium-xp"><i class="fa-solid fa-bolt"></i> ${rank2.xp} XP</div>
+              </div>
+            `;
+          } else {
+            html += '<div class="podium-card rank-2"><span class="podium-badge">🥈</span><p class="state-desc">Unclaimed</p></div>';
+          }
+
+          // Rank 1 Card (Elevated center)
+          if (rank1) {
+            html += `
+              <div class="podium-card rank-1">
+                <span class="podium-badge">🥇</span>
+                <span class="nexus-badge badge-amber" style="margin-bottom:8px;">Champion · Rank 1</span>
+                <div class="podium-name" style="font-size:20px;">${rank1.name}</div>
+                <div class="podium-dept"><i class="fa-solid fa-graduation-cap"></i> ${rank1.department}</div>
+                <div class="podium-xp" style="font-size:24px;color:#fbbf24;"><i class="fa-solid fa-bolt"></i> ${rank1.xp} XP</div>
+              </div>
+            `;
+          }
+
+          // Rank 3 Card
+          if (rank3) {
+            html += `
+              <div class="podium-card rank-3">
+                <span class="podium-badge">🥉</span>
+                <span class="nexus-badge badge-purple" style="margin-bottom:8px;">Rank 3</span>
+                <div class="podium-name">${rank3.name}</div>
+                <div class="podium-dept"><i class="fa-solid fa-graduation-cap"></i> ${rank3.department}</div>
+                <div class="podium-xp"><i class="fa-solid fa-bolt"></i> ${rank3.xp} XP</div>
+              </div>
+            `;
+          } else {
+            html += '<div class="podium-card rank-3"><span class="podium-badge">🥉</span><p class="state-desc">Unclaimed</p></div>';
+          }
+
+          podium.innerHTML = html;
+        } catch (err) {
+          console.error('Failed to fetch top 3 leaderboard:', err);
+        }
+      }
+
+      // Initial Load
+      await loadStudentStats();
+      await fetchTop3();
+
+      // Real-time automatic polling every 15 seconds (Section 38)
+      const pollingInterval = setInterval(() => {
+        fetchTop3();
+        refreshUserXP();
+      }, 15000);
+
+      window.addEventListener('beforeunload', () => clearInterval(pollingInterval));
+    });
+  </script>
+</body>
+</html>

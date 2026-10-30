@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>EDUTECH NEXUS | Login</title>
+
+
+    <!-- GOOGLE FONTS -->
+
+    <link rel="preconnect"
+          href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+          rel="stylesheet">
+
+
+    <!-- FONT AWESOME -->
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+<style>
+
+/* =====================================
+   RESET
+===================================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+
+/* =====================================
+   BODY
+===================================== */
+
+body{
+
+    min-height:100vh;
+
+    font-family:"Inter",Arial,sans-serif;
+
+    color:#ffffff;
+
+    background:
+        radial-gradient(
+            circle at 10% 15%,
+            rgba(105,85,255,.18),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 90% 80%,
+            rgba(20,160,255,.12),
+            transparent 30%
+        ),
+        #060a17;
+
+    overflow:hidden;
+}
+
+
+/* =====================================
+   BACKGROUND ORBS
+===================================== */
+
+.orb{
+
+    position:fixed;
+
+    border-radius:50%;
+
+    pointer-events:none;
+
+    filter:blur(2px);
+
+    opacity:.18;
+
+    animation:float 8s ease-in-out infinite;
+}
+
+
+.orb1{
+
+    width:190px;
+    height:190px;
+
+    background:#6955ff;
+
+    left:5%;
+    top:15%;
+}
+
+
+.orb2{
+
+    width:140px;
+    height:140px;
+
+    background:#159cff;
+
+    right:8%;
+    top:25%;
+
+    animation-delay:2s;
+}
+
+
+.orb3{
+
+    width:170px;
+    height:170px;
+
+    background:#8b3dff;
+
+    left:30%;
+    bottom:-80px;
+
+    animation-delay:4s;
+}
+
+
+@keyframes float{
+
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-25px);
+    }
+
+}
+
+
+/* =====================================
+   HEADER
+===================================== */
+
+.header{
+
+    position:relative;
+
+    z-index:5;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:22px 6%;
+
+    background:rgba(6,10,23,.65);
+
+    border-bottom:1px solid rgba(255,255,255,.07);
+
+    backdrop-filter:blur(15px);
+}
+
+
+.logo{
+
+    text-decoration:none;
+
+    color:#ffffff;
+
+    font-family:"Space Grotesk";
+
+    font-size:23px;
+
+    font-weight:700;
+}
+
+
+.logo span{
+
+    color:#806dff;
+}
+
+
+.register-link{
+
+    color:#9da6be;
+
+    text-decoration:none;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    transition:.3s;
+}
+
+
+.register-link:hover{
+
+    color:#ffffff;
+}
+
+
+.register-link strong{
+
+    color:#8f80ff;
+
+    margin-left:5px;
+}
+
+
+/* =====================================
+   MAIN
+===================================== */
+
+.main{
+
+    min-height:calc(100vh - 75px);
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:30px 20px;
+
+    position:relative;
+
+    z-index:2;
+}
+
+
+/* =====================================
+   LOGIN CARD
+===================================== */
+
+.login-card{
+
+    width:100%;
+
+    max-width:470px;
+
+    padding:38px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(19,27,55,.97),
+            rgba(9,14,31,.98)
+        );
+
+    border:1px solid #29345b;
+
+    border-radius:25px;
+
+    box-shadow:
+        0 30px 90px rgba(0,0,0,.50),
+        0 0 60px rgba(105,85,255,.08);
+
+    animation:cardFloat 5s ease-in-out infinite;
+}
+
+
+@keyframes cardFloat{
+
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-5px);
+    }
+
+}
+
+
+/* =====================================
+   LOGIN ICON
+===================================== */
+
+.login-icon{
+
+    width:68px;
+
+    height:68px;
+
+    margin:0 auto 20px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:19px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #6955ff,
+            #347cff
+        );
+
+    font-size:27px;
+
+    box-shadow:
+        0 12px 35px rgba(80,70,255,.25);
+}
+
+
+/* =====================================
+   TITLE
+===================================== */
+
+.title{
+
+    text-align:center;
+
+    margin-bottom:30px;
+}
+
+
+.title h1{
+
+    font-family:"Space Grotesk";
+
+    font-size:32px;
+
+    margin-bottom:8px;
+}
+
+
+.title p{
+
+    color:#818ba7;
+
+    font-size:13px;
+
+    line-height:1.5;
+}
+
+
+/* =====================================
+   FORM
+===================================== */
+
+.form-group{
+
+    margin-bottom:19px;
+}
+
+
+.form-group label{
+
+    display:block;
+
+    color:#aeb7ce;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    margin-bottom:8px;
+}
+
+
+.input-box{
+
+    position:relative;
+}
+
+
+.input-box > i{
+
+    position:absolute;
+
+    left:14px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    color:#69748f;
+
+    pointer-events:none;
+}
+
+
+.input-box input{
+
+    width:100%;
+
+    padding:14px 45px 14px 43px;
+
+    background:#080e20;
+
+    color:#ffffff;
+
+    border:1px solid #29345a;
+
+    border-radius:11px;
+
+    outline:none;
+
+    font-family:inherit;
+
+    font-size:14px;
+
+    transition:.3s;
+}
+
+
+.input-box input::placeholder{
+
+    color:#58637d;
+}
+
+
+.input-box input:focus{
+
+    border-color:#6955ff;
+
+    box-shadow:
+        0 0 0 3px rgba(105,85,255,.10);
+}
+
+
+/* =====================================
+   PASSWORD TOGGLE
+===================================== */
+
+.password-toggle{
+
+    position:absolute;
+
+    right:14px;
+
+    top:50%;
+
+    transform:translateY(-50%);
+
+    border:0;
+
+    background:none;
+
+    color:#69748f;
+
+    cursor:pointer;
+
+    font-size:15px;
+}
+
+
+.password-toggle:hover{
+
+    color:#ffffff;
+}
+
+
+/* =====================================
+   REMEMBER + FORGOT
+===================================== */
+
+.options{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin:4px 0 22px;
+
+    font-size:12px;
+}
+
+
+.remember{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:7px;
+
+    color:#818ba6;
+
+    cursor:pointer;
+}
+
+
+.remember input{
+
+    accent-color:#6955ff;
+
+    cursor:pointer;
+}
+
+
+.forgot{
+
+    border:0;
+
+    background:none;
+
+    color:#8e80ff;
+
+    cursor:pointer;
+
+    font-family:inherit;
+
+    font-size:12px;
+}
+
+
+.forgot:hover{
+
+    color:#b0a7ff;
+}
+
+
+/* =====================================
+   LOGIN BUTTON
+===================================== */
+
+.login-btn{
+
+    width:100%;
+
+    padding:15px;
+
+    border:0;
+
+    border-radius:12px;
+
+    color:#ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #6955ff,
+            #4377ff
+        );
+
+    font-family:inherit;
+
+    font-size:15px;
+
+    font-weight:800;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    box-shadow:
+        0 12px 30px rgba(80,70,255,.20);
+}
+
+
+.login-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 16px 35px rgba(80,70,255,.35);
+}
+
+
+.login-btn:disabled{
+
+    opacity:.7;
+
+    cursor:not-allowed;
+
+    transform:none;
+}
+
+
+.login-btn i{
+
+    margin-right:8px;
+}
+
+
+/* =====================================
+   DIVIDER
+===================================== */
+
+.divider{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    margin:25px 0;
+
+    color:#5e6882;
+
+    font-size:11px;
+}
+
+
+.divider::before,
+.divider::after{
+
+    content:"";
+
+    flex:1;
+
+    height:1px;
+
+    background:#242e4c;
+}
+
+
+/* =====================================
+   REGISTER BOX
+===================================== */
+
+.register-box{
+
+    text-align:center;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    background:#0a1023;
+
+    border:1px solid #202a48;
+
+    color:#7f89a4;
+
+    font-size:13px;
+}
+
+
+.register-box a{
+
+    color:#9587ff;
+
+    text-decoration:none;
+
+    font-weight:700;
+
+    margin-left:4px;
+}
+
+
+/* =====================================
+   ERROR
+===================================== */
+
+.error-message{
+
+    display:none;
+
+    padding:11px 13px;
+
+    margin-bottom:17px;
+
+    border-radius:10px;
+
+    background:#351725;
+
+    border:1px solid #6b2940;
+
+    color:#ff8194;
+
+    font-size:12px;
+
+    line-height:1.4;
+}
+
+
+.error-message i{
+
+    margin-right:6px;
+}
+
+
+/* =====================================
+   SUCCESS
+===================================== */
+
+.success-message{
+
+    display:none;
+
+    padding:11px 13px;
+
+    margin-bottom:17px;
+
+    border-radius:10px;
+
+    background:#102c25;
+
+    border:1px solid #1d705c;
+
+    color:#68e1bc;
+
+    font-size:12px;
+
+    line-height:1.4;
+}
+
+
+/* =====================================
+   LOADING
+===================================== */
+
+.spinner{
+
+    display:inline-block;
+
+    width:15px;
+
+    height:15px;
+
+    border:2px solid rgba(255,255,255,.35);
+
+    border-top-color:#ffffff;
+
+    border-radius:50%;
+
+    animation:spin .7s linear infinite;
+
+    vertical-align:middle;
+
+    margin-right:7px;
+}
+
+
+@keyframes spin{
+
+    to{
+        transform:rotate(360deg);
+    }
+
+}
+
+
+/* =====================================
+   FOOTER
+===================================== */
+
+.footer{
+
+    text-align:center;
+
+    margin-top:20px;
+
+    color:#4f5a76;
+
+    font-size:10px;
+}
+
+
+/* =====================================
+   FORGOT PASSWORD MODAL
+===================================== */
+
+.modal{
+
+    display:none;
+
+    position:fixed;
+
+    inset:0;
+
+    z-index:100;
+
+    background:rgba(0,0,0,.75);
+
+    backdrop-filter:blur(8px);
+
+    align-items:center;
+
+    justify-content:center;
+
+    padding:20px;
+}
+
+
+.modal-box{
+
+    width:100%;
+
+    max-width:420px;
+
+    background:#0d1429;
+
+    border:1px solid #303b61;
+
+    border-radius:20px;
+
+    padding:27px;
+
+    box-shadow:0 30px 80px rgba(0,0,0,.55);
+}
+
+
+.modal-header{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    margin-bottom:20px;
+}
+
+
+.modal-header h2{
+
+    font-family:"Space Grotesk";
+
+    font-size:21px;
+}
+
+
+.close-btn{
+
+    border:0;
+
+    background:none;
+
+    color:#7f89a4;
+
+    font-size:23px;
+
+    cursor:pointer;
+}
+
+
+.modal-box p{
+
+    color:#808aa4;
+
+    font-size:12px;
+
+    line-height:1.5;
+
+    margin-bottom:18px;
+}
+
+
+.reset-btn{
+
+    width:100%;
+
+    padding:13px;
+
+    border:0;
+
+    border-radius:10px;
+
+    background:linear-gradient(
+        135deg,
+        #6955ff,
+        #4377ff
+    );
+
+    color:#fff;
+
+    font-weight:700;
+
+    cursor:pointer;
+}
+
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media(max-width:550px){
+
+    body{
+        overflow:auto;
+    }
+
+
+    .header{
+
+        padding:18px 20px;
+    }
+
+
+    .logo{
+
+        font-size:19px;
+    }
+
+
+    .register-link{
+
+        font-size:11px;
+    }
+
+
+    .main{
+
+        padding:25px 12px;
+    }
+
+
+    .login-card{
+
+        padding:27px 20px;
+
+        border-radius:20px;
+    }
+
+
+    .title h1{
+
+        font-size:27px;
+    }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<!-- BACKGROUND -->
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+
+
+<!-- HEADER -->
+
+<header class="header">
+
+    <a href="home.html" class="logo">
+
+        EDUTECH <span>NEXUS</span>
+
+    </a>
+
+
+    <a href="register.html"
+       class="register-link">
+
+        New student?
+
+        <strong>Register</strong>
+
+    </a>
+
+</header>
+
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+
+    <div class="login-card">
+
+
+        <!-- ICON -->
+
+        <div class="login-icon">
+
+            <i class="fa-solid fa-right-to-bracket"></i>
+
+        </div>
+
+
+        <!-- TITLE -->
+
+        <div class="title">
+
+            <h1>Welcome Back</h1>
+
+            <p>
+                Login to continue your EDUTECH NEXUS journey
+            </p>
+
+        </div>
+
+
+
+        <!-- ERROR -->
+
+        <div
+            class="error-message"
+            id="errorMessage">
+
+            <i class="fa-solid fa-circle-exclamation"></i>
+
+            <span id="errorText">
+                Invalid login details.
+            </span>
+
+        </div>
+
+
+
+        <!-- SUCCESS -->
+
+        <div
+            class="success-message"
+            id="successMessage">
+
+            <i class="fa-solid fa-circle-check"></i>
+
+            Login successful! Opening dashboard...
+
+        </div>
+
+
+
+        <!-- LOGIN FORM -->
+
+        <form id="loginForm">
+
+
+            <!-- EMAIL -->
+
+            <div class="form-group">
+
+                <label>
+                    Email Address or Username
+                </label>
+
+
+                <div class="input-box">
+
+                    <i class="fa-solid fa-user-shield"></i>
+
+
+                    <input
+                        type="text"
+                        id="email"
+                        placeholder="Enter email or username (e.g. admin or student)"
+                        autocomplete="username"
+                        required>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- PASSWORD -->
+
+            <div class="form-group">
+
+                <label>
+                    Password
+                </label>
+
+
+                <div class="input-box">
+
+                    <i class="fa-solid fa-lock"></i>
+
+
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required>
+
+
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        onclick="togglePassword()">
+
+                        <i
+                            class="fa-solid fa-eye"
+                            id="eyeIcon">
+                        </i>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- OPTIONS -->
+
+            <div class="options">
+
+
+                <label class="remember">
+
+                    <input
+                        type="checkbox"
+                        id="remember">
+
+                    Remember me
+
+                </label>
+
+
+                <button
+                    type="button"
+                    class="forgot"
+                    onclick="openForgotModal()">
+
+                    Forgot password?
+
+                </button>
+
+
+            </div>
+
+
+
+            <!-- LOGIN BUTTON -->
+
+            <button
+                type="submit"
+                class="login-btn"
+                id="loginButton">
+
+                <i class="fa-solid fa-right-to-bracket"></i>
+
+                Login to EDUTECH NEXUS
+
+            </button>
+
+            <!-- QUICK DEMO FILL PILLS -->
+            <div style="margin-top: 14px; padding: 12px; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px; font-size: 0.85rem;">
+                <div style="color: #94a3b8; margin-bottom: 8px; font-weight: 600; display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fa-solid fa-key" style="color: #38bdf8;"></i> Quick account fill (enter admin password):</span>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" onclick="fillCredentials('admin')" style="flex: 1; min-width: 130px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                        <i class="fa-solid fa-shield-halved"></i> Admin
+                    </button>
+                    <button type="button" onclick="fillCredentials('student')" style="flex: 1; min-width: 130px; background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.8rem; font-weight: 600;">
+                        <i class="fa-solid fa-user-graduate"></i> Student
+                    </button>
+                </div>
+            </div>
+
+
+        </form>
+
+
+
+        <!-- DIVIDER -->
+
+        <div class="divider">
+
+            OR
+
+        </div>
+
+
+
+        <!-- REGISTER -->
+
+        <div class="register-box">
+
+            Don't have an account?
+
+            <a href="register.html">
+                Create Account
+            </a>
+
+        </div>
+
+
+
+        <div class="footer">
+
+            EDUTECH NEXUS © 2026
+
+        </div>
+
+
+    </div>
+
+</main>
+
+
+
+<!-- FORGOT PASSWORD MODAL -->
+
+<div
+    class="modal"
+    id="forgotModal">
+
+
+    <div class="modal-box">
+
+
+        <div class="modal-header">
+
+            <h2>
+                Reset Password
+            </h2>
+
+
+            <button
+                class="close-btn"
+                onclick="closeForgotModal()">
+
+                &times;
+
+            </button>
+
+        </div>
+
+
+        <p>
+
+            Enter your registered email address.
+            In the final Supabase version, a secure
+            password-reset email will be sent to you.
+
+        </p>
+
+
+        <div class="form-group">
+
+            <label>
+                Email Address
+            </label>
+
+
+            <div class="input-box">
+
+                <i class="fa-solid fa-envelope"></i>
+
+
+                <input
+                    type="email"
+                    id="resetEmail"
+                    placeholder="Enter your email">
+
+            </div>
+
+        </div>
+
+
+        <button
+            class="reset-btn"
+            onclick="resetPassword()">
+
+            <i class="fa-solid fa-paper-plane"></i>
+
+            Send Reset Request
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+function fillCredentials(type) {
+    const emailEl = document.getElementById('email');
+    const passwordEl = document.getElementById('password');
+    if (!emailEl || !passwordEl) return;
+
+    if (type === 'admin') {
+        emailEl.value = 'adminedutech001@gmail.com';
+        passwordEl.value = '';
+        passwordEl.focus();
+    } else {
+        emailEl.value = 'student@edutechnexus.com';
+        passwordEl.value = 'Student@123';
+    }
+}
+
+/* =====================================
+   PASSWORD TOGGLE
+===================================== */
+
+function togglePassword(){
+
+    const password =
+        document.getElementById("password");
+
+    const icon =
+        document.getElementById("eyeIcon");
+
+
+    if(password.type === "password"){
+
+        password.type = "text";
+
+        icon.classList.remove("fa-eye");
+
+        icon.classList.add("fa-eye-slash");
+
+    }
+    else{
+
+        password.type = "password";
+
+        icon.classList.remove("fa-eye-slash");
+
+        icon.classList.add("fa-eye");
+
+    }
+
+}
+
+
+/* =====================================
+   SHOW ERROR
+===================================== */
+
+function showError(message){
+
+    const error =
+        document.getElementById("errorMessage");
+
+    const text =
+        document.getElementById("errorText");
+
+
+    text.textContent = message;
+
+    error.style.display = "block";
+
+
+    document.getElementById(
+        "successMessage"
+    ).style.display = "none";
+
+}
+
+
+/* =====================================
+   HIDE ERROR
+===================================== */
+
+function hideError(){
+
+    document.getElementById(
+        "errorMessage"
+    ).style.display = "none";
+
+}
+
+
+/* =====================================
+   LOGIN
+===================================== */
+
+document
+.getElementById("loginForm")
+.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    hideError();
+
+    const identifier = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const remember = document.getElementById("remember").checked;
+    const button = document.getElementById("loginButton");
+
+    if (!identifier || !password) {
+        showError("Please enter your username or email and password.");
+        return;
+    }
+
+    button.disabled = true;
+    button.innerHTML = '<span class="spinner"></span> Signing in...';
+
+    try {
+        const result = await api.post("/auth/login", {
+            emailOrUsername: identifier,
+            password
+        });
+        if (!result.success || !result.token || !result.user) {
+            throw new Error("Login could not be completed. Please try again.");
+        }
+
+        auth.saveSession(result, remember);
+        document.getElementById("successMessage").style.display = "block";
+
+        if (result.user.role === "admin") {
+            window.location.replace("admin-dashboard.html");
+            return;
+        }
+
+        const requestedReturnUrl = new URLSearchParams(window.location.search).get("returnUrl") || "";
+        const safeStudentReturnUrl = /^[A-Za-z0-9_-]+\.html(?:\?[A-Za-z0-9_=&%-]*)?$/.test(requestedReturnUrl)
+            && !/^admin(?:-|\/)/i.test(requestedReturnUrl);
+        window.location.replace(safeStudentReturnUrl ? requestedReturnUrl : "dashboard.html");
+    } catch (error) {
+        showError(error.message || "Unable to sign in. Please check your credentials.");
+        button.disabled = false;
+        button.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Login to EDUTECH NEXUS';
+    }
+});
+
+
+/* =====================================
+   FORGOT PASSWORD
+===================================== */
+
+function openForgotModal(){
+
+    document.getElementById(
+        "forgotModal"
+    ).style.display = "flex";
+
+
+    const currentEmail =
+        document.getElementById("email")
+        .value
+        .trim();
+
+
+    if(currentEmail){
+
+        document.getElementById(
+            "resetEmail"
+        ).value = currentEmail;
+
+    }
+
+}
+
+
+function closeForgotModal(){
+
+    document.getElementById(
+        "forgotModal"
+    ).style.display = "none";
+
+}
+
+
+/* =====================================
+    SECURE RESET REQUEST
+===================================== */
+
+async function resetPassword(){
+
+    const email =
+        document.getElementById("resetEmail")
+        .value
+        .trim()
+        .toLowerCase();
+
+
+    if(!email){
+
+        alert(
+            "Please enter your registered email."
+        );
+
+        return;
+
+    }
+
+
+    try{
+        const result = await api.post("/auth/forgot-password", { email });
+        alert(result.message);
+        closeForgotModal();
+    }
+    catch(error){
+        alert("Unable to process the password reset request right now.");
+    }
+
+}
+
+
+/* =====================================
+   MODAL CLOSE
+===================================== */
+
+document
+.getElementById("forgotModal")
+.addEventListener("click",function(e){
+
+    if(e.target === this){
+
+        closeForgotModal();
+
+    }
+
+});
+
+
+/* =====================================
+   AUTO LOGIN CHECK
+===================================== */
+
+window.addEventListener("load",function(){
+
+    const savedSession =
+        localStorage.getItem(
+            "edutechSession"
+        );
+
+
+    if(savedSession){
+
+        try{
+
+            const session =
+                JSON.parse(savedSession);
+
+
+            if(session.loggedIn){
+
+                document.getElementById(
+                    "email"
+                ).value =
+                    session.email || "";
+
+            }
+
+        }
+        catch(error){
+
+            localStorage.removeItem(
+                "edutechSession"
+            );
+
+        }
+
+    }
+
+});
+
+</script>
+
+</body>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/auth-forms.js"></script>
+</html>

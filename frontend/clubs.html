@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technology Clubs | EDUTECH NEXUS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/nexus-core.css">
+  <style>
+    .clubs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 26px;
+    }
+
+    .club-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      backdrop-filter: blur(14px);
+      transition: var(--transition-normal);
+    }
+
+    .club-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-glow);
+      box-shadow: var(--shadow-glow);
+    }
+
+    .club-header-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(108, 76, 255, 0.15);
+      border: 1px solid rgba(108, 76, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--cyan-accent);
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/nexus-student.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const layout = await renderStudentLayout('clubs.html', 'Student Technology Clubs', 'Join collaborative student communities to build projects, participate in hackathons, and share peer learning.');
+      if (!layout) return;
+
+      const { pageContent } = layout;
+
+      pageContent.innerHTML = `
+        <div class="clubs-grid" id="clubs-grid">
+          <div class="state-container" style="grid-column:1/-1;">
+            <div class="state-spinner"></div>
+            <div class="state-title">Loading Technology Communities...</div>
+          </div>
+        </div>
+      `;
+
+      async function fetchClubs() {
+        try {
+          const res = await api.get('/clubs');
+          const clubs = res.clubs || [];
+          renderClubs(clubs);
+        } catch (err) {
+          document.getElementById('clubs-grid').innerHTML = `
+            <div class="state-container" style="grid-column:1/-1;">
+              <p style="color:#ef4444;">Failed to load clubs: ${err.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      function renderClubs(clubs) {
+        const grid = document.getElementById('clubs-grid');
+        if (!grid) return;
+
+        if (!clubs.length) {
+          grid.innerHTML = `
+            <div class="state-container" style="grid-column:1/-1;">
+              <div class="state-icon"><i class="fa-solid fa-users-slash"></i></div>
+              <div class="state-title">No Clubs Formed Yet</div>
+              <p class="state-desc">Technology clubs will be established soon by student leaders and administrators.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const myId = layout.currentUser._id;
+
+        grid.innerHTML = clubs.map(c => {
+          // Check if user is member
+          const isMember = c.members?.some(m => (m._id || m) === myId);
+
+          return `
+            <article class="club-card">
+              <div>
+                <div class="club-header-icon">
+                  <i class="fa-solid fa-people-group"></i>
+                </div>
+                <div style="display:flex;gap:8px;margin-bottom:10px;">
+                  <span class="nexus-badge badge-purple">${c.category || 'Technology'}</span>
+                  <span class="nexus-badge badge-blue"><i class="fa-solid fa-users"></i> ${c.members?.length || 0} Members</span>
+                </div>
+                <h3 style="font-size:20px;margin-bottom:8px;">${c.name}</h3>
+                <p style="color:var(--text-secondary);font-size:14px;line-height:1.6;margin-bottom:16px;">
+                  ${c.description}
+                </p>
+
+                <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Activities:</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">
+                  ${(c.activities || ['Workshops', 'Hackathons']).map(a => `<span class="nexus-badge badge-purple" style="font-size:11px;">${a}</span>`).join('')}
+                </div>
+              </div>
+
+              <div style="border-top:1px solid var(--border-subtle);padding-top:16px;display:flex;justify-content:space-between;align-items:center;">
+                <div style="font-size:12px;color:var(--text-secondary);">
+                  Leader: <strong>${c.leader?.fullName || 'Elected Student'}</strong>
+                </div>
+                ${isMember ? `
+                  <button class="btn-nexus btn-nexus-secondary" data-leave-club="${c._id}" style="font-size:13px;padding:8px 16px;">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Leave Club
+                  </button>
+                ` : `
+                  <button class="btn-nexus btn-nexus-primary" data-join-club="${c._id}" style="font-size:13px;padding:8px 16px;">
+                    <i class="fa-solid fa-user-plus"></i> Join Club (+15 XP)
+                  </button>
+                `}
+              </div>
+            </article>
+          `;
+        }).join('');
+
+        grid.querySelectorAll('[data-join-club]').forEach(b => {
+          b.onclick = async () => {
+            const id = b.dataset.joinClub;
+            try {
+              const res = await api.post(`/clubs/${id}/join`, {});
+              showToast(res.message || 'Joined club! +15 XP', 'success');
+              await refreshUserXP();
+              await fetchClubs();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          };
+        });
+
+        grid.querySelectorAll('[data-leave-club]').forEach(b => {
+          b.onclick = async () => {
+            const id = b.dataset.leaveClub;
+            try {
+              const res = await api.post(`/clubs/${id}/leave`, {});
+              showToast(res.message || 'Left club', 'info');
+              await fetchClubs();
+            } catch (err) {
+              showToast(err.message, 'error');
+            }
+          };
+        });
+      }
+
+      await fetchClubs();
+    });
+  </script>
+</body>
+
+</html>

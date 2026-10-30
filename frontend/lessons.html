@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting to Course Learning Page | EDUTECH NEXUS</title>
+  <script>
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const courseId = urlParams.get('courseId') || urlParams.get('id');
+      const lessonId = urlParams.get('lessonId');
+      let target = 'course-learning.html';
+      const params = [];
+      if (courseId) params.push('courseId=' + encodeURIComponent(courseId));
+      if (lessonId) params.push('lessonId=' + encodeURIComponent(lessonId));
+      if (params.length > 0) target += '?' + params.join('&');
+      window.location.replace(target);
+    })();
+  </script>
+</head>
+<body style="background:#090d16;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;">
+  <p>Redirecting to modern Course Learning Room...</p>
+</body>
+</html>
