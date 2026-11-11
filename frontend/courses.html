@@ -9,7 +9,7 @@
   <style>
     .courses-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
       gap: 26px;
     }
     .course-card {
@@ -29,7 +29,7 @@
     }
     .course-thumb-wrapper {
       position: relative;
-      height: 180px;
+      height: 190px;
       overflow: hidden;
       background: #0f172a;
     }
@@ -66,6 +66,7 @@
       font-size: 13px;
       color: var(--text-secondary);
       margin-bottom: 12px;
+      flex-wrap: wrap;
     }
     .course-meta-row span {
       display: flex;
@@ -73,18 +74,42 @@
       gap: 6px;
     }
     .course-title {
-      font-size: 19px;
+      font-size: 20px;
       line-height: 1.3;
       margin-bottom: 8px;
+      color: #fff;
+      font-weight: 700;
     }
     .course-desc {
-      font-size: 13px;
+      font-size: 13.5px;
       color: var(--text-secondary);
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      line-height: 1.6;
+    }
+    .progress-box {
+      margin: 12px 0 16px;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-subtle);
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+    }
+    .progress-bar-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 6px 0;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #38bdf8);
+      border-radius: 3px;
+      transition: width 0.3s ease;
     }
     .course-footer {
       display: flex;
@@ -93,13 +118,7 @@
       border-top: 1px solid var(--border-subtle);
       padding-top: 16px;
       margin-top: auto;
-    }
-    .instructor-name {
-      font-size: 13px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      gap: 10px;
     }
   </style>
 </head>
@@ -109,7 +128,7 @@
   <script src="js/nexus-student.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      const layout = await renderStudentLayout('courses.html', 'Certificate Courses', 'Develop high-demand industry skills, complete practical lessons, and earn verified credentials.');
+      const layout = await renderStudentLayout('courses.html', 'Industry Certification Courses', 'Develop high-demand engineering skills across our core curriculum. Watch 100% of lessons to unlock verified credentials.');
       if (!layout) return;
 
       const { pageContent, headerActions } = layout;
@@ -124,20 +143,15 @@
         <div class="toolbar-section">
           <div class="search-input-wrapper">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="course-search" class="nexus-input" placeholder="Search courses by title, category, or skills...">
+            <input type="text" id="course-search" class="nexus-input" placeholder="Search courses by title, topic, or skills...">
           </div>
           <div class="filter-group">
             <select id="category-filter" class="nexus-select" style="min-width:180px;">
               <option value="all">All Categories</option>
-              <option value="Artificial Intelligence">Artificial Intelligence</option>
               <option value="Web Development">Web Development</option>
+              <option value="Artificial Intelligence">Artificial Intelligence</option>
+              <option value="Machine Learning">Machine Learning</option>
               <option value="Programming">Programming</option>
-            </select>
-            <select id="difficulty-filter" class="nexus-select" style="min-width:150px;">
-              <option value="all">All Levels</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
             </select>
           </div>
         </div>
@@ -145,7 +159,7 @@
         <div class="courses-grid" id="courses-grid">
           <div class="state-container" style="grid-column: 1 / -1;">
             <div class="state-spinner"></div>
-            <div class="state-title">Loading Available Courses...</div>
+            <div class="state-title">Loading Curriculum Courses...</div>
           </div>
         </div>
       `;
@@ -174,13 +188,11 @@
 
         const search = (document.getElementById('course-search')?.value || '').toLowerCase().trim();
         const cat = document.getElementById('category-filter')?.value || 'all';
-        const diff = document.getElementById('difficulty-filter')?.value || 'all';
 
         const filtered = list.filter(c => {
-          const matchSearch = !search || c.title.toLowerCase().includes(search) || (c.description || '').toLowerCase().includes(search) || (c.category || '').toLowerCase().includes(search);
-          const matchCat = cat === 'all' || c.category === cat;
-          const matchDiff = diff === 'all' || c.difficulty === diff || c.level === diff;
-          return matchSearch && matchCat && matchDiff;
+          const matchSearch = !search || c.title.toLowerCase().includes(search) || (c.description || '').toLowerCase().includes(search);
+          const matchCat = cat === 'all' || (c.category || '').toLowerCase().includes(cat.toLowerCase());
+          return matchSearch && matchCat;
         });
 
         if (!filtered.length) {
@@ -188,7 +200,7 @@
             <div class="state-container" style="grid-column: 1 / -1;">
               <div class="state-icon"><i class="fa-solid fa-graduation-cap"></i></div>
               <div class="state-title">No Courses Match Your Criteria</div>
-              <p class="state-desc">Try clearing your filters or check back later as new curriculums are added.</p>
+              <p class="state-desc">Try clearing your search query or explore all 5 core modules.</p>
             </div>
           `;
           return;
@@ -196,60 +208,66 @@
 
         grid.innerHTML = filtered.map(course => {
           const thumb = course.thumbnail || course.image || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80';
-          const lessonsCount = course.lessons ? course.lessons.length : (course.lessonCount || 7);
-          const difficulty = course.difficulty || course.level || 'Beginner';
-          const diffBadge = difficulty === 'Advanced' ? 'badge-rose' : difficulty === 'Intermediate' ? 'badge-blue' : 'badge-green';
+          const lessonsCount = course.lessons ? course.lessons.length : (course.lessonCount || 10);
+          const duration = course.duration || '6 weeks';
+          const progressPct = (course.enrollment && typeof course.enrollment.progress === 'number') 
+            ? course.enrollment.progress 
+            : 0;
+          const isEnrolled = Boolean(course.isEnrolled);
+          const hasStarted = isEnrolled && progressPct > 0;
+          const completedLessonsCount = course.enrollment?.completedLessons?.length || 0;
 
           return `
             <article class="course-card">
               <div class="course-thumb-wrapper">
                 <img src="${thumb}" alt="${course.title}" class="course-thumb" onerror="this.src='https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80'">
                 <div class="course-badge-overlay">
-                  <span class="nexus-badge ${diffBadge}">${difficulty}</span>
+                  <span class="nexus-badge badge-purple">${course.category || 'Tech'}</span>
                 </div>
                 <div class="course-xp-overlay">
-                  <span class="nexus-badge badge-purple"><i class="fa-solid fa-bolt"></i> +${course.xpReward || 100} XP</span>
+                  <span class="nexus-badge badge-blue"><i class="fa-solid fa-bolt"></i> +${course.xpReward || 500} XP</span>
                 </div>
               </div>
 
               <div class="course-body">
                 <div>
                   <div class="course-meta-row">
-                    <span><i class="fa-regular fa-clock"></i> ${course.duration || '6 weeks'}</span>
-                    <span><i class="fa-solid fa-book-bookmark"></i> ${lessonsCount} Lessons</span>
-                    <span><i class="fa-solid fa-tag"></i> ${course.category || 'Tech'}</span>
+                    <span><i class="fa-solid fa-book-bookmark" style="color:var(--cyan-accent);"></i> ${lessonsCount} Lessons</span>
+                    <span><i class="fa-regular fa-clock" style="color:#fbbf24;"></i> ${duration}</span>
                   </div>
 
                   <h3 class="course-title">${course.title}</h3>
                   <p class="course-desc">${course.description}</p>
 
-                  ${course.isEnrolled && course.enrollment ? `
-                    <div style="margin: 12px 0 16px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); padding: 10px 14px; border-radius: var(--radius-sm);">
-                      <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:600; margin-bottom:6px;">
-                        <span style="color:#38bdf8;"><i class="fa-solid fa-chart-line"></i> Enrolled Progress</span>
-                        <span style="color:#a78bfa;">${course.enrollment.progress}%</span>
-                      </div>
-                      <div style="width:100%; height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden;">
-                        <div style="width:${course.enrollment.progress}%; height:100%; background:linear-gradient(90deg, #6366f1, #38bdf8); border-radius:3px;"></div>
-                      </div>
-                      <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">
-                        ${course.enrollment.completedLessons?.length || 0} of ${lessonsCount} Lessons Completed
-                        ${course.enrollment.quizPassed ? ' • <span style="color:#10b981;font-weight:700;">Quiz Passed ✓</span>' : ''}
-                      </div>
+                  <!-- Course Progress Percentage Display -->
+                  <div class="progress-box">
+                    <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
+                      <span style="color:#94a3b8;">Course Progress</span>
+                      <span style="color:${progressPct === 100 ? '#10b981' : '#38bdf8'};">${progressPct}%</span>
                     </div>
-                  ` : ''}
+                    <div class="progress-bar-track">
+                      <div class="progress-bar-fill" style="width:${progressPct}%; background:${progressPct === 100 ? '#10b981' : 'linear-gradient(90deg, #6366f1, #38bdf8)'};"></div>
+                    </div>
+                    <div style="font-size:11px; color:var(--text-secondary); display:flex; justify-content:space-between;">
+                      <span>${completedLessonsCount} / ${lessonsCount} Lessons</span>
+                      <span>${progressPct === 100 ? '<strong style="color:#10b981;">100% Completed ✓</strong>' : (hasStarted ? 'In Progress' : 'Not Started')}</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="course-footer">
-                  <div class="instructor-name">
-                    <i class="fa-solid fa-chalkboard-user"></i>
-                    <span>${course.instructor || 'EDUTECH Faculty'}</span>
-                  </div>
-                  <div style="display:flex;gap:8px;align-items:center;">
-                    <a href="course-details.html?id=${course._id}" id="view-course-${course._id}" class="btn-nexus btn-nexus-primary" style="padding:9px 18px;font-size:13px;font-weight:700;letter-spacing:0.5px;">
-                      VIEW COURSE <i class="fa-solid fa-arrow-right"></i>
+                  <a href="course-details.html?id=${course._id}" class="btn-nexus btn-nexus-secondary" style="padding:9px 14px; font-size:12px;">
+                    Details
+                  </a>
+                  ${hasStarted ? `
+                    <a href="course-learning.html?id=${course._id}" class="btn-nexus btn-nexus-glow" style="padding:9px 18px; font-size:13px; font-weight:700;">
+                      <i class="fa-solid fa-play"></i> Continue Learning
                     </a>
-                  </div>
+                  ` : `
+                    <a href="course-learning.html?id=${course._id}" class="btn-nexus btn-nexus-primary" style="padding:9px 18px; font-size:13px; font-weight:700;">
+                      <i class="fa-solid fa-rocket"></i> Start Learning
+                    </a>
+                  `}
                 </div>
               </div>
             </article>
@@ -257,10 +275,8 @@
         }).join('');
       }
 
-      // Filter event listeners
       document.getElementById('course-search')?.addEventListener('input', () => renderCourses(allCourses));
       document.getElementById('category-filter')?.addEventListener('change', () => renderCourses(allCourses));
-      document.getElementById('difficulty-filter')?.addEventListener('change', () => renderCourses(allCourses));
 
       await fetchCourses();
     });

@@ -40,6 +40,10 @@ const lessonSchema = new mongoose.Schema({
     type: String,
     default: '20 mins'
   },
+  durationSeconds: {
+    type: Number,
+    default: 600
+  },
   videoType: {
     type: String,
     enum: ['youtube', 'local', 'url', 'external'],
@@ -48,6 +52,10 @@ const lessonSchema = new mongoose.Schema({
   videoUrl: {
     type: String,
     default: ''
+  },
+  defaultVideo: {
+    type: String,
+    default: '/videos/sample-lesson.mp4'
   },
   youtubeVideoId: {
     type: String,

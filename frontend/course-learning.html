@@ -6,6 +6,7 @@
   <title>Course Learning | EDUTECH NEXUS</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="css/nexus-core.css">
+  <script src="https://www.youtube.com/iframe_api"></script>
   <style>
     .learning-layout {
       display: grid;
@@ -29,7 +30,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
     .course-brand-title {
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
       letter-spacing: 0.5px;
       color: #fff;
@@ -101,7 +102,6 @@
       border-color: #6366f1;
       color: #fff;
       font-weight: 600;
-      box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
     }
     .lesson-nav-item.locked {
       opacity: 0.5;
@@ -109,37 +109,30 @@
       background: rgba(15, 23, 42, 0.4);
     }
     .lesson-status-icon {
-      width: 26px;
-      height: 26px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
-      flex-shrink: 0;
       font-weight: 700;
+      flex-shrink: 0;
     }
     .lesson-status-icon.done {
       background: #10b981;
       color: #fff;
-      box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
     }
     .lesson-status-icon.current {
       background: #6366f1;
       color: #fff;
-      box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
     }
-    .lesson-status-icon.locked {
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text-muted);
+    .lesson-status-icon.lock {
+      background: rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
     }
 
-    /* Right Main Classroom */
-    .classroom-main {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
+    /* Video Player Shell */
     .video-viewport-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
@@ -148,18 +141,50 @@
       backdrop-filter: blur(16px);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
     }
+    .lesson-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .lesson-number-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .lesson-title-main {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .video-player-shell {
+      position: relative;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 16px;
+    }
     .video-container {
       position: relative;
       width: 100%;
-      padding-bottom: 56.25%; /* 16:9 */
-      height: 0;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #020617;
-      border: 1px solid var(--border-medium);
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
-      margin-bottom: 20px;
+      padding-top: 56.25%; /* 16:9 Aspect Ratio */
+      background: #090d16;
     }
+    .video-container iframe,
     .video-container video {
       position: absolute;
       top: 0;
@@ -167,132 +192,47 @@
       width: 100%;
       height: 100%;
       border: 0;
-      object-fit: contain;
-      background: #020617;
+      object-fit: cover;
     }
-    .video-player-shell {
-      width: 100%;
-    }
-    .custom-video-controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: -8px;
-      padding: 10px 12px;
+
+    /* Watch Tracker Live Bar */
+    .watch-tracker-panel {
+      background: rgba(15, 23, 42, 0.8);
       border: 1px solid var(--border-subtle);
       border-radius: 10px;
-      background: rgba(15, 23, 42, 0.9);
-      color: #e2e8f0;
-    }
-    .custom-video-controls button,
-    .custom-video-controls select {
-      flex: 0 0 auto;
-      color: inherit;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border-subtle);
-      border-radius: 7px;
-      padding: 7px 9px;
-      font: inherit;
-      cursor: pointer;
-    }
-    .custom-video-controls button:hover,
-    .custom-video-controls select:hover {
-      background: rgba(99, 102, 241, 0.2);
-    }
-    .custom-video-controls input[type="range"] {
-      min-width: 0;
-      accent-color: #6366f1;
-    }
-    .video-progress {
-      flex: 1 1 auto;
-    }
-    .video-time {
-      flex: 0 0 auto;
-      min-width: 84px;
-      font-size: 12px;
-      font-variant-numeric: tabular-nums;
-      text-align: center;
-    }
-    .video-volume {
-      width: 86px;
-    }
-    .video-loading-state,
-    .video-error-state {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      padding: 14px 18px;
+      margin-bottom: 20px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(2, 6, 23, 0.94);
-      z-index: 5;
-      text-align: center;
-      padding: 24px;
+      gap: 8px;
     }
-    .video-error-state {
-      display: none;
-    }
-    .video-player-shell:fullscreen {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: #020617;
-      padding: 16px;
-    }
-    .video-player-shell:fullscreen .video-container {
-      max-height: calc(100vh - 100px);
-      margin-bottom: 12px;
-    }
-    @media (max-width: 600px) {
-      .video-viewport-card {
-        padding: 14px;
-      }
-      .custom-video-controls {
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .video-progress {
-        order: 2;
-        flex-basis: 100%;
-      }
-      .video-time {
-        margin-left: auto;
-      }
-      .video-volume {
-        width: 68px;
-      }
-    }
-
-    .lesson-header-row {
+    .watch-tracker-header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .lesson-number-badge {
+      align-items: center;
       font-size: 13px;
-      color: #38bdf8;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
     }
-    .lesson-title-main {
-      font-size: 24px;
-      color: #fff;
-      margin-top: 4px;
-      line-height: 1.3;
+    .watch-bar-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+    .watch-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #f59e0b, #10b981);
+      border-radius: 5px;
+      transition: width 0.3s ease;
     }
 
+    /* Objectives & Content */
     .objectives-card {
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.5);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-md);
-      padding: 18px 22px;
+      border-radius: var(--radius-sm);
+      padding: 16px;
       margin: 18px 0;
     }
     .objectives-list {
@@ -320,21 +260,22 @@
       gap: 14px;
     }
 
-    /* Final Quiz Completion Banner */
-    .all-done-banner {
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(99, 102, 241, 0.15));
-      border: 1px solid rgba(16, 185, 129, 0.4);
+    /* Certificate Claim Banner */
+    .certificate-ready-banner {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(99, 102, 241, 0.25));
+      border: 2px solid rgba(16, 185, 129, 0.6);
       border-radius: var(--radius-lg);
       padding: 32px;
       text-align: center;
       backdrop-filter: blur(16px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6), 0 0 30px rgba(16, 185, 129, 0.2);
+      margin-top: 28px;
     }
-    .quiz-callout-icon {
-      font-size: 42px;
-      color: #10b981;
-      margin-bottom: 14px;
-      text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+    .certificate-ready-icon {
+      font-size: 48px;
+      color: #fbbf24;
+      margin-bottom: 12px;
+      text-shadow: 0 0 25px rgba(251, 191, 36, 0.5);
     }
 
     @media (max-width: 900px) {
@@ -353,7 +294,6 @@
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nexus-student.js"></script>
-  <script src="js/course-video-map.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
@@ -365,14 +305,17 @@
         return;
       }
 
-      const layout = await renderStudentLayout('courses.html', 'Course Learning', 'Interactive Technical Curriculum');
+      const layout = await renderStudentLayout('courses.html', 'Course Learning', 'Interactive Curriculum & Video Watch Tracking');
       if (!layout) return;
 
       const { pageContent, headerActions } = layout;
 
       headerActions.innerHTML = `
+        <a href="courses.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-arrow-left"></i> All Courses
+        </a>
         <a href="course-details.html?id=${courseId}" class="btn-nexus btn-nexus-secondary">
-          <i class="fa-solid fa-arrow-left"></i> Course Details
+          <i class="fa-solid fa-circle-info"></i> Course Details
         </a>
       `;
 
@@ -392,7 +335,7 @@
 
             <div class="sidebar-progress-box">
               <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;">
-                <span style="color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">COURSE PROGRESS</span>
+                <span style="color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.5px;">COURSE COMPLETION</span>
                 <span id="progress-percent-label" style="color:#38bdf8;">0%</span>
               </div>
               <div class="progress-bar-track">
@@ -401,17 +344,20 @@
               <div id="progress-summary-label" style="font-size:12px;color:var(--text-secondary);">
                 0 / 10 Lessons Completed
               </div>
+              <div id="cert-status-indicator" style="margin-top:8px;font-size:11px;color:#94a3b8;">
+                <i class="fa-solid fa-lock"></i> Complete all lessons to unlock certificate.
+              </div>
             </div>
 
             <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">
-              LESSONS
+              COURSE LESSONS (100% WATCH REQUIRED)
             </div>
             <div id="lessons-nav-list" class="lessons-nav-list"></div>
 
-            <div id="quiz-sidebar-link" style="margin-top:20px;display:none;">
-              <a href="course-quiz.html?courseId=${courseId}" id="btn-sidebar-quiz" class="btn-nexus btn-nexus-glow" style="width:100%;padding:12px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
-                <i class="fa-solid fa-clipboard-question"></i> FINAL COURSE QUIZ
-              </a>
+            <div id="sidebar-cert-btn-box" style="margin-top:20px;display:none;">
+              <button id="btn-sidebar-cert" class="btn-nexus btn-nexus-glow" style="width:100%;padding:12px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;">
+                <i class="fa-solid fa-award"></i> GENERATE CERTIFICATE
+              </button>
             </div>
           </aside>
 
@@ -422,12 +368,55 @@
             </div>
           </main>
         </div>
+
+        <!-- Certificate Generation Modal -->
+        <div class="modal-overlay" id="cert-claim-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+          <div class="modal-dialog" style="background:#0b1329;border:1px solid #10b981;border-radius:16px;padding:32px;max-width:540px;width:90%;color:#fff;box-shadow:0 0 40px rgba(16,185,129,0.3);">
+            <div style="text-align:center;margin-bottom:20px;">
+              <div style="font-size:48px;color:#fbbf24;margin-bottom:10px;"><i class="fa-solid fa-award"></i></div>
+              <h2 style="font-size:24px;font-weight:800;color:#fff;">Congratulations! Curriculum 100% Completed!</h2>
+              <p style="color:var(--text-secondary);font-size:14px;margin-top:6px;">
+                You have fulfilled all learning requirements and watched 100% of all lessons.
+              </p>
+            </div>
+
+            <div style="margin-bottom:20px;">
+              <label style="display:block;font-size:13px;font-weight:700;color:#38bdf8;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;">
+                Enter Your Full Name for Official Certificate:
+              </label>
+              <input type="text" id="cert-student-name-input" class="nexus-input" placeholder="Full Name as you want it printed" style="font-size:16px;padding:12px 16px;font-weight:600;width:100%;">
+              <small style="color:var(--text-muted);font-size:11px;margin-top:4px;display:block;">
+                This name will appear on your verified credential with unique Certificate ID and Administrator digital signature.
+              </small>
+            </div>
+
+            <div style="display:flex;gap:12px;justify-content:flex-end;">
+              <button type="button" id="btn-cancel-claim-modal" class="btn-nexus btn-nexus-secondary" style="padding:10px 18px;">
+                Cancel
+              </button>
+              <button type="button" id="btn-confirm-generate-cert" class="btn-nexus btn-nexus-glow" style="padding:10px 22px;font-weight:700;">
+                <i class="fa-solid fa-certificate"></i> Generate & View Certificate
+              </button>
+            </div>
+          </div>
+        </div>
       `;
 
       let courseData = null;
       let lessons = [];
       let enrollment = null;
       let currentLessonIndex = 0;
+      let currentLessonProgress = null;
+
+      // Video tracking state
+      let ytPlayer = null;
+      let html5VideoEl = null;
+      let trackingIntervalTimer = null;
+      let syncIntervalTimer = null;
+      let watchedIntervals = []; // [{ start, end }]
+      let lastTrackingTime = 0;
+      let currentVideoDuration = 0;
+      let currentWatchPercentage = 0;
 
       async function loadCourse() {
         try {
@@ -451,14 +440,14 @@
 
           updateProgressUI();
 
-          // Open the requested lesson or resume at the first incomplete lesson.
+          // Resume target lesson: find first incomplete lesson or parameter
           const completedSet = new Set((enrollment.completedLessons || []).map(String));
           const paramLessonId = urlParams.get('lessonId');
           let targetIdx = 0;
 
           if (paramLessonId) {
             const foundIdx = lessons.findIndex(l => String(l._id) === String(paramLessonId) || String(l.lessonNumber) === String(paramLessonId));
-            if (foundIdx !== -1) {
+            if (foundIdx !== -1 && !lessons[foundIdx].isLocked) {
               targetIdx = foundIdx;
             }
           } else {
@@ -473,15 +462,15 @@
           currentLessonIndex = targetIdx;
 
           renderSidebarLessons();
-          renderCurrentLesson();
+          await loadLessonDetails(currentLessonIndex);
 
         } catch (error) {
           document.getElementById('learning-loader').innerHTML = `
             <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></div>
             <div class="state-title">Unable to Load Course Learning Page</div>
             <p class="state-desc">${error.message}</p>
-            <a href="course-details.html?id=${courseId}" class="btn-nexus btn-nexus-primary" style="margin-top:16px;">
-              Return to Course Overview
+            <a href="courses.html" class="btn-nexus btn-nexus-primary" style="margin-top:16px;">
+              Return to Courses
             </a>
           `;
         }
@@ -496,12 +485,18 @@
         document.getElementById('progress-bar-fill').style.width = `${percent}%`;
         document.getElementById('progress-summary-label').textContent = `${completedCount} / ${total} Lessons Completed`;
 
-        const quizBtn = document.getElementById('quiz-sidebar-link');
-        if (quizBtn) {
-          if (completedCount >= total) {
-            quizBtn.style.display = 'block';
-          } else {
-            quizBtn.style.display = 'none';
+        const certBtnBox = document.getElementById('sidebar-cert-btn-box');
+        const certIndicator = document.getElementById('cert-status-indicator');
+
+        if (completedCount >= total) {
+          if (certBtnBox) certBtnBox.style.display = 'block';
+          if (certIndicator) {
+            certIndicator.innerHTML = '<span style="color:#10b981;font-weight:700;"><i class="fa-solid fa-circle-check"></i> 100% Completed! Certificate Unlocked</span>';
+          }
+        } else {
+          if (certBtnBox) certBtnBox.style.display = 'none';
+          if (certIndicator) {
+            certIndicator.innerHTML = '<i class="fa-solid fa-lock"></i> Complete all lessons to unlock certificate.';
           }
         }
       }
@@ -512,38 +507,47 @@
 
         container.innerHTML = lessons.map((l, idx) => {
           const num = l.lessonNumber || (idx + 1);
-          const isDone = completedSet.has(String(num));
+          const isDone = completedSet.has(String(num)) || l.isCompleted;
+          const isLocked = l.isLocked;
           const isCurrent = idx === currentLessonIndex;
 
           let iconHtml = '';
           if (isDone) {
             iconHtml = '<span class="lesson-status-icon done"><i class="fa-solid fa-check"></i></span>';
+          } else if (isLocked) {
+            iconHtml = '<span class="lesson-status-icon lock"><i class="fa-solid fa-lock"></i></span>';
           } else if (isCurrent) {
-            iconHtml = '<span class="lesson-status-icon current"><i class="fa-solid fa-circle"></i></span>';
+            iconHtml = '<span class="lesson-status-icon current"><i class="fa-solid fa-play"></i></span>';
           } else {
             iconHtml = `<span class="lesson-status-icon" style="background:rgba(255,255,255,0.06);color:#fff;">${num}</span>`;
           }
 
           return `
-            <button type="button" class="lesson-nav-item ${isCurrent ? 'active' : ''}" data-index="${idx}">
+            <button type="button" class="lesson-nav-item ${isCurrent ? 'active' : ''} ${isLocked ? 'locked' : ''}" data-index="${idx}" ${isLocked ? 'title="Locked. Complete previous lessons first."' : ''}>
               ${iconHtml}
               <div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
                 <span style="font-weight:700;margin-right:4px;">Lesson ${num}:</span>
                 <span>${l.title}</span>
               </div>
+              ${isDone ? '<span style="font-size:10px;color:#10b981;font-weight:700;">100%</span>' : ''}
             </button>
           `;
         }).join('');
 
-        // Attach click events
         container.querySelectorAll('.lesson-nav-item').forEach(btn => {
-          btn.addEventListener('click', () => {
+          btn.addEventListener('click', async () => {
             const idx = Number(btn.getAttribute('data-index'));
+            const targetLesson = lessons[idx];
+            if (targetLesson.isLocked) {
+              showToast(`Lesson ${targetLesson.lessonNumber || (idx + 1)} is locked. You must watch 100% of Lesson ${idx} first.`, 'warning');
+              return;
+            }
             if (idx === currentLessonIndex) return;
+
             teardownActivePlayer();
             currentLessonIndex = idx;
             renderSidebarLessons();
-            renderCurrentLesson();
+            await loadLessonDetails(currentLessonIndex);
             updateLessonUrl();
           });
         });
@@ -559,178 +563,333 @@
       }
 
       function teardownActivePlayer() {
-        const activeEmbed = document.getElementById('active-lesson-youtube');
-        if (activeEmbed) activeEmbed.remove();
+        if (trackingIntervalTimer) {
+          clearInterval(trackingIntervalTimer);
+          trackingIntervalTimer = null;
+        }
+        if (syncIntervalTimer) {
+          clearInterval(syncIntervalTimer);
+          syncIntervalTimer = null;
+        }
 
-        const activeVideo = document.getElementById('active-lesson-video');
-        if (activeVideo) {
-          activeVideo.pause();
-          activeVideo.removeAttribute('src');
-          activeVideo.querySelectorAll('source').forEach(source => source.remove());
-          activeVideo.load();
+        if (ytPlayer && typeof ytPlayer.destroy === 'function') {
+          try { ytPlayer.destroy(); } catch (e) {}
+          ytPlayer = null;
+        }
+
+        if (html5VideoEl) {
+          try {
+            html5VideoEl.pause();
+            html5VideoEl.removeAttribute('src');
+            html5VideoEl.load();
+          } catch (e) {}
+          html5VideoEl = null;
+        }
+
+        const ytContainer = document.getElementById('youtube-player-mount');
+        if (ytContainer) ytContainer.innerHTML = '';
+      }
+
+      async function loadLessonDetails(index) {
+        teardownActivePlayer();
+        const lesson = lessons[index];
+        if (!lesson) return;
+
+        const lessonNum = lesson.lessonNumber || (index + 1);
+
+        try {
+          const detailRes = await api.get(`/courses/${courseId}/lessons/${lesson._id || lessonNum}`);
+          if (detailRes.success && detailRes.lesson) {
+            // merge detailed lesson attributes
+            Object.assign(lesson, detailRes.lesson);
+            currentLessonProgress = detailRes.progress || null;
+          }
+        } catch (e) {
+          console.warn('Could not load specific lesson detail from backend:', e.message);
+        }
+
+        renderCurrentLesson();
+      }
+
+      function extractYouTubeId(urlOrId) {
+        if (!urlOrId) return '';
+        const clean = String(urlOrId).trim();
+        if (/^[a-zA-Z0-9_-]{11}$/.test(clean)) return clean;
+        const match = clean.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+        return match ? match[1] : '';
+      }
+
+      function mergeIntervals(intervals) {
+        if (!intervals || !intervals.length) return [];
+        const sorted = intervals
+          .map(iv => ({ start: Math.max(0, Number(iv.start) || 0), end: Math.max(0, Number(iv.end) || 0) }))
+          .filter(iv => iv.end > iv.start)
+          .sort((a, b) => a.start - b.start);
+
+        if (!sorted.length) return [];
+        const merged = [sorted[0]];
+        for (let i = 1; i < sorted.length; i++) {
+          const prev = merged[merged.length - 1];
+          const curr = sorted[i];
+          if (curr.start <= prev.end + 1.0) {
+            prev.end = Math.max(prev.end, curr.end);
+          } else {
+            merged.push({ start: curr.start, end: curr.end });
+          }
+        }
+        return merged;
+      }
+
+      function calculateWatchedSeconds(intervals) {
+        const merged = mergeIntervals(intervals);
+        return merged.reduce((acc, iv) => acc + (iv.end - iv.start), 0);
+      }
+
+      function updateWatchUI() {
+        const uniqueSec = calculateWatchedSeconds(watchedIntervals);
+        let pct = 0;
+        if (currentVideoDuration > 0) {
+          pct = Math.min(100, Math.round((uniqueSec / currentVideoDuration) * 100));
+        }
+
+        currentWatchPercentage = pct;
+
+        const fillEl = document.getElementById('lesson-watch-bar-fill');
+        const pctEl = document.getElementById('lesson-watch-percent');
+        const secEl = document.getElementById('lesson-watch-time-desc');
+        const completeBtn = document.getElementById('btn-mark-complete');
+
+        if (fillEl) fillEl.style.width = `${pct}%`;
+        if (pctEl) pctEl.textContent = `${pct}%`;
+
+        const completedSet = new Set((enrollment.completedLessons || []).map(String));
+        const lesson = lessons[currentLessonIndex];
+        const num = String(lesson?.lessonNumber || (currentLessonIndex + 1));
+        const isAlreadyDone = completedSet.has(num) || lesson?.isCompleted;
+
+        if (secEl) {
+          const curMins = Math.floor(uniqueSec / 60);
+          const curSecs = Math.floor(uniqueSec % 60);
+          const totMins = Math.floor(currentVideoDuration / 60);
+          const totSecs = Math.floor(currentVideoDuration % 60);
+          secEl.textContent = `${curMins}:${String(curSecs).padStart(2, '0')} / ${totMins}:${String(totSecs).padStart(2, '0')} unique time watched (100% required)`;
+        }
+
+        if (completeBtn) {
+          if (isAlreadyDone || pct >= 100) {
+            completeBtn.disabled = false;
+            completeBtn.className = 'btn-nexus btn-nexus-primary';
+            completeBtn.innerHTML = isAlreadyDone 
+              ? '<i class="fa-solid fa-circle-check" style="color:#10b981;"></i> LESSON COMPLETED (100%)'
+              : '<i class="fa-solid fa-check"></i> 100% WATCHED — CLICK TO COMPLETE (+50 XP)';
+          } else {
+            completeBtn.disabled = true;
+            completeBtn.className = 'btn-nexus btn-nexus-secondary';
+            completeBtn.innerHTML = `<i class="fa-solid fa-lock"></i> Watch 100% to Complete (Currently ${pct}%)`;
+          }
         }
       }
 
-      function resolveVideoSource(lesson, courseTitle) {
-        if (!lesson) return { type: 'none', message: 'No lesson data is available.' };
+      async function syncWatchProgressToServer(isManualComplete = false) {
+        const lesson = lessons[currentLessonIndex];
+        if (!lesson) return;
 
-        const lessonNumber = String(lesson.lessonNumber || (currentLessonIndex + 1));
-        const mapping = window.EDUTECH_LESSON_VIDEO_MAP?.[courseTitle]?.[lessonNumber];
-        if (
-          mapping &&
-          mapping.status === 'available' &&
-          mapping.embeddingVerified === true &&
-          typeof mapping.youtubeId === 'string' &&
-          /^[A-Za-z0-9_-]{11}$/.test(mapping.youtubeId) &&
-          typeof mapping.videoTitle === 'string' &&
-          mapping.videoTitle.trim() &&
-          mapping.lessonTitle === lesson.title
-        ) {
-          return {
-            type: 'youtube',
-            videoId: mapping.youtubeId,
-            videoTitle: mapping.videoTitle
-          };
+        const lessonNum = lesson.lessonNumber || (currentLessonIndex + 1);
+        const uniqueSec = calculateWatchedSeconds(watchedIntervals);
+
+        try {
+          const res = await api.post(`/courses/${courseId}/lessons/${lesson._id || lessonNum}/watch-progress`, {
+            intervals: watchedIntervals,
+            duration: currentVideoDuration,
+            lastPosition: lastTrackingTime
+          });
+
+          if (res.success && res.completed) {
+            lesson.isCompleted = true;
+            if (!enrollment.completedLessons) enrollment.completedLessons = [];
+            if (!enrollment.completedLessons.includes(String(lessonNum))) {
+              enrollment.completedLessons.push(String(lessonNum));
+            }
+            // Unlock next lesson
+            if (currentLessonIndex + 1 < lessons.length) {
+              lessons[currentLessonIndex + 1].isLocked = false;
+            }
+            updateProgressUI();
+            renderSidebarLessons();
+            updateWatchUI();
+          }
+        } catch (err) {
+          console.warn('Watch progress sync error:', err.message);
+        }
+      }
+
+      function startWatchTracking(getCurrentTimeFn, getDurationFn) {
+        if (trackingIntervalTimer) clearInterval(trackingIntervalTimer);
+        if (syncIntervalTimer) clearInterval(syncIntervalTimer);
+
+        lastTrackingTime = getCurrentTimeFn();
+        currentVideoDuration = getDurationFn() || currentVideoDuration || 600;
+
+        // Initialize from existing progress if any
+        if (currentLessonProgress && Array.isArray(currentLessonProgress.watchedIntervals) && currentLessonProgress.watchedIntervals.length) {
+          watchedIntervals = currentLessonProgress.watchedIntervals;
         }
 
-        if (
-          mapping &&
-          mapping.status === 'available' &&
-          mapping.licenseVerified === true &&
-          typeof mapping.license === 'string' &&
-          mapping.license.trim() &&
-          typeof mapping.licenseUrl === 'string' &&
-          /^https:\/\/creativecommons\.org\/licenses\//.test(mapping.licenseUrl) &&
-          typeof mapping.attribution === 'string' &&
-          mapping.attribution.trim() &&
-          typeof mapping.sourcePage === 'string' &&
-          (/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(mapping.sourcePage) ||
-            mapping.sourcePage === '/videos/VIDEO-REPORT.md') &&
-          typeof mapping.videoFile === 'string' &&
-          /^\/videos\/[a-zA-Z0-9._/-]+$/.test(mapping.videoFile) &&
-          !mapping.videoFile.includes('..') &&
-          mapping.lessonTitle === lesson.title
-        ) {
-          const extension = mapping.videoFile.split('.').pop().toLowerCase();
-          return {
-            type: 'local',
-            src: mapping.videoFile,
-            mime: extension === 'mov' ? 'video/quicktime' : extension === 'webm' ? 'video/webm' : 'video/mp4',
-            license: mapping.license,
-            licenseUrl: mapping.licenseUrl,
-            attribution: mapping.attribution,
-            sourcePage: mapping.sourcePage,
-            changes: mapping.changes
-          };
+        trackingIntervalTimer = setInterval(() => {
+          const now = getCurrentTimeFn();
+          const dur = getDurationFn();
+          if (dur && dur > 0) currentVideoDuration = dur;
+
+          if (now > lastTrackingTime && now - lastTrackingTime <= 2.5) {
+            // Normal continuous playback
+            watchedIntervals.push({ start: lastTrackingTime, end: now });
+            watchedIntervals = mergeIntervals(watchedIntervals);
+          } else if (Math.abs(now - lastTrackingTime) > 2.5) {
+            // Seek detected: do not count skipped portion
+          }
+          lastTrackingTime = now;
+          updateWatchUI();
+        }, 1000);
+
+        // Periodically sync progress every 6 seconds to MongoDB
+        syncIntervalTimer = setInterval(() => {
+          syncWatchProgressToServer(false);
+        }, 6000);
+      }
+
+      function setupYouTubePlayer(videoId, fallbackDefaultVideo) {
+        const container = document.getElementById('player-mount-point');
+        if (!container) return;
+
+        container.innerHTML = `<div id="yt-player-box" style="position:absolute;inset:0;width:100%;height:100%;"></div>`;
+
+        let playerReady = false;
+
+        function createYT() {
+          if (!window.YT || !window.YT.Player) {
+            setTimeout(createYT, 200);
+            return;
+          }
+
+          try {
+            ytPlayer = new YT.Player('yt-player-box', {
+              videoId: videoId,
+              playerVars: {
+                autoplay: 1,
+                controls: 1,
+                rel: 0,
+                modestbranding: 1,
+                playsinline: 1,
+                enablejsapi: 1
+              },
+              events: {
+                onReady: (event) => {
+                  playerReady = true;
+                  const dur = ytPlayer.getDuration();
+                  if (dur && dur > 0) currentVideoDuration = dur;
+                  updateWatchUI();
+                },
+                onStateChange: (event) => {
+                  if (event.data === YT.PlayerState.PLAYING) {
+                    startWatchTracking(
+                      () => ytPlayer.getCurrentTime(),
+                      () => ytPlayer.getDuration()
+                    );
+                  } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                    if (trackingIntervalTimer) clearInterval(trackingIntervalTimer);
+                    syncWatchProgressToServer(false);
+                    updateWatchUI();
+                  }
+                },
+                onError: (event) => {
+                  console.warn('YouTube Player error code:', event.data, 'switching to default fallback video');
+                  showToast('Online video link could not be loaded. Playing default system video.', 'info');
+                  setupHTML5Player(fallbackDefaultVideo);
+                }
+              }
+            });
+          } catch (e) {
+            console.error('Failed to init YT player, switching to fallback:', e);
+            setupHTML5Player(fallbackDefaultVideo);
+          }
         }
 
-        return {
-          type: 'unavailable',
-          message: mapping
-            ? 'The selected lesson video is still being verified and is not available yet.'
-            : 'No video is mapped to this lesson yet.'
-        };
+        createYT();
+      }
+
+      function setupHTML5Player(videoSrc) {
+        const container = document.getElementById('player-mount-point');
+        if (!container) return;
+
+        const safeSrc = videoSrc || '/videos/sample-lesson.mp4';
+        container.innerHTML = `
+          <video id="html5-video-player" controls playsinline autoplay style="position:absolute;inset:0;width:100%;height:100%;background:#000;">
+            <source src="${safeSrc}" type="video/mp4">
+            <source src="/videos/sample-lesson.mp4" type="video/mp4">
+            Your browser does not support HTML5 video.
+          </video>
+        `;
+
+        html5VideoEl = document.getElementById('html5-video-player');
+
+        html5VideoEl.addEventListener('loadedmetadata', () => {
+          if (html5VideoEl.duration) currentVideoDuration = html5VideoEl.duration;
+          updateWatchUI();
+        });
+
+        html5VideoEl.addEventListener('play', () => {
+          startWatchTracking(
+            () => html5VideoEl.currentTime,
+            () => html5VideoEl.duration
+          );
+        });
+
+        html5VideoEl.addEventListener('pause', () => {
+          if (trackingIntervalTimer) clearInterval(trackingIntervalTimer);
+          syncWatchProgressToServer(false);
+          updateWatchUI();
+        });
+
+        html5VideoEl.addEventListener('ended', () => {
+          if (trackingIntervalTimer) clearInterval(trackingIntervalTimer);
+          syncWatchProgressToServer(false);
+          updateWatchUI();
+        });
+
+        html5VideoEl.addEventListener('error', () => {
+          console.warn('HTML5 Video error, trying generic sample');
+          if (html5VideoEl.src !== window.location.origin + '/videos/sample-lesson.mp4') {
+            html5VideoEl.src = '/videos/sample-lesson.mp4';
+            html5VideoEl.play().catch(() => {});
+          }
+        });
       }
 
       function renderCurrentLesson() {
-        teardownActivePlayer();
-
         const viewport = document.getElementById('lesson-viewport');
         const lesson = lessons[currentLessonIndex];
         if (!lesson) return;
 
         const lessonNum = lesson.lessonNumber || (currentLessonIndex + 1);
         const completedSet = new Set((enrollment.completedLessons || []).map(String));
-        const isDone = completedSet.has(String(lessonNum));
+        const isDone = completedSet.has(String(lessonNum)) || lesson.isCompleted;
         const total = lessons.length;
         const allCompleted = completedSet.size >= total;
 
-        const sourceInfo = resolveVideoSource(lesson, courseData.courseTitle);
+        // Determine video source
+        const ytId = extractYouTubeId(lesson.youtubeVideoId || lesson.videoUrl);
+        const defaultVideo = lesson.defaultVideo || lesson.videoFile || '/videos/sample-lesson.mp4';
 
-        let videoPlayerHtml = '';
-
-        if (sourceInfo.type === 'local') {
-          videoPlayerHtml = `
-            <div class="video-player-shell" id="video-player-shell">
-              <div class="video-container" id="video-player-wrapper">
-                <video id="active-lesson-video" playsinline autoplay preload="metadata" poster="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80">
-                  <source src="${sourceInfo.src}" type="${sourceInfo.mime}">
-                  Your browser does not support HTML5 video.
-                </video>
-                <div id="video-loading-indicator" class="video-loading-state">
-                  <div class="state-spinner"></div>
-                  <div style="font-size:13px;color:#94a3b8;margin-top:12px;">Loading selected lesson video...</div>
-                </div>
-                <div id="video-error-container" class="video-error-state">
-                  <div style="font-size:40px;color:#ef4444;margin-bottom:12px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                  <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:6px;">Video unavailable</div>
-                  <p id="video-error-desc" style="font-size:13px;color:#cbd5e1;max-width:440px;margin:0 auto;line-height:1.6;"></p>
-                </div>
-              </div>
-              <div class="custom-video-controls" id="video-controls">
-                <button type="button" id="video-play-toggle" aria-label="Play video"><i class="fa-solid fa-play"></i></button>
-                <input class="video-progress" id="video-progress" type="range" min="0" max="1000" value="0" aria-label="Video progress">
-                <span class="video-time"><span id="video-current-time">0:00</span> / <span id="video-duration">0:00</span></span>
-                <button type="button" id="video-mute-toggle" aria-label="Mute video"><i class="fa-solid fa-volume-high"></i></button>
-                <input class="video-volume" id="video-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volume">
-                <select id="video-playback-speed" aria-label="Playback speed">
-                  <option value="0.5">0.5x</option>
-                  <option value="0.75">0.75x</option>
-                  <option value="1" selected>1x</option>
-                  <option value="1.25">1.25x</option>
-                  <option value="1.5">1.5x</option>
-                  <option value="2">2x</option>
-                </select>
-                <button type="button" id="video-fullscreen-toggle" aria-label="Enter fullscreen"><i class="fa-solid fa-expand"></i></button>
-              </div>
-              <p style="font-size:11px;color:var(--text-muted);line-height:1.6;margin:10px 2px 0;">
-                Video: <a href="${sourceInfo.sourcePage}" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;">${sourceInfo.attribution}</a>.
-                Licensed under <a href="${sourceInfo.licenseUrl}" target="_blank" rel="noopener noreferrer" style="color:#38bdf8;">${sourceInfo.license}</a>.
-                ${sourceInfo.changes}
-              </p>
-            </div>
-          `;
-        } else if (sourceInfo.type === 'youtube') {
-          const embedUrl = `https://www.youtube.com/embed/${sourceInfo.videoId}?autoplay=1&playsinline=1&cc_load_policy=1&enablejsapi=1`;
-          videoPlayerHtml = `
-            <div class="video-player-shell" id="video-player-shell">
-              <div class="video-container" id="video-player-wrapper">
-                <iframe
-                  id="active-lesson-youtube"
-                  src="${embedUrl}"
-                  title="${sourceInfo.videoTitle.replace(/[&<>"']/g, character => ({
-                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-                  })[character])}"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerpolicy="strict-origin-when-cross-origin"
-                  allowfullscreen
-                  style="position:absolute;inset:0;width:100%;height:100%;border:0;"
-                ></iframe>
-                <div id="video-loading-indicator" class="video-loading-state">
-                  <div class="state-spinner"></div>
-                  <div style="font-size:13px;color:#94a3b8;margin-top:12px;">Loading selected lesson video...</div>
-                </div>
-              </div>
-            </div>
-          `;
-        } else {
-          videoPlayerHtml = `
-            <div class="video-container" role="status" aria-live="polite" style="display:flex;align-items:center;justify-content:center;background:#090d16;text-align:center;padding:24px;">
-              <div>
-                <div style="font-size:42px;color:#eab308;margin-bottom:12px;"><i class="fa-solid fa-video-slash"></i></div>
-                <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:8px;">Video not available yet</div>
-                <p style="font-size:13px;color:#94a3b8;max-width:440px;margin:0 auto;line-height:1.6;">${sourceInfo.message}</p>
-              </div>
-            </div>
-          `;
-        }
+        // Prepare existing watch intervals if present
+        watchedIntervals = (currentLessonProgress?.watchedIntervals) || [];
+        currentVideoDuration = lesson.durationSeconds || (currentLessonProgress?.totalDuration) || 600;
 
         const objectives = lesson.learningObjectives || lesson.objectives || [];
 
         viewport.innerHTML = `
           <div class="lesson-header-row">
             <div>
-              <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:6px;">${courseData.courseTitle || 'Course'}</div>
+              <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:6px;">${courseData.courseTitle || 'Curriculum'}</div>
               <div class="lesson-number-badge">
                 <i class="fa-solid fa-bookmark"></i> LESSON ${lessonNum} OF ${total}
               </div>
@@ -742,14 +901,35 @@
             </div>
           </div>
 
-          <!-- Video Player Container -->
-          ${videoPlayerHtml}
+          <!-- Video Shell Container (16:9, Never Empty) -->
+          <div class="video-player-shell">
+            <div class="video-container" id="player-mount-point">
+              <!-- Mounted dynamically -->
+            </div>
+          </div>
 
-          <!-- Lesson Description -->
+          <!-- Watch Progress Tracking Bar (100% Required Rule) -->
+          <div class="watch-tracker-panel">
+            <div class="watch-tracker-header">
+              <span style="font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;">
+                <i class="fa-solid fa-eye" style="color:var(--cyan-accent);"></i> Lesson Watch Progress:
+              </span>
+              <span id="lesson-watch-percent" style="font-weight:800;font-size:15px;color:#10b981;">0%</span>
+            </div>
+            <div class="watch-bar-track">
+              <div id="lesson-watch-bar-fill" class="watch-bar-fill" style="width:0%;"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--text-secondary);">
+              <span id="lesson-watch-time-desc">0:00 / 0:00 unique time watched</span>
+              <span style="color:#fbbf24;font-weight:600;"><i class="fa-solid fa-circle-exclamation"></i> Must watch 100% to complete</span>
+            </div>
+          </div>
+
+          <!-- Lesson Overview -->
           <div style="margin: 16px 0;">
             <h3 style="font-size:16px;color:#fff;margin-bottom:8px;">Lesson Overview</h3>
             <p style="color:var(--text-secondary);font-size:15px;line-height:1.7;">
-              ${lesson.description || 'Watch the video lesson attentively, take notes on core architecture, and click complete to earn XP.'}
+              ${lesson.description || 'Watch the video lesson attentively. Non-linear skipping is ignored; exactly 100% of the lesson video must be watched to achieve completion and earn +50 XP.'}
             </p>
           </div>
 
@@ -776,9 +956,9 @@
               <i class="fa-solid fa-arrow-left"></i> PREVIOUS
             </button>
 
-            <div style="display:flex;gap:12px;align-items:center;">
-              <button id="btn-mark-complete" class="btn-nexus ${isDone ? 'btn-nexus-secondary' : 'btn-nexus-primary'}" style="padding:12px 22px;font-weight:700;">
-                ${isDone ? '<i class="fa-solid fa-circle-check" style="color:#10b981;"></i> COMPLETED (+50 XP)' : '<i class="fa-solid fa-check"></i> MARK LESSON COMPLETE'}
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+              <button id="btn-mark-complete" class="btn-nexus btn-nexus-secondary" style="padding:12px 22px;font-weight:700;" disabled>
+                <i class="fa-solid fa-lock"></i> Watch 100% to Complete (Currently 0%)
               </button>
 
               <button id="btn-next-lesson" class="btn-nexus btn-nexus-secondary" style="padding:10px 18px;" ${currentLessonIndex >= total - 1 ? 'disabled' : ''}>
@@ -787,187 +967,38 @@
             </div>
           </div>
 
-          <!-- After Completion banner -->
+          <!-- Certificate Generation Banner when all 10 are completed -->
           ${allCompleted ? `
-            <div class="all-done-banner" style="margin-top:28px;">
-              <div class="quiz-callout-icon"><i class="fa-solid fa-circle-check"></i></div>
-              <h2 style="font-size:24px;color:#fff;margin-bottom:8px;">COURSE LESSONS COMPLETED ✓</h2>
+            <div class="certificate-ready-banner">
+              <div class="certificate-ready-icon"><i class="fa-solid fa-award"></i></div>
+              <h2 style="font-size:26px;color:#fff;margin-bottom:8px;font-weight:800;">ALL 10 LESSONS COMPLETED (100%)</h2>
               <p style="color:#cbd5e1;font-size:15px;max-width:540px;margin:0 auto 20px;">
-                Congratulations! You have completed all ${total} lessons in this curriculum. Your next step is the final course quiz.
+                Congratulations! You have fulfilled all curriculum watch requirements. Your verified Certificate of Completion is ready for issuance.
               </p>
-              <a href="course-quiz.html?courseId=${courseId}" id="btn-start-final-quiz" class="btn-nexus btn-nexus-glow" style="padding:14px 28px;font-size:16px;font-weight:800;letter-spacing:1px;display:inline-flex;align-items:center;gap:10px;">
-                <i class="fa-solid fa-clipboard-question"></i> START FINAL QUIZ
-              </a>
+              <button id="btn-banner-generate-cert" class="btn-nexus btn-nexus-glow" style="padding:14px 32px;font-size:16px;font-weight:800;letter-spacing:1px;display:inline-flex;align-items:center;gap:10px;">
+                <i class="fa-solid fa-certificate"></i> GENERATE OFFICIAL CERTIFICATE
+              </button>
             </div>
           ` : ''}
         `;
 
-        const videoEl = viewport.querySelector('#active-lesson-video');
-        const youtubeEmbed = viewport.querySelector('#active-lesson-youtube');
-        const loadingEl = viewport.querySelector('#video-loading-indicator');
-        const errorContainer = viewport.querySelector('#video-error-container');
-        const errorDesc = viewport.querySelector('#video-error-desc');
-
-        if (videoEl) {
-          const playButton = viewport.querySelector('#video-play-toggle');
-          const muteButton = viewport.querySelector('#video-mute-toggle');
-          const progress = viewport.querySelector('#video-progress');
-          const volume = viewport.querySelector('#video-volume');
-          const speed = viewport.querySelector('#video-playback-speed');
-          const fullscreenButton = viewport.querySelector('#video-fullscreen-toggle');
-          const shell = viewport.querySelector('#video-player-shell');
-          const currentTime = viewport.querySelector('#video-current-time');
-          const duration = viewport.querySelector('#video-duration');
-
-          const formatTime = seconds => {
-            if (!Number.isFinite(seconds)) return '0:00';
-            const minutes = Math.floor(seconds / 60);
-            const remainingSeconds = Math.floor(seconds % 60);
-            return `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
-          };
-
-          const updateProgress = () => {
-            const fraction = videoEl.duration ? videoEl.currentTime / videoEl.duration : 0;
-            progress.value = String(Math.round(fraction * 1000));
-            currentTime.textContent = formatTime(videoEl.currentTime);
-            duration.textContent = formatTime(videoEl.duration);
-          };
-
-          videoEl.addEventListener('loadstart', () => {
-            if (loadingEl) loadingEl.style.display = 'flex';
-            if (errorContainer) errorContainer.style.display = 'none';
-          });
-
-          videoEl.addEventListener('waiting', () => {
-            if (loadingEl) loadingEl.style.display = 'flex';
-          });
-
-          videoEl.addEventListener('canplay', () => {
-            if (loadingEl) loadingEl.style.display = 'none';
-          });
-
-          videoEl.addEventListener('playing', () => {
-            if (loadingEl) loadingEl.style.display = 'none';
-          });
-
-          videoEl.addEventListener('loadedmetadata', updateProgress);
-          videoEl.addEventListener('timeupdate', updateProgress);
-          videoEl.addEventListener('durationchange', updateProgress);
-          videoEl.addEventListener('play', () => {
-            playButton.innerHTML = '<i class="fa-solid fa-pause"></i>';
-            playButton.setAttribute('aria-label', 'Pause video');
-          });
-          videoEl.addEventListener('pause', () => {
-            playButton.innerHTML = '<i class="fa-solid fa-play"></i>';
-            playButton.setAttribute('aria-label', 'Play video');
-          });
-          videoEl.addEventListener('ended', () => {
-            playButton.innerHTML = '<i class="fa-solid fa-play"></i>';
-            playButton.setAttribute('aria-label', 'Play video');
-          });
-          videoEl.addEventListener('volumechange', () => {
-            volume.value = String(videoEl.muted ? 0 : videoEl.volume);
-            muteButton.innerHTML = videoEl.muted || videoEl.volume === 0
-              ? '<i class="fa-solid fa-volume-xmark"></i>'
-              : '<i class="fa-solid fa-volume-high"></i>';
-            muteButton.setAttribute('aria-label', videoEl.muted ? 'Unmute video' : 'Mute video');
-          });
-
-          videoEl.addEventListener('error', () => {
-            if (loadingEl) loadingEl.style.display = 'none';
-            if (errorContainer) {
-              errorContainer.style.display = 'flex';
-              videoEl.style.display = 'none';
-
-              const errorCode = videoEl.error?.code;
-              const message = errorCode === 2
-                ? 'A network error prevented the local video from loading.'
-                : errorCode === 3
-                  ? 'The local video could not be decoded by this browser.'
-                  : 'The local lesson video could not be found or played.';
-              if (errorDesc) errorDesc.textContent = message;
-            }
-          });
-
-          playButton.addEventListener('click', () => {
-            if (videoEl.paused) {
-              videoEl.play().catch(error => showToast(error.message || 'Unable to play this video.', 'error'));
-            } else {
-              videoEl.pause();
-            }
-          });
-
-          progress.addEventListener('input', () => {
-            if (videoEl.duration) {
-              videoEl.currentTime = (Number(progress.value) / 1000) * videoEl.duration;
-            }
-          });
-
-          volume.addEventListener('input', () => {
-            videoEl.volume = Number(volume.value);
-            videoEl.muted = videoEl.volume === 0;
-          });
-
-          muteButton.addEventListener('click', () => {
-            videoEl.muted = !videoEl.muted;
-          });
-
-          speed.addEventListener('change', () => {
-            videoEl.playbackRate = Number(speed.value);
-          });
-
-          fullscreenButton.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-              if (!shell.requestFullscreen) {
-                showToast('Fullscreen is unavailable in this browser.', 'warning');
-                return;
-              }
-              shell.requestFullscreen().catch(error => {
-                showToast(error.message || 'Fullscreen is unavailable in this browser.', 'error');
-              });
-            } else {
-              document.exitFullscreen().catch(error => {
-                showToast(error.message || 'Could not exit fullscreen.', 'error');
-              });
-            }
-          });
-
-          shell.addEventListener('fullscreenchange', () => {
-            const isFullscreen = document.fullscreenElement === shell;
-            fullscreenButton.innerHTML = isFullscreen
-              ? '<i class="fa-solid fa-compress"></i>'
-              : '<i class="fa-solid fa-expand"></i>';
-            fullscreenButton.setAttribute('aria-label', isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen');
-          });
-
-          if (videoEl.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA && loadingEl) {
-            loadingEl.style.display = 'none';
-          }
-
-          videoEl.play().catch(() => {
-            showToast('Select Play to start this lesson video.', 'info');
-          });
+        // Initialize appropriate video player
+        if (ytId) {
+          setupYouTubePlayer(ytId, defaultVideo);
+        } else {
+          setupHTML5Player(defaultVideo);
         }
 
-        if (youtubeEmbed && loadingEl) {
-          youtubeEmbed.addEventListener('load', () => {
-            loadingEl.style.display = 'none';
-          }, { once: true });
-          youtubeEmbed.addEventListener('error', () => {
-            loadingEl.style.display = 'none';
-            showToast('The selected YouTube video could not be loaded.', 'error');
-          }, { once: true });
-        }
+        updateWatchUI();
 
-        // Attach Button Listeners
+        // Attach action handlers
         const prevBtn = document.getElementById('btn-prev-lesson');
         if (prevBtn) {
-          prevBtn.onclick = () => {
+          prevBtn.onclick = async () => {
             if (currentLessonIndex > 0) {
-              teardownActivePlayer();
               currentLessonIndex--;
               renderSidebarLessons();
-              renderCurrentLesson();
+              await loadLessonDetails(currentLessonIndex);
               updateLessonUrl();
               window.scrollTo({ top: 120, behavior: 'smooth' });
             }
@@ -976,12 +1007,16 @@
 
         const nextBtn = document.getElementById('btn-next-lesson');
         if (nextBtn) {
-          nextBtn.onclick = () => {
+          nextBtn.onclick = async () => {
             if (currentLessonIndex < lessons.length - 1) {
-              teardownActivePlayer();
+              const nextLesson = lessons[currentLessonIndex + 1];
+              if (nextLesson.isLocked) {
+                showToast(`Lesson ${currentLessonIndex + 2} is locked. You must watch 100% of the current lesson first.`, 'warning');
+                return;
+              }
               currentLessonIndex++;
               renderSidebarLessons();
-              renderCurrentLesson();
+              await loadLessonDetails(currentLessonIndex);
               updateLessonUrl();
               window.scrollTo({ top: 120, behavior: 'smooth' });
             }
@@ -999,28 +1034,84 @@
               });
 
               if (res.success) {
-                if (res.alreadyCompleted) {
-                  showToast('Lesson is already completed!', 'info');
-                } else {
-                  showToast(`Lesson ${lessonNum} completed! +50 XP Awarded! 🎉`, 'success');
-                }
-
+                showToast(`Lesson ${lessonNum} verified complete! +50 XP Awarded! 🎉`, 'success');
                 enrollment.completedLessons = res.completedLessons || enrollment.completedLessons;
                 enrollment.progress = res.progress || enrollment.progress;
+
+                // Unlock next lesson
+                if (currentLessonIndex + 1 < lessons.length) {
+                  lessons[currentLessonIndex + 1].isLocked = false;
+                }
 
                 updateProgressUI();
                 renderSidebarLessons();
                 renderCurrentLesson();
-
               }
             } catch (err) {
               completeBtn.disabled = false;
-              completeBtn.innerHTML = '<i class="fa-solid fa-check"></i> MARK LESSON COMPLETE';
-              showToast(err.message || 'Failed to complete lesson', 'error');
+              completeBtn.innerHTML = '<i class="fa-solid fa-check"></i> CLICK TO COMPLETE (+50 XP)';
+              showToast(err.message || 'Failed to complete lesson. Watch 100% first.', 'error');
             }
           };
         }
+
+        const openCertModal = () => {
+          const modal = document.getElementById('cert-claim-modal');
+          const nameInput = document.getElementById('cert-student-name-input');
+          if (nameInput) {
+            nameInput.value = layout.currentUser?.fullName || '';
+          }
+          if (modal) modal.style.display = 'flex';
+        };
+
+        const bannerCertBtn = document.getElementById('btn-banner-generate-cert');
+        if (bannerCertBtn) bannerCertBtn.onclick = openCertModal;
+
+        const sidebarCertBtn = document.getElementById('btn-sidebar-cert');
+        if (sidebarCertBtn) sidebarCertBtn.onclick = openCertModal;
       }
+
+      // Certificate Modal actions
+      document.addEventListener('click', async (e) => {
+        if (e.target && e.target.id === 'btn-cancel-claim-modal') {
+          const modal = document.getElementById('cert-claim-modal');
+          if (modal) modal.style.display = 'none';
+        }
+
+        if (e.target && e.target.id === 'btn-confirm-generate-cert') {
+          const btn = document.getElementById('btn-confirm-generate-cert');
+          const nameInput = document.getElementById('cert-student-name-input');
+          const studentName = (nameInput?.value || '').trim();
+
+          if (!studentName) {
+            showToast('Please enter your full name for the certificate.', 'warning');
+            return;
+          }
+
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating Certificate...';
+
+          try {
+            const res = await api.post('/certificates/generate', {
+              courseId,
+              studentName
+            });
+
+            if (res.success && res.certificate) {
+              showToast('Certificate successfully generated! Redirecting to credentials viewer...', 'success');
+              setTimeout(() => {
+                window.location.href = `certificate.html?id=${res.certificate.certificateId || res.certificate._id}`;
+              }, 1200);
+            } else {
+              throw new Error(res.message || 'Unable to generate certificate');
+            }
+          } catch (err) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-certificate"></i> Generate & View Certificate';
+            showToast(err.message || 'Failed to generate certificate', 'error');
+          }
+        }
+      });
 
       await loadCourse();
     });

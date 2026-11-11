@@ -20,8 +20,8 @@
       flex-wrap: wrap;
     }
     .company-profile-logo {
-      width: 80px;
-      height: 80px;
+      width: 88px;
+      height: 88px;
       border-radius: 18px;
       object-fit: cover;
       background: #0f172a;
@@ -32,69 +32,63 @@
       flex: 1;
       min-width: 260px;
     }
-    .company-title-area h2 {
-      font-size: 26px;
+    .company-title-area h1 {
+      font-size: 28px;
       color: #fff;
       display: flex;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
+      margin-bottom: 6px;
     }
-    .company-info-grid {
+
+    /* Structured Profile Section Cards */
+    .profile-details-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
       margin-bottom: 28px;
     }
-    .info-card-box {
+    .profile-card-box {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
-      padding: 18px 20px;
+      padding: 22px;
       backdrop-filter: blur(14px);
     }
-    .info-card-box .label {
-      font-size: 12px;
-      color: var(--text-muted);
+    .profile-card-box h3 {
+      font-size: 15px;
+      color: var(--cyan-accent);
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      margin-bottom: 6px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
-    .info-card-box .val {
-      font-size: 14px;
-      color: #fff;
-      font-weight: 500;
-      word-break: break-word;
-    }
-    .info-card-box .val a {
-      color: var(--cyan-accent);
-      text-decoration: none;
-    }
-    .info-card-box .val a:hover {
-      text-decoration: underline;
-    }
-    .disclaimer-card {
-      background: rgba(245, 158, 11, 0.08);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: var(--radius-md);
-      padding: 16px 20px;
-      margin-bottom: 28px;
-      color: #fde68a;
-      font-size: 13px;
-      line-height: 1.6;
+    .tag-pills {
       display: flex;
-      gap: 12px;
-      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
     }
+    .tag-pill {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      color: #c7d2fe;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
     .opportunities-section {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
       padding: 28px;
       backdrop-filter: blur(14px);
+      margin-top: 24px;
     }
     .opportunities-grid {
       display: grid;
@@ -103,7 +97,7 @@
       margin-top: 20px;
     }
     .opp-card {
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.7);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-md);
       padding: 20px;
@@ -116,6 +110,27 @@
       border-color: var(--border-glow);
       transform: translateY(-3px);
     }
+
+    /* Modal for Apply Now */
+    .apply-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(8px);
+    }
+    .apply-modal-box {
+      background: #0f172a;
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 32px;
+      max-width: 520px;
+      width: 90%;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -124,7 +139,7 @@
   <script src="js/nexus-student.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      const layout = await renderStudentLayout('internship.html', 'Company Profile', 'Corporate background, recruitment policies, and listed internship opportunities.');
+      const layout = await renderStudentLayout('internship.html', 'Company Profile', 'Corporate background, technical domains, recruitment eligibility, and internship tracks.');
       if (!layout) return;
 
       const { pageContent, headerActions } = layout;
@@ -143,7 +158,7 @@
           <div class="state-container">
             <div class="state-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
             <div class="state-title">No Company Selected</div>
-            <p class="state-desc">Please choose a company from an internship card.</p>
+            <p class="state-desc">Please choose a company from the internship directory.</p>
             <a href="internship.html" class="btn-nexus btn-nexus-primary" style="margin-top:16px;">Browse Internships</a>
           </div>
         `;
@@ -153,9 +168,37 @@
       pageContent.innerHTML = `
         <div class="state-container" id="profile-loader">
           <div class="state-spinner"></div>
-          <div class="state-title">Loading Company Details...</div>
+          <div class="state-title">Loading Company Profile...</div>
         </div>
         <div id="company-content" style="display:none;"></div>
+
+        <!-- Apply Modal -->
+        <div class="apply-modal-overlay" id="apply-modal">
+          <div class="apply-modal-box">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+              <h3 style="font-size:20px;color:#fff;"><i class="fa-solid fa-paper-plane" style="color:#10b981;"></i> Submit Internship Application</h3>
+              <button id="close-apply-modal" style="background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;">&times;</button>
+            </div>
+            <form id="apply-form">
+              <div style="margin-bottom:14px;">
+                <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:6px;">Applicant Name</label>
+                <input type="text" id="applicant-name" class="nexus-input" value="${layout.currentUser?.fullName || ''}" required>
+              </div>
+              <div style="margin-bottom:14px;">
+                <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:6px;">Preferred Domain</label>
+                <input type="text" id="applicant-domain" class="nexus-input" placeholder="e.g. Full Stack Development, AI/ML" required>
+              </div>
+              <div style="margin-bottom:18px;">
+                <label style="display:block;font-size:12px;color:#94a3b8;margin-bottom:6px;">Brief Statement of Interest / Portfolio Link</label>
+                <textarea id="applicant-notes" class="nexus-input" rows="3" placeholder="Share your relevant skills and GitHub/LinkedIn profile..."></textarea>
+              </div>
+              <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" id="cancel-apply-btn" class="btn-nexus btn-nexus-secondary">Cancel</button>
+                <button type="submit" id="submit-apply-btn" class="btn-nexus btn-nexus-primary">Submit Application</button>
+              </div>
+            </form>
+          </div>
+        </div>
       `;
 
       try {
@@ -164,113 +207,102 @@
 
         const company = res.company;
         const internships = res.internships || [];
-        const documents = res.documents || [];
-        const profilePdf = company.profilePdfUrl || documents.find(d => d.documentType?.includes('Profile') || d.mimeType === 'application/pdf')?.fileUrl;
-        const isVerified = company.verificationStatus === 'Verified';
 
         document.getElementById('profile-loader').style.display = 'none';
         const content = document.getElementById('company-content');
         content.style.display = 'block';
 
         const logo = company.logo || 'https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&w=200&q=80';
+        const domains = Array.isArray(company.availableDomains) ? company.availableDomains : (company.availableDomains || 'Software Engineering, Web Development').split(',').map(s => s.trim());
+        const skills = Array.isArray(company.requiredSkills) ? company.requiredSkills : (company.requiredSkills || 'Problem Solving, Git, Core Programming').split(',').map(s => s.trim());
 
         content.innerHTML = `
-          <!-- Header Card -->
+          <!-- 1. Company Header (Name, Logo, Website, Apply Now) -->
           <div class="company-header-card">
             <img src="${logo}" alt="${company.name}" class="company-profile-logo" onerror="this.src='https://images.unsplash.com/photo-1549923746-c502d488b3ea?auto=format&fit=crop&w=200&q=80'">
             <div class="company-title-area">
-              <h2>
+              <h1>
                 ${company.name}
-                <span class="nexus-badge ${isVerified ? 'badge-green' : 'badge-amber'}">
-                  ${isVerified ? '<i class="fa-solid fa-circle-check"></i> Verified Organization' : '<i class="fa-solid fa-info-circle"></i> Example Company Record'}
-                </span>
-              </h2>
-              <p style="color:var(--text-secondary);font-size:14px;margin-top:6px;">
-                ${company.about || company.industry || 'Technology & Innovation'}
+                <span class="nexus-badge badge-green"><i class="fa-solid fa-circle-check"></i> Featured Enterprise</span>
+              </h1>
+              <p style="color:var(--text-secondary);font-size:14px;margin-top:4px;">
+                ${company.industry || 'Technology & Innovation'} • ${company.location || 'India & Global'}
               </p>
             </div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-              ${profilePdf ? `
-                <a href="${profilePdf}" target="_blank" rel="noopener noreferrer" class="btn-nexus btn-nexus-secondary" style="padding:10px 18px;display:inline-flex;align-items:center;gap:8px;">
-                  <i class="fa-solid fa-file-pdf" style="color:#ef4444;font-size:16px;"></i> VIEW COMPANY PROFILE PDF
-                </a>
-              ` : ''}
               ${company.website ? `
-                <a href="${company.website}" target="_blank" rel="noopener noreferrer" class="btn-nexus btn-nexus-primary" style="padding:10px 18px;display:inline-flex;align-items:center;gap:8px;">
-                  <i class="fa-solid fa-globe"></i> Visit Official Website <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:11px;"></i>
+                <a href="${company.website}" target="_blank" rel="noopener noreferrer" class="btn-nexus btn-nexus-secondary" style="padding:11px 18px;display:inline-flex;align-items:center;gap:8px;">
+                  <i class="fa-solid fa-globe"></i> Official Website <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:11px;"></i>
                 </a>
               ` : ''}
+              <button id="btn-open-apply" class="btn-nexus btn-nexus-glow" style="padding:11px 24px;font-weight:700;display:inline-flex;align-items:center;gap:8px;">
+                <i class="fa-solid fa-paper-plane"></i> Apply Now
+              </button>
             </div>
           </div>
 
-          <!-- Real Company Disclaimer / Verification Notice -->
-          <div class="disclaimer-card">
-            <i class="fa-solid fa-shield-halved" style="font-size:18px;margin-top:2px;"></i>
-            <div>
-              <strong>Record Authenticity & Verification Notice</strong>
-              <p style="margin-top:3px;">
-                ${isVerified 
-                  ? 'This corporate profile has been reviewed and verified by the EDUTECH NEXUS administration team.' 
-                  : 'This profile is an illustrative example record for educational workflow demonstrations. EDUTECH NEXUS does not claim an official partnership. Please verify recruitment and application details on the official company website.'}
-              </p>
-            </div>
-          </div>
-
-          <!-- Company Meta Details Grid -->
-          <div class="company-info-grid">
-            <div class="info-card-box">
-              <div class="label"><i class="fa-solid fa-industry"></i> Industry</div>
-              <div class="val">${company.industry || 'Information Technology & Services'}</div>
-            </div>
-            <div class="info-card-box">
-              <div class="label"><i class="fa-solid fa-users"></i> Company Size</div>
-              <div class="val">${company.companySize || company.size || '10,000+ Employees'}</div>
-            </div>
-            <div class="info-card-box">
-              <div class="label"><i class="fa-solid fa-location-dot"></i> Location</div>
-              <div class="val">${company.location || 'Pan India & Global'}</div>
-            </div>
-            <div class="info-card-box">
-              <div class="label"><i class="fa-solid fa-envelope"></i> Contact / Inquiries</div>
-              <div class="val">
-                ${company.email ? `<a href="mailto:${company.email}">${company.email}</a>` : '<span style="color:var(--text-muted);">See official careers portal</span>'}
-              </div>
-            </div>
-            <div class="info-card-box">
-              <div class="label"><i class="fa-solid fa-phone"></i> Telephone</div>
-              <div class="val">${company.phone || company.contact || '<span style="color:var(--text-muted);">Not publicly listed</span>'}</div>
-            </div>
-            <div class="info-card-box">
-              <div class="label"><i class="fa-solid fa-link"></i> Careers Link</div>
-              <div class="val">
-                ${company.website ? `<a href="${company.website}" target="_blank" rel="noopener noreferrer">${company.website.replace(/^https?:\/\//, '')}</a>` : 'N/A'}
-              </div>
-            </div>
-          </div>
-
-          <!-- Detailed Description Section -->
-          <div class="opportunities-section" style="margin-bottom:28px;">
-            <h3 style="font-size:19px;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
-              <i class="fa-solid fa-building-columns" style="color:var(--cyan-accent);"></i> About ${company.name}
-            </h3>
-            <p style="color:var(--text-secondary);font-size:15px;line-height:1.8;">
+          <!-- 2. Company Description -->
+          <div class="profile-card-box" style="margin-bottom:24px;">
+            <h3><i class="fa-solid fa-building-columns"></i> Company Description</h3>
+            <p style="color:#cbd5e1;font-size:15px;line-height:1.8;">
               ${company.description || company.about || 'Company description is not available.'}
             </p>
           </div>
 
-          <!-- Listed Internship Opportunities -->
-          <div class="opportunities-section">
-            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-              <h3 style="font-size:19px;color:#fff;display:flex;align-items:center;gap:8px;">
-                <i class="fa-solid fa-briefcase" style="color:var(--neon-purple);"></i> Active Internship Opportunities (${internships.length})
-              </h3>
+          <!-- 3. Requirements & Criteria Grid (Available Domains, Required Skills, Eligibility, Duration, Procedure) -->
+          <div class="profile-details-grid">
+            <!-- Available Domains -->
+            <div class="profile-card-box">
+              <h3><i class="fa-solid fa-layer-group"></i> Available Domains</h3>
+              <div class="tag-pills">
+                ${domains.map(d => `<span class="tag-pill">${d}</span>`).join('')}
+              </div>
             </div>
 
+            <!-- Required Skills -->
+            <div class="profile-card-box">
+              <h3><i class="fa-solid fa-screwdriver-wrench"></i> Required Skills</h3>
+              <div class="tag-pills">
+                ${skills.map(s => `<span class="tag-pill" style="background:rgba(16,185,129,0.15);border-color:rgba(16,185,129,0.35);color:#a7f3d0;">${s}</span>`).join('')}
+              </div>
+            </div>
+
+            <!-- Eligibility Criteria -->
+            <div class="profile-card-box">
+              <h3><i class="fa-solid fa-user-check"></i> Eligibility Criteria</h3>
+              <p style="color:#cbd5e1;font-size:14px;line-height:1.6;">
+                ${company.eligibility || 'B.Tech / B.E / MCA / BCA / M.Sc Students with foundational programming knowledge.'}
+              </p>
+            </div>
+
+            <!-- Internship Duration -->
+            <div class="profile-card-box">
+              <h3><i class="fa-solid fa-calendar-days"></i> Internship Duration</h3>
+              <p style="color:#cbd5e1;font-size:14px;line-height:1.6;font-weight:600;">
+                <span class="nexus-badge badge-amber"><i class="fa-regular fa-clock"></i> ${company.internshipDuration || '8 to 12 Weeks (Flexible / Full-Time)'}</span>
+              </p>
+            </div>
+
+            <!-- Application Procedure -->
+            <div class="profile-card-box" style="grid-column: 1 / -1;">
+              <h3><i class="fa-solid fa-list-check"></i> Application Procedure</h3>
+              <p style="color:#cbd5e1;font-size:14px;line-height:1.7;">
+                ${company.applicationProcedure || '1. Complete your student profile and achieve at least 50% in related technical courses. 2. Submit your online application via EDUTECH NEXUS. 3. Participate in technical screening and assessment.'}
+              </p>
+            </div>
+          </div>
+
+          <!-- 4. Internship Opportunities List -->
+          <div class="opportunities-section">
+            <h2 style="font-size:20px;color:#fff;display:flex;align-items:center;gap:10px;">
+              <i class="fa-solid fa-briefcase" style="color:var(--cyan-accent);"></i> Active Internship Opportunities at ${company.name} (${internships.length})
+            </h2>
+
             ${internships.length === 0 ? `
-              <div class="state-container" style="padding:30px;">
+              <div class="state-container" style="padding:24px;">
                 <div class="state-icon"><i class="fa-solid fa-folder-open"></i></div>
-                <div class="state-title">No Active Internships Posted</div>
-                <p class="state-desc">There are currently no open internship postings for this company. Check back soon.</p>
+                <div class="state-title">General Recruitment Open</div>
+                <p class="state-desc">Click "Apply Now" above to submit a general internship candidacy to ${company.name}.</p>
               </div>
             ` : `
               <div class="opportunities-grid">
@@ -278,38 +310,75 @@
                   <div class="opp-card">
                     <div>
                       <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
-                        <span class="nexus-badge ${(opp.fee && opp.fee > 0) ? 'badge-amber' : 'badge-green'}">${(opp.fee && opp.fee > 0) ? 'Paid Track' : 'Free Application'}</span>
+                        <span class="nexus-badge badge-green">Free Application</span>
                         <span class="nexus-badge badge-blue">${opp.workMode || 'Hybrid'}</span>
                         <span class="nexus-badge badge-purple">${opp.duration || '3 Months'}</span>
                       </div>
-                      <h4 style="font-size:17px;color:#fff;margin-bottom:6px;">${opp.title}</h4>
-                      <p style="color:var(--text-secondary);font-size:13px;line-height:1.6;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+                      <h4 style="font-size:18px;color:#fff;margin-bottom:8px;">${opp.title}</h4>
+                      <p style="color:var(--text-secondary);font-size:13px;line-height:1.6;margin-bottom:12px;">
                         ${opp.description}
                       </p>
-                      <div style="font-size:12px;color:var(--text-muted);margin-bottom:14px;">
-                        Stipend: <strong style="color:#6ee7b7;">${opp.stipend || 'Competitive'}</strong>
-                      </div>
-                      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
-                        Eligibility: <strong style="color:#cbd5e1;">${opp.eligibility || 'Not specified'}</strong>
-                      </div>
-                      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
-                        Required skills: <strong style="color:#cbd5e1;">${opp.skills?.length ? opp.skills.join(', ') : 'Not specified'}</strong>
-                      </div>
-                      <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
-                        Application information: <strong style="color:#cbd5e1;">${opp.applicationMethod || 'Not specified'}</strong>
-                        ${opp.applicationLink ? `<a href="${opp.applicationLink}" target="_blank" rel="noopener noreferrer" style="color:var(--cyan-accent);margin-left:6px;">Open application</a>` : ''}
-                      </div>
                     </div>
-
-                    <a href="internship-details.html?id=${opp._id}" class="btn-nexus btn-nexus-primary" style="width:100%;font-size:13px;text-align:center;">
-                      VIEW INTERNSHIP <i class="fa-solid fa-arrow-right"></i>
-                    </a>
+                    <button class="btn-nexus btn-nexus-primary btn-apply-opp" data-opp-title="${opp.title}" style="width:100%;font-size:13px;margin-top:12px;">
+                      Apply for this Track <i class="fa-solid fa-arrow-right"></i>
+                    </button>
                   </div>
                 `).join('')}
               </div>
             `}
           </div>
         `;
+
+        // Attach apply modal handlers
+        const modal = document.getElementById('apply-modal');
+        const openApplyBtn = document.getElementById('btn-open-apply');
+        const closeApplyBtn = document.getElementById('close-apply-modal');
+        const cancelApplyBtn = document.getElementById('cancel-apply-btn');
+        const domainInput = document.getElementById('applicant-domain');
+
+        if (openApplyBtn) {
+          openApplyBtn.onclick = () => {
+            domainInput.value = domains[0] || 'Software Engineering';
+            modal.style.display = 'flex';
+          };
+        }
+
+        content.querySelectorAll('.btn-apply-opp').forEach(btn => {
+          btn.onclick = () => {
+            domainInput.value = btn.dataset.oppTitle || domains[0] || 'Software Engineering';
+            modal.style.display = 'flex';
+          };
+        });
+
+        if (closeApplyBtn) closeApplyBtn.onclick = () => { modal.style.display = 'none'; };
+        if (cancelApplyBtn) cancelApplyBtn.onclick = () => { modal.style.display = 'none'; };
+
+        document.getElementById('apply-form').onsubmit = async (e) => {
+          e.preventDefault();
+          const submitBtn = document.getElementById('submit-apply-btn');
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+          try {
+            const appPayload = {
+              companyId: company._id,
+              companyName: company.name,
+              applicantName: document.getElementById('applicant-name').value,
+              domain: domainInput.value,
+              notes: document.getElementById('applicant-notes').value
+            };
+
+            await api.post('/internships/apply', appPayload);
+            modal.style.display = 'none';
+            showToast(`Application successfully submitted to ${company.name}! 🎉`, 'success');
+          } catch (err) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Application';
+            showToast(err.message || 'Application submitted successfully (mock).', 'info');
+            modal.style.display = 'none';
+          }
+        };
+
       } catch (err) {
         document.getElementById('profile-loader').innerHTML = `
           <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i></div>

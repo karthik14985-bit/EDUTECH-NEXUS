@@ -801,11 +801,44 @@ function getStudentCourseVideoFolder(course) {
   const name = `${title} ${slug}`;
   const normalizedName = name.replace(/[^a-z0-9]+/g, ' ').trim();
 
+  if (normalizedName.includes('java')) return 'java';
   if (normalizedName.includes('python')) return 'python';
   if (normalizedName.includes('machine learning') || normalizedName.includes('ai ml') || normalizedName.includes('aiml')) return 'ai-ml';
   if (normalizedName.includes('full stack') || normalizedName.includes('fullstack')) return 'fullstack';
   if (normalizedName.includes('ai fundamentals') || normalizedName.includes('artificial intelligence') || normalizedName === 'ai') return 'ai';
   return 'course1';
+}
+
+// Helper: Merge intervals to compute unique watched seconds
+function mergeWatchedIntervals(intervals) {
+  if (!intervals || !intervals.length) return [];
+  const normalized = intervals
+    .map(i => {
+      const s = Number(i.start !== undefined ? i.start : (Array.isArray(i) ? i[0] : 0));
+      const e = Number(i.end !== undefined ? i.end : (Array.isArray(i) ? i[1] : 0));
+      return [s, e];
+    })
+    .filter(([s, e]) => !isNaN(s) && !isNaN(e) && e > s)
+    .sort((a, b) => a[0] - b[0]);
+  if (!normalized.length) return [];
+
+  const merged = [normalized[0]];
+  for (let i = 1; i < normalized.length; i++) {
+    const cur = normalized[i];
+    const prev = merged[merged.length - 1];
+    // 2-second tolerance for continuous playback jitter
+    if (cur[0] <= prev[1] + 2) {
+      prev[1] = Math.max(prev[1], cur[1]);
+    } else {
+      merged.push(cur);
+    }
+  }
+  return merged;
+}
+
+function calculateWatchedSeconds(mergedIntervals) {
+  if (!mergedIntervals || !mergedIntervals.length) return 0;
+  return mergedIntervals.reduce((acc, [s, e]) => acc + Math.max(0, e - s), 0);
 }
 
 // Video URL Extractor Helper (Supports watch?v=, youtu.be, shorts, embed, and 11-char IDs)
@@ -824,12 +857,17 @@ function attachStudentCourseVideos(courseData, course) {
   courseData.lessons = (courseData.lessons || []).map((lesson, index) => {
     const lessonData = lesson.toObject ? lesson.toObject() : { ...lesson };
     const lessonNumber = lessonData.lessonNumber || index + 1;
+    lessonData.lessonNumber = lessonNumber;
 
     let vType = (lessonData.videoType || '').toLowerCase();
     const rawUrl = (lessonData.videoUrl || '').trim();
     const rawFile = (lessonData.videoFile || '').trim();
     const ytIdFromId = extractYtId(lessonData.youtubeVideoId);
     const ytIdFromUrl = extractYtId(rawUrl);
+
+    const defaultFallback = lessonData.defaultVideo || (fs.existsSync(path.join(frontendPath, 'videos', videoFolder, `lesson${lessonNumber}.mp4`))
+      ? `/videos/${videoFolder}/lesson${lessonNumber}.mp4`
+      : '/videos/sample-lesson.mp4');
 
     // An explicitly configured local file takes precedence over a YouTube fallback.
     const configuredLocalFile = [rawFile, rawUrl].find(p =>
@@ -843,6 +881,7 @@ function attachStudentCourseVideos(courseData, course) {
         videoType: 'local',
         videoFile: resolvedLocal,
         videoUrl: resolvedLocal,
+        defaultVideo: defaultFallback,
         youtubeVideoId: ''
       };
     }
@@ -857,17 +896,18 @@ function attachStudentCourseVideos(courseData, course) {
         videoType: 'youtube',
         youtubeVideoId: validYtId,
         videoUrl: `https://www.youtube.com/watch?v=${validYtId}`,
+        defaultVideo: defaultFallback,
         videoFile: rawFile || ''
       };
     }
 
     if (vType === 'youtube' && isYtUrl) {
-      // It's a YouTube link without an extracted 11-char ID (invalid/malformed YouTube link)
       return {
         ...lessonData,
         videoType: 'youtube',
         youtubeVideoId: '',
         videoUrl: rawUrl,
+        defaultVideo: defaultFallback,
         videoFile: ''
       };
     }
@@ -882,52 +922,39 @@ function attachStudentCourseVideos(courseData, course) {
       let resolvedLocal = foundLocal || rawFile || rawUrl;
       if (resolvedLocal && !resolvedLocal.startsWith('/')) resolvedLocal = '/' + resolvedLocal;
 
-      // If no file path given, check if a curriculum video exists on disk
       if (!resolvedLocal) {
-        const potentialDiskPath = path.join(frontendPath, 'videos', videoFolder, `lesson${lessonNumber}.mp4`);
-        if (fs.existsSync(potentialDiskPath)) {
-          resolvedLocal = `/videos/${videoFolder}/lesson${lessonNumber}.mp4`;
-        }
+        resolvedLocal = defaultFallback;
       }
 
       return {
         ...lessonData,
         videoType: 'local',
-        videoFile: resolvedLocal || '',
-        videoUrl: resolvedLocal || '',
+        videoFile: resolvedLocal,
+        videoUrl: resolvedLocal,
+        defaultVideo: defaultFallback,
         youtubeVideoId: ''
       };
     }
 
-    // 3. Direct external video URL (.mp4, .webm, .mov, etc.)
+    // 3. Direct external video URL
     if (vType === 'url' || vType === 'external' || /^https?:\/\//i.test(rawUrl)) {
       return {
         ...lessonData,
         videoType: 'url',
         videoUrl: rawUrl,
+        defaultVideo: defaultFallback,
         videoFile: '',
         youtubeVideoId: ''
       };
     }
 
-    // 4. Default: check if static video exists on disk for this curriculum lesson
-    const defaultDiskPath = path.join(frontendPath, 'videos', videoFolder, `lesson${lessonNumber}.mp4`);
-    if (fs.existsSync(defaultDiskPath)) {
-      const defaultUrl = `/videos/${videoFolder}/lesson${lessonNumber}.mp4`;
-      return {
-        ...lessonData,
-        videoType: 'local',
-        videoFile: defaultUrl,
-        videoUrl: defaultUrl,
-        youtubeVideoId: ''
-      };
-    }
-
+    // 4. Default system fallback
     return {
       ...lessonData,
-      videoType: vType || 'none',
-      videoFile: rawFile || '',
-      videoUrl: rawUrl || '',
+      videoType: 'default',
+      videoFile: defaultFallback,
+      videoUrl: defaultFallback,
+      defaultVideo: defaultFallback,
       youtubeVideoId: ''
     };
   });
@@ -1210,7 +1237,7 @@ const handleMyCourses = asyncRoute(async (req, res) => {
 app.get('/api/courses/my-courses', authenticateUser, handleMyCourses);
 app.get('/api/courses/registrations/me', authenticateUser, handleMyCourses);
 
-// 5. Get Course Lessons (with Lock System)
+// 5. Get Course Lessons (with Sequential Lock System and Watch Tracking)
 app.get('/api/courses/:courseId/lessons', authenticateUser, asyncRoute(async (req, res) => {
   const courseId = req.params.courseId || req.params.id;
   const course = await findCourseByIdOrSlug(courseId);
@@ -1231,15 +1258,49 @@ app.get('/api/courses/:courseId/lessons', authenticateUser, asyncRoute(async (re
   }
 
   const completedSet = new Set((enrollment.completedLessons || []).map(String));
+
+  // Retrieve user watch progress records for all lessons in this course
+  const progressRecords = await LessonProgress.find({
+    $or: [{ userId: req.user._id }, { studentId: req.user._id }],
+    $or: [{ courseId: course._id }, { course: course._id }]
+  });
+  const progressMap = new Map();
+  progressRecords.forEach(p => {
+    if (p.lessonId) progressMap.set(String(p.lessonId), p);
+    if (p.lessonNumber) progressMap.set(String(p.lessonNumber), p);
+  });
+
   const lessons = (course.lessons || []).map((l, idx) => {
     const lObj = l.toObject ? l.toObject() : { ...l };
     const num = lObj.lessonNumber || (idx + 1);
     lObj.lessonNumber = num;
-    lObj.isCompleted = completedSet.has(String(num)) || completedSet.has(String(lObj._id));
-    lObj.isLocked = false;
+    lObj.order = num;
+
+    const isCompleted = completedSet.has(String(num)) || completedSet.has(String(lObj._id));
+    lObj.isCompleted = isCompleted;
+
+    // Sequential Unlocking Rule:
+    // Lesson 1 is always unlocked.
+    // Lesson N (N > 1) is unlocked ONLY IF Lesson N-1 is completed.
+    const isLocked = idx > 0 && !completedSet.has(String(idx));
+    lObj.isLocked = isLocked;
+
+    const prog = progressMap.get(String(num)) || progressMap.get(String(lObj._id));
+    lObj.watchPercentage = isCompleted ? 100 : (prog ? prog.watchPercentage || 0 : 0);
+    lObj.watchedSeconds = prog ? prog.watchedSeconds || 0 : (isCompleted ? 600 : 0);
+    lObj.totalDuration = prog ? prog.totalDuration || 600 : (Number(lObj.durationSeconds) || 600);
+    lObj.lastPosition = prog ? prog.lastPosition || 0 : 0;
+
     return lObj;
   });
+
   const resolvedLessons = attachStudentCourseVideos({ lessons }, course).lessons;
+
+  const totalCount = resolvedLessons.length;
+  const completedCount = completedSet.size;
+  const lockedCount = resolvedLessons.filter(l => l.isLocked).length;
+  const remainingCount = Math.max(0, totalCount - completedCount);
+  const courseProgress = Math.min(100, Math.round((completedCount / totalCount) * 100));
 
   res.json({
     success: true,
@@ -1247,22 +1308,29 @@ app.get('/api/courses/:courseId/lessons', authenticateUser, asyncRoute(async (re
     courseTitle: course.title,
     instructor: course.instructor,
     duration: course.duration,
-    totalLessons: resolvedLessons.length,
+    totalLessons: totalCount,
     lessons: resolvedLessons,
+    progressStats: {
+      overallProgress: courseProgress,
+      completedLessons: completedCount,
+      lockedLessons: lockedCount,
+      remainingLessons: remainingCount,
+      status: completedCount >= totalCount ? 'Completed' : 'In Progress'
+    },
     enrollment: {
-      progress: enrollment.progress || 0,
-      completedLessons: enrollment.completedLessons || [],
+      progress: courseProgress,
+      completedLessons: Array.from(completedSet),
       quizPassed: enrollment.quizPassed || false,
       quizScore: enrollment.quizScore || 0,
-      certificateEligible: enrollment.certificateEligible || false,
+      certificateEligible: completedCount >= totalCount,
       certificateClaimed: enrollment.certificateClaimed || false,
-      status: enrollment.status || 'registered',
+      status: completedCount >= totalCount ? 'completed' : 'in_progress',
       expiryDate: enrollment.expiryDate
     }
   });
 }));
 
-// 6. Get Single Lesson Details
+// 6. Get Single Lesson Details (Sequential Access Protected)
 app.get('/api/courses/:courseId/lessons/:lessonId', authenticateUser, asyncRoute(async (req, res) => {
   const { courseId, lessonId } = req.params;
   const course = await findCourseByIdOrSlug(courseId);
@@ -1292,10 +1360,40 @@ app.get('/api/courses/:courseId/lessons/:lessonId', authenticateUser, asyncRoute
 
   if (!lesson) return res.status(404).json({ success: false, message: 'Lesson not found in course.' });
 
-  const lessonObj = lesson.toObject ? lesson.toObject() : { ...lesson };
   const completedSet = new Set((enrollment.completedLessons || []).map(String));
+
+  // Sequential verification: Previous lesson must be completed
+  if (lessonIndex > 0) {
+    const prevNum = String(lessonIndex);
+    if (!completedSet.has(prevNum)) {
+      return res.status(403).json({
+        success: false,
+        message: `Lesson ${lessonIndex + 1} is locked. You must watch and complete Lesson ${lessonIndex} first.`,
+        isLocked: true,
+        previousLessonRequired: lessonIndex
+      });
+    }
+  }
+
+  const lessonObj = lesson.toObject ? lesson.toObject() : { ...lesson };
   lessonObj.lessonNumber = lessonObj.lessonNumber || (lessonIndex + 1);
-  lessonObj.isCompleted = completedSet.has(String(lessonObj.lessonNumber)) || completedSet.has(String(lesson._id));
+  const isCompleted = completedSet.has(String(lessonObj.lessonNumber)) || completedSet.has(String(lesson._id));
+  lessonObj.isCompleted = isCompleted;
+  lessonObj.isLocked = lessonIndex > 0 && !completedSet.has(String(lessonIndex));
+
+  // Fetch watch progress
+  const progressDoc = await LessonProgress.findOne({
+    $or: [{ userId: req.user._id }, { studentId: req.user._id }],
+    $or: [{ courseId: course._id }, { course: course._id }],
+    lessonId: String(lessonObj.lessonNumber)
+  });
+
+  lessonObj.watchPercentage = isCompleted ? 100 : (progressDoc ? progressDoc.watchPercentage || 0 : 0);
+  lessonObj.watchedSeconds = progressDoc ? progressDoc.watchedSeconds || 0 : (isCompleted ? 600 : 0);
+  lessonObj.totalDuration = progressDoc ? progressDoc.totalDuration || 600 : (Number(lessonObj.durationSeconds) || 600);
+  lessonObj.lastPosition = progressDoc ? progressDoc.lastPosition || 0 : 0;
+  lessonObj.watchedIntervals = progressDoc ? progressDoc.watchedIntervals || [] : [];
+
   const resolvedLesson = attachStudentCourseVideos({ lessons: [lessonObj] }, course).lessons[0];
 
   res.json({
@@ -1304,12 +1402,150 @@ app.get('/api/courses/:courseId/lessons/:lessonId', authenticateUser, asyncRoute
     courseTitle: course.title,
     lesson: resolvedLesson,
     totalLessons: course.lessons.length,
-    hasNext: lessonIndex < course.lessons.length - 1,
+    hasNext: lessonIndex < course.lessons.length - 1 && completedSet.has(String(lessonObj.lessonNumber)),
     hasPrev: lessonIndex > 0
   });
 }));
 
-// 7. Complete a Lesson (Sequential Check + Award 50 XP + Update Progress)
+// 6b. Video Watch Progress Tracking Endpoint (Intervals & 100% Watch Calculation)
+app.post('/api/courses/:courseId/lessons/:lessonId/watch-progress', authenticateUser, asyncRoute(async (req, res) => {
+  const { courseId, lessonId } = req.params;
+  const { currentTime, duration, interval, intervals } = req.body;
+
+  const course = await findCourseByIdOrSlug(courseId);
+  if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+  const enrollment = await findUserEnrollment(req.user._id, course._id, course);
+  if (!enrollment) return res.status(403).json({ success: false, message: 'You must register for this course first.' });
+
+  let targetLesson = null;
+  let targetIndex = -1;
+  for (let i = 0; i < course.lessons.length; i++) {
+    const l = course.lessons[i];
+    if (String(l._id) === String(lessonId) || String(l.lessonNumber) === String(lessonId) || String(i + 1) === String(lessonId)) {
+      targetLesson = l;
+      targetIndex = i;
+      break;
+    }
+  }
+  if (!targetLesson) return res.status(404).json({ success: false, message: 'Lesson not found.' });
+
+  const targetLessonNum = targetLesson.lessonNumber || (targetIndex + 1);
+  const targetKey = String(targetLessonNum);
+
+  // Sequential verification
+  const completedList = (enrollment.completedLessons || []).map(String);
+  if (targetIndex > 0) {
+    const prevKey = String(targetIndex);
+    if (!completedList.includes(prevKey)) {
+      return res.status(403).json({
+        success: false,
+        message: `Lesson ${targetLessonNum} is locked. Complete Lesson ${prevKey} first.`,
+        isLocked: true
+      });
+    }
+  }
+
+  let progressDoc = await LessonProgress.findOne({
+    $or: [{ userId: req.user._id }, { studentId: req.user._id }],
+    $or: [{ courseId: course._id }, { course: course._id }],
+    lessonId: targetKey
+  });
+
+  if (!progressDoc) {
+    progressDoc = new LessonProgress({
+      userId: req.user._id,
+      studentId: req.user._id,
+      user: req.user._id,
+      courseId: course._id,
+      course: course._id,
+      lessonId: targetKey,
+      lessonNumber: targetLessonNum,
+      watchedIntervals: [],
+      watchedSeconds: 0,
+      totalDuration: Number(duration) || 600,
+      watchPercentage: 0,
+      completed: false
+    });
+  }
+
+  const validDuration = Math.max(1, Number(duration) || progressDoc.totalDuration || 600);
+  progressDoc.totalDuration = validDuration;
+
+  let newIntervals = [];
+  if (Array.isArray(intervals) && intervals.length > 0) {
+    newIntervals = intervals;
+  } else if (Array.isArray(interval) && interval.length === 2) {
+    newIntervals = [interval];
+  }
+
+  const combined = [...(progressDoc.watchedIntervals || []).map(i => [i.start, i.end]), ...newIntervals];
+  const merged = mergeWatchedIntervals(combined);
+  progressDoc.watchedIntervals = merged.map(([start, end]) => ({ start, end }));
+
+  const uniqueWatchedSeconds = calculateWatchedSeconds(merged);
+  progressDoc.watchedSeconds = uniqueWatchedSeconds;
+  progressDoc.lastPosition = Math.max(0, Number(currentTime) || progressDoc.lastPosition || 0);
+
+  // 100% Watch Requirement (allow 2-second buffer for video ending)
+  const isFullyWatched = uniqueWatchedSeconds >= (validDuration - 2) || (uniqueWatchedSeconds / validDuration) >= 0.995;
+  const rawPercentage = Math.min(100, Math.round((uniqueWatchedSeconds / validDuration) * 100));
+  progressDoc.watchPercentage = isFullyWatched ? 100 : Math.min(99, rawPercentage);
+
+  let newlyCompleted = false;
+  if (progressDoc.watchPercentage >= 100 && !progressDoc.completed) {
+    progressDoc.completed = true;
+    progressDoc.completedAt = new Date();
+    newlyCompleted = true;
+
+    if (!completedList.includes(targetKey)) {
+      enrollment.completedLessons.push(targetKey);
+      await awardXP(
+        req.user._id,
+        50,
+        `Completed Lesson ${targetLessonNum}: ${targetLesson.title} in ${course.title}`,
+        { source: 'course', courseId: course._id, lessonId: targetKey }
+      ).catch(() => {});
+    }
+
+    const totalLessons = Math.max(1, course.lessons.length);
+    const uniqueCompleted = [...new Set(enrollment.completedLessons.map(String))];
+    enrollment.progress = Math.min(100, Math.round((uniqueCompleted.length / totalLessons) * 100));
+    if (uniqueCompleted.length >= totalLessons) {
+      enrollment.status = 'completed';
+      enrollment.completed = true;
+      enrollment.completedAt = new Date();
+      enrollment.certificateEligible = true;
+    }
+    await enrollment.save();
+
+    await CourseRegistration.findOneAndUpdate(
+      { user: req.user._id, course: course._id },
+      {
+        progress: enrollment.progress,
+        completedLessons: enrollment.completedLessons,
+        completed: enrollment.completed,
+        certificateEligible: enrollment.certificateEligible
+      }
+    ).catch(() => {});
+  }
+
+  await progressDoc.save();
+
+  res.json({
+    success: true,
+    lessonNumber: targetLessonNum,
+    watchPercentage: progressDoc.watchPercentage,
+    watchedSeconds: Math.round(uniqueWatchedSeconds),
+    totalDuration: Math.round(validDuration),
+    completed: progressDoc.completed,
+    newlyCompleted,
+    courseProgress: enrollment.progress || 0,
+    certificateEligible: enrollment.certificateEligible || false
+  });
+}));
+
+// 7. Complete a Lesson (Sequential Check + Strict 100% Video Watch Verification)
 const handleLessonComplete = asyncRoute(async (req, res) => {
   const courseId = req.params.courseId || req.params.id;
   const lessonParam = req.params.lessonId || req.body.lessonId || req.body.lessonNumber || '1';
@@ -1323,7 +1559,6 @@ const handleLessonComplete = asyncRoute(async (req, res) => {
   if (isCourseEnrollmentExpired(enrollment)) {
     return res.status(403).json({ success: false, message: 'Course access has expired.', courseExpired: true });
   }
-
 
   // Locate the target lesson and its index
   let targetLesson = null;
@@ -1349,20 +1584,37 @@ const handleLessonComplete = asyncRoute(async (req, res) => {
   if (targetIndex > 0) {
     const prevKey = String(targetIndex);
     if (!completedList.includes(prevKey)) {
-      return res.status(400).json({
+      return res.status(403).json({
         success: false,
-        message: 'Complete the previous lesson to continue.'
+        message: `Lesson ${targetLessonNum} is locked. You must complete Lesson ${prevKey} first.`,
+        isLocked: true
       });
     }
   }
 
   const alreadyCompleted = completedList.includes(targetKey);
-  let xpAwarded = 0;
 
+  // Backend verification of 100% video watching requirement
+  let progressDoc = await LessonProgress.findOne({
+    $or: [{ userId: req.user._id }, { studentId: req.user._id }],
+    $or: [{ courseId: course._id }, { course: course._id }],
+    lessonId: targetKey
+  });
+
+  const watchPct = progressDoc ? (progressDoc.watchPercentage || 0) : 0;
+  if (!alreadyCompleted && watchPct < 100) {
+    return res.status(400).json({
+      success: false,
+      message: `You must watch 100% of the lesson video before this lesson can be marked as completed. Currently watched: ${watchPct}%.`,
+      watchPercentage: watchPct,
+      required: 100
+    });
+  }
+
+  let xpAwarded = 0;
   if (!alreadyCompleted) {
     enrollment.completedLessons.push(targetKey);
 
-    // Award 50 XP per lesson (Requirement 14 & 26)
     const xpResult = await awardXP(
       req.user._id,
       50,
@@ -1371,7 +1623,6 @@ const handleLessonComplete = asyncRoute(async (req, res) => {
     );
     if (xpResult) xpAwarded = 50;
 
-    // Record in LessonProgress collection
     await LessonProgress.findOneAndUpdate(
       {
         userId: req.user._id,
@@ -1383,8 +1634,10 @@ const handleLessonComplete = asyncRoute(async (req, res) => {
         studentId: req.user._id,
         courseId: course._id,
         lessonId: targetKey,
+        lessonNumber: targetLessonNum,
         completed: true,
         completedAt: new Date(),
+        watchPercentage: 100,
         xpAwarded: 50
       },
       { upsert: true }
@@ -1398,36 +1651,38 @@ const handleLessonComplete = asyncRoute(async (req, res) => {
 
   const allLessonsCompleted = uniqueCompleted.length >= totalLessons;
   if (allLessonsCompleted) {
-    enrollment.status = enrollment.quizPassed ? 'completed' : 'in_progress';
+    enrollment.status = 'completed';
+    enrollment.completed = true;
+    enrollment.completedAt = enrollment.completedAt || new Date();
+    enrollment.certificateEligible = true;
   } else {
     enrollment.status = 'in_progress';
+    enrollment.certificateEligible = false;
   }
-
-  enrollment.certificateEligible = (progressPercent >= 90) || allLessonsCompleted;
 
   await enrollment.save();
 
-  // Sync CourseRegistration
   await CourseRegistration.findOneAndUpdate(
     { user: req.user._id, course: course._id },
     {
       progress: enrollment.progress,
       completedLessons: enrollment.completedLessons,
       status: enrollment.status,
+      completed: enrollment.completed,
       certificateEligible: enrollment.certificateEligible
     }
   ).catch(() => {});
 
   res.json({
     success: true,
-    message: alreadyCompleted ? 'Lesson already completed.' : `Lesson ${targetLessonNum} completed! +50 XP earned.`,
+    message: alreadyCompleted ? 'Lesson is already completed.' : `Lesson ${targetLessonNum} completed! +50 XP Awarded! 🎉`,
     alreadyCompleted,
+    xpAwarded,
     progress: enrollment.progress,
     completedLessons: enrollment.completedLessons,
     allLessonsCompleted,
     certificateEligible: enrollment.certificateEligible,
     nextLessonNumber: targetIndex + 2 <= totalLessons ? targetIndex + 2 : null,
-    xpAwarded,
     enrollment: {
       progress: enrollment.progress,
       completedLessons: enrollment.completedLessons,
@@ -1704,60 +1959,65 @@ app.post('/api/courses/:courseId/quiz/submit', authenticateUser, asyncRoute(asyn
   });
 }));
 
-// 3. Claim Certificate (Requires Lessons Completed + Quiz Passed >= 70%)
-app.post('/api/certificates/claim', authenticateUser, asyncRoute(async (req, res) => {
-  const courseId = req.body.courseId || req.params.id;
-  if (!courseId) return res.status(400).json({ success: false, message: 'courseId is required to claim certificate.' });
+// 3. Generate & Claim Certificate (Requires All 10 Lessons 100% Completed)
+const handleCertificateGenerate = asyncRoute(async (req, res) => {
+  const courseId = req.body.courseId || req.params.courseId || req.params.id;
+  if (!courseId) return res.status(400).json({ success: false, message: 'courseId is required to generate certificate.' });
 
   const course = await findCourseByIdOrSlug(courseId);
   if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
 
   const enrollment = await findUserEnrollment(req.user._id, course._id, course);
 
-  if (!enrollment) return res.status(404).json({ success: false, message: 'You have not registered for this course.' });
+  if (!enrollment) return res.status(403).json({ success: false, message: 'You have not registered for this course.' });
   if (isCourseEnrollmentExpired(enrollment)) {
     return res.status(403).json({ success: false, message: 'Course access has expired.', courseExpired: true });
   }
 
   const totalLessons = course.lessons ? course.lessons.length : 10;
-  const completedLessons = enrollment.completedLessons ? enrollment.completedLessons.length : 0;
-  if (completedLessons < totalLessons) {
-    return res.status(400).json({
+  const uniqueCompleted = [...new Set((enrollment.completedLessons || []).map(String))];
+  const completedCount = uniqueCompleted.length;
+
+  // Strict check: ALL 10 lessons must be completed
+  if (completedCount < totalLessons) {
+    return res.status(403).json({
       success: false,
-      message: `Complete all ${totalLessons} lessons before claiming your certificate. (${completedLessons}/${totalLessons} done)`
+      message: 'Complete all lessons to unlock your certificate.',
+      totalLessons,
+      completedLessons: completedCount,
+      remainingLessons: Math.max(0, totalLessons - completedCount)
     });
   }
 
-  const courseQuiz = await Quiz.findOne({ courseId: course._id });
-  if (courseQuiz && !enrollment.quizPassed && (enrollment.quizScore || 0) < 70) {
-    return res.status(400).json({
-      success: false,
-      message: 'You must pass the final course quiz (70% or higher) before claiming your certificate.'
-    });
-  }
-
-  // Return existing certificate if already claimed
+  // Return existing certificate if already claimed (no duplicates)
   let existingCert = await Certificate.findOne(getEnrollmentFilter(req.user._id, course._id));
 
   if (existingCert) {
     return res.json({
       success: true,
-      message: 'Your certificate is already generated.',
+      message: 'Your certificate has already been generated.',
       alreadyClaimed: true,
       certificate: existingCert
     });
   }
 
-  // Generate unique Certificate ID (e.g. EN-CERT-2026-A8F39K)
+  // Load configured administrator details from SystemConfig
+  const SystemConfig = require('./models/SystemConfig');
+  const certConfig = await SystemConfig.findOne({ key: 'certificate_config' }) || {};
+
+  // Student name can be customized/entered by student or defaults to registered full name
+  const requestedName = (req.body.studentName || req.user.fullName || 'Certified Student').trim();
+
+  // Generate unique Certificate ID (e.g. EN-CERT-2026-FSD-98F12A)
   const uniqueCode = crypto.randomBytes(3).toString('hex').toUpperCase();
-  const certId = `EN-CERT-2026-${uniqueCode}`;
+  const certId = `EN-CERT-${new Date().getFullYear()}-${uniqueCode}`;
 
   const certificate = await Certificate.create({
     certificateId: certId,
     userId: req.user._id,
     studentId: req.user._id,
     user: req.user._id,
-    studentName: req.user.fullName,
+    studentName: requestedName,
     studentDepartment: req.user.department || enrollment.department || 'Technology & Engineering',
     studentCollege: req.user.college || req.user.institution || enrollment.institution || 'EDUTECH NEXUS Academic Partner',
     courseId: course._id,
@@ -1765,7 +2025,12 @@ app.post('/api/certificates/claim', authenticateUser, asyncRoute(async (req, res
     courseName: course.title,
     completionDate: enrollment.completedAt || new Date(),
     issueDate: new Date(),
-    quizScore: enrollment.quizScore || 80,
+    adminName: certConfig.adminName || 'Course Administrator',
+    adminDesignation: certConfig.adminDesignation || 'Course Administrator',
+    adminSignature: certConfig.adminSignature || 'Course Administrator',
+    title: certConfig.certificateHeading || 'CERTIFICATE OF COMPLETION',
+    description: certConfig.certificateDescription || 'This certificate is awarded in recognition of successfully completing the course and fulfilling all learning requirements.',
+    quizScore: enrollment.quizScore || 100,
     xp: 200,
     xpAwarded: 200,
     awardedXP: 200,
@@ -1777,37 +2042,37 @@ app.post('/api/certificates/claim', authenticateUser, asyncRoute(async (req, res
   enrollment.certificateClaimed = true;
   enrollment.certificate = certificate._id;
   enrollment.certificateEligible = true;
+  enrollment.completed = true;
+  enrollment.status = 'completed';
   await enrollment.save();
 
   await CourseRegistration.findOneAndUpdate(
     { user: req.user._id, course: course._id },
-    { certificateClaimed: true, certificate: certificate._id }
+    {
+      certificateClaimed: true,
+      certificate: certificate._id,
+      certificateEligible: true,
+      completed: true,
+      status: 'completed'
+    }
   ).catch(() => {});
 
-  await User.findByIdAndUpdate(req.user._id, { $addToSet: { certificates: certificate._id } });
-
-  // Award 200 XP for certificate claim (Requirement 26)
   await awardXP(
     req.user._id,
-    200,
-    `Claimed Official Certificate of Completion for ${course.title}`,
-    { source: 'certificate', referenceId: certId }
-  );
+    150,
+    `Claimed official course completion certificate for ${course.title}`,
+    { source: 'certificate', courseId: course._id, certificateId: certificate._id }
+  ).catch(() => {});
 
-  await Notification.create({
-    user: req.user._id,
-    title: 'Certificate Issued! 🎓',
-    message: `Your verified certificate for "${course.title}" (ID: ${certId}) is ready.`,
-    type: 'certificate',
-    link: `certificate.html?id=${certificate._id}`
-  }).catch(() => {});
-
-  res.status(201).json({
+  res.json({
     success: true,
-    message: 'Congratulations! Professional certificate generated and +200 XP awarded!',
+    message: 'Official completion certificate generated successfully!',
     certificate
   });
-}));
+});
+
+app.post('/api/certificates/claim', authenticateUser, handleCertificateGenerate);
+app.post('/api/certificates/generate', authenticateUser, handleCertificateGenerate);
 
 // 4. My Certificates & Eligible to Claim List
 app.get('/api/certificates/my', authenticateUser, asyncRoute(async (req, res) => {
@@ -2747,50 +3012,52 @@ app.get('/api/games/daily-challenge', authenticateOptionalUser, asyncRoute(async
   });
 }));
 
-// 3. GET /api/games/leaderboard - Top ranked game players based on verified scores
+// 3. GET /api/games/leaderboard - Common Leaderboard for all three technical games
 app.get('/api/games/leaderboard', asyncRoute(async (req, res) => {
-  const topResults = await GameResult.aggregate([
-    { $match: { status: { $ne: 'in-progress' } } },
-    {
-      $group: {
-        _id: { $ifNull: ['$studentId', '$userId'] },
-        totalScore: { $sum: '$score' },
-        totalXP: { $sum: '$xpEarned' },
-        gamesPlayed: { $sum: 1 },
-        avgScore: { $avg: '$score' },
-        lastPlayed: { $max: '$createdAt' }
-      }
-    },
-    { $sort: { totalScore: -1, totalXP: -1 } },
-    { $limit: 20 }
-  ]);
+  const isViewAll = req.query.all === 'true' || req.query.view === 'all';
+  const limit = isViewAll ? 200 : Math.min(Number(req.query.limit) || 10, 50);
+  const gameFilter = req.query.game;
 
-  const userIds = topResults.map(r => r._id).filter(Boolean);
-  const users = await User.find({ _id: { $in: userIds } })
-    .select('fullName department college institution profileImageUrl xp level')
+  const query = { status: { $ne: 'in-progress' } };
+  if (gameFilter && gameFilter !== 'all') {
+    query.gameName = new RegExp(gameFilter, 'i');
+  }
+
+  // Find all game results sorted by score descending, then date
+  const rawResults = await GameResult.find(query)
+    .sort({ score: -1, xpEarned: -1, createdAt: -1 })
+    .limit(limit)
+    .populate('studentId', 'fullName department profileImageUrl')
+    .populate('userId', 'fullName department profileImageUrl')
     .lean();
 
-  const userMap = new Map();
-  users.forEach(u => userMap.set(u._id.toString(), u));
+  const leaderboard = rawResults.map((r, index) => {
+    const user = r.studentId || r.userId || {};
+    const studentName = r.studentName || user.fullName || 'Student Scholar';
+    const department = r.department || user.department || 'Computer Science';
+    const profileImage = user.profileImageUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(studentName)}`;
 
-  const leaderboard = topResults.map((r, index) => {
-    const user = userMap.get(r._id?.toString()) || { fullName: 'Anonymous Learner', department: 'Computer Science' };
     return {
       rank: index + 1,
-      userId: r._id,
-      fullName: user.fullName || 'Student',
-      department: user.department || user.college || 'Engineering',
-      profileImageUrl: user.profileImageUrl || '',
-      overallXP: user.xp || r.totalXP,
-      level: user.level || 1,
-      gamesPlayed: r.gamesPlayed,
-      totalGameScore: r.totalScore,
-      totalGameXP: r.totalXP,
-      accuracy: Math.round(r.avgScore || 0)
+      id: r._id,
+      studentName,
+      profileImage,
+      department,
+      gameName: r.gameName || 'Technical Challenge',
+      totalScore: r.score || 0,
+      correctAnswers: r.correctAnswers || r.correctCount || (r.responses ? r.responses.filter(x => x.isCorrect).length : 0),
+      totalQuestions: r.totalQuestions || 0,
+      completionDate: r.completedAt || r.date || r.createdAt,
+      xpEarned: r.xpEarned || r.xp || 0
     };
   });
 
-  res.json({ success: true, count: leaderboard.length, leaderboard });
+  res.json({
+    success: true,
+    count: leaderboard.length,
+    isTop10: !isViewAll,
+    leaderboard
+  });
 }));
 
 // 4. GET /api/games/my-history - Authenticated student's game play history
@@ -4662,13 +4929,63 @@ app.get('/api/admin/course-registrations', authenticateUser, requireAdmin, async
   res.json({ success: true, enrollments, registrations: enrollments });
 }));
 
-// Admin Companies CRUD
+// Admin Certificate Configuration APIs
+app.get('/api/admin/certificate-config', authenticateUser, requireAdmin, asyncRoute(async (req, res) => {
+  const SystemConfig = require('./models/SystemConfig');
+  let config = await SystemConfig.findOne({ key: 'certificate_config' });
+  if (!config) {
+    config = await SystemConfig.create({ key: 'certificate_config' });
+  }
+  res.json({ success: true, config });
+}));
+
+app.put('/api/admin/certificate-config', authenticateUser, requireAdmin, asyncRoute(async (req, res) => {
+  const SystemConfig = require('./models/SystemConfig');
+  const { adminName, adminSignature, adminDesignation, organizationName } = req.body;
+  const config = await SystemConfig.findOneAndUpdate(
+    { key: 'certificate_config' },
+    {
+      adminName: adminName || 'Course Administrator',
+      adminSignature: adminSignature || 'Course Administrator',
+      adminDesignation: adminDesignation || 'Course Administrator',
+      organizationName: organizationName || 'EDUTECH NEXUS'
+    },
+    { upsert: true, new: true }
+  );
+  res.json({ success: true, message: 'Certificate administrator configuration updated successfully.', config });
+}));
+
+// Admin View Student Progress for Course
+app.get('/api/admin/courses/:id/progress', authenticateUser, requireAdmin, asyncRoute(async (req, res) => {
+  const course = await findCourseByIdOrSlug(req.params.id);
+  if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+  const enrollments = await CourseEnrollment.find({
+    $or: [{ courseId: course._id }, { course: course._id }]
+  }).populate('userId', 'fullName email studentId department college userType').sort({ progress: -1 });
+
+  res.json({
+    success: true,
+    courseTitle: course.title,
+    totalEnrolled: enrollments.length,
+    enrollments
+  });
+}));
+
+// Admin Companies CRUD (Enforces maximum 5 companies rule)
 app.get('/api/admin/companies', authenticateUser, requireAdmin, asyncRoute(async (req, res) => {
   const companies = await Company.find().sort({ name: 1 });
-  res.json({ success: true, companies });
+  res.json({ success: true, companies, count: companies.length, maxAllowed: 5 });
 }));
 
 app.post('/api/admin/companies', authenticateUser, requireAdmin, asyncRoute(async (req, res) => {
+  const currentCount = await Company.countDocuments();
+  if (currentCount >= 5) {
+    return res.status(400).json({
+      success: false,
+      message: 'Maximum 5 companies allowed. Please edit or delete an existing company to add a new one.'
+    });
+  }
   const company = await Company.create(req.body);
   await recordAudit(req, 'create', 'company', company._id, { name: company.name });
   res.status(201).json({ success: true, company });

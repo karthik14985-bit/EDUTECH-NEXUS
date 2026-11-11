@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Debugging Game | EDUTECH NEXUS</title>
+  <title>Debugging Challenge | EDUTECH NEXUS</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="css/nexus-core.css">
   <style>
@@ -31,7 +31,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 16px;
+      padding: 14px 16px;
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-subtle);
@@ -42,11 +42,6 @@
       text-align: left;
       font-family: inherit;
     }
-    .level-pill-btn:hover:not(.locked) {
-      background: rgba(99, 102, 241, 0.12);
-      border-color: rgba(99, 102, 241, 0.4);
-      color: #fff;
-    }
     .level-pill-btn.active {
       background: rgba(99, 102, 241, 0.22);
       border-color: #6366f1;
@@ -54,13 +49,11 @@
       font-weight: 700;
       box-shadow: 0 0 16px rgba(99, 102, 241, 0.3);
     }
-    .level-pill-btn.solved {
+    .level-pill-btn.done {
       border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
     }
-    .level-pill-btn.locked {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
+
     .debug-workspace-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
@@ -68,6 +61,19 @@
       padding: 28px;
       backdrop-filter: blur(16px);
       box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+    }
+    .timer-badge-header {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-weight: 800;
+      font-size: 15px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: monospace;
     }
     .code-editor-mock {
       background: #020617;
@@ -87,15 +93,6 @@
       font-size: 13px;
       color: var(--text-secondary);
     }
-    .editor-dots {
-      display: flex;
-      gap: 6px;
-    }
-    .editor-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
     .code-display-area {
       padding: 20px;
       font-family: 'Consolas', 'Courier New', monospace;
@@ -105,25 +102,6 @@
       white-space: pre-wrap;
       word-break: break-all;
       background: rgba(2, 6, 23, 0.95);
-    }
-    .code-edit-input {
-      width: 100%;
-      min-height: 140px;
-      background: #090e1a;
-      border: 1px solid var(--border-subtle);
-      border-radius: 8px;
-      padding: 16px;
-      color: #a5f3fc;
-      font-family: 'Consolas', 'Courier New', monospace;
-      font-size: 14px;
-      line-height: 1.6;
-      resize: vertical;
-      outline: none;
-      margin-top: 10px;
-    }
-    .code-edit-input:focus {
-      border-color: var(--cyan-accent);
-      box-shadow: 0 0 10px rgba(0, 210, 255, 0.2);
     }
     .feedback-banner {
       padding: 14px 18px;
@@ -146,9 +124,7 @@
       color: #fca5a5;
     }
     @media (max-width: 800px) {
-      .debug-layout {
-        grid-template-columns: 1fr;
-      }
+      .debug-layout { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -159,12 +135,15 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      const layout = await renderStudentLayout('games.html', 'Debugging Game', 'Find and fix errors in programming code across 5 technical levels.');
+      const layout = await renderStudentLayout('games.html', 'Debugging Challenge', 'Identify and correct errors across 3 progressive difficulty levels (Easy, Medium, Hard). 10 minutes per level (30 minutes total).');
       if (!layout) return;
 
       const { pageContent, headerActions } = layout;
 
       headerActions.innerHTML = `
+        <div class="timer-badge-header" id="level-timer-box">
+          <i class="fa-solid fa-stopwatch"></i> Level Time: <span id="timer-display">10:00</span>
+        </div>
         <a href="games.html" class="btn-nexus btn-nexus-secondary">
           <i class="fa-solid fa-arrow-left"></i> Exit Game
         </a>
@@ -177,276 +156,325 @@
         </div>
 
         <div class="debug-layout" id="debug-view" style="display:none;">
-          <!-- Left: Levels Navigation -->
+          <!-- Left: 3 Difficulty Levels Sidebar -->
           <div class="levels-sidebar-card">
             <h3 style="font-size:17px;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
-              <i class="fa-solid fa-layer-group" style="color:var(--cyan-accent);"></i> Levels
+              <i class="fa-solid fa-layer-group" style="color:var(--cyan-accent);"></i> Challenge Levels
             </h3>
-            <p style="font-size:12px;color:var(--text-secondary);">5 Progressive Debugging Challenges</p>
+            <p style="font-size:12px;color:var(--text-secondary);">3 Tiers • 10 Mins Each • 30 Mins Total</p>
 
-            <div class="level-pills-list" id="level-pills-container"></div>
+            <div class="level-pills-list" id="level-pills-container">
+              <!-- Dynamically populated -->
+            </div>
 
             <div style="margin-top:24px;border-top:1px solid var(--border-subtle);padding-top:16px;">
-              <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Game Reward:</div>
-              <div style="font-size:14px;color:#fbbf24;font-weight:700;">
-                <i class="fa-solid fa-bolt"></i> +20 XP per solved level
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">Current Total Score:</div>
+              <div style="font-size:24px;color:#fbbf24;font-weight:800;" id="total-score-badge">
+                0 / 100
               </div>
             </div>
           </div>
 
           <!-- Right: Main Debugging Workspace -->
-          <div class="debug-workspace-card">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+          <div class="debug-workspace-card" id="workspace-panel">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
               <div>
-                <span class="nexus-badge badge-blue" id="level-tag">Level 1: HTML Error</span>
-                <span class="nexus-badge badge-amber" style="margin-left:8px;" id="xp-tag">+20 XP</span>
-                <h2 style="font-size:22px;color:#fff;margin-top:8px;" id="level-question-title">Find the error.</h2>
+                <span class="nexus-badge badge-blue" id="level-difficulty-badge">Level 1: Easy</span>
+                <span class="nexus-badge badge-amber" style="margin-left:8px;" id="level-time-badge"><i class="fa-regular fa-clock"></i> 10 Minutes</span>
+                <h2 style="font-size:22px;color:#fff;margin-top:8px;" id="level-title">Buggy Code Snippet</h2>
               </div>
-              <div id="level-status-pill"></div>
+              <div id="level-score-display" style="font-size:14px;font-weight:700;color:#38bdf8;"></div>
             </div>
 
-            <!-- Code Editor Frame -->
+            <p style="color:var(--text-secondary);font-size:14px;margin-bottom:12px;" id="level-instructions">
+              Analyze the code snippet below. Identify the bug and submit the exact corrected syntax or fixed token.
+            </p>
+
+            <!-- Code Editor Mock -->
             <div class="code-editor-mock">
               <div class="editor-header">
-                <div class="editor-dots">
-                  <div class="editor-dot" style="background:#ef4444;"></div>
-                  <div class="editor-dot" style="background:#f59e0b;"></div>
-                  <div class="editor-dot" style="background:#10b981;"></div>
-                </div>
-                <div id="file-name-label" style="font-family:monospace;font-size:12px;">snippet.html</div>
-                <button class="btn-nexus btn-nexus-secondary" id="reset-code-btn" style="padding:4px 10px;font-size:11px;">
-                  <i class="fa-solid fa-rotate-left"></i> Reset
-                </button>
+                <span id="editor-filename" style="font-family:monospace;">solution.js</span>
+                <span style="font-size:11px;color:#f87171;"><i class="fa-solid fa-bug"></i> Error contained inside code</span>
               </div>
               <div class="code-display-area" id="bug-code-display"></div>
             </div>
 
-            <!-- Interactive Fix Section -->
+            <!-- Fix Input Form -->
             <div>
-              <label class="form-label" style="display:flex;justify-content:space-between;">
-                <span><strong>Enter Corrected Code or Error Fix:</strong></span>
-                <span style="font-size:12px;color:var(--text-secondary);">e.g. replace buggy syntax with valid syntax</span>
+              <label style="display:block;font-size:13px;font-weight:700;color:#fff;margin-bottom:8px;">
+                Enter Your Corrected Answer / Code Fix:
               </label>
-              <input type="text" id="answer-token-input" class="nexus-input" placeholder="Type the corrected code or token here..." style="font-family:monospace;margin-bottom:12px;">
-              
-              <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">
-                Or edit the complete code snippet directly:
-              </div>
-              <textarea id="full-code-input" class="code-edit-input" spellcheck="false"></textarea>
+              <input type="text" id="answer-input" class="nexus-input" placeholder="Type the corrected syntax or code replacement..." style="font-family:monospace;font-size:15px;margin-bottom:14px;" required>
             </div>
 
-            <!-- Feedback Banner -->
+            <!-- Feedback Box -->
             <div id="feedback-box" class="feedback-banner"></div>
 
-            <!-- Action Buttons -->
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:22px;flex-wrap:wrap;gap:12px;">
-              <button id="check-answer-btn" class="btn-nexus btn-nexus-primary" style="padding:12px 28px;font-size:14px;font-weight:700;">
-                <i class="fa-solid fa-wrench"></i> CHECK ANSWER
+            <!-- Action Controls -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;flex-wrap:wrap;gap:12px;">
+              <button id="submit-answer-btn" class="btn-nexus btn-nexus-primary" style="padding:12px 28px;font-weight:700;">
+                <i class="fa-solid fa-check"></i> SUBMIT ANSWER FOR EVALUATION
               </button>
 
-              <button id="next-level-btn" class="btn-nexus btn-nexus-glow" style="padding:12px 24px;font-size:14px;display:none;">
-                Next Level <i class="fa-solid fa-arrow-right"></i>
+              <button id="next-level-btn" class="btn-nexus btn-nexus-glow" style="padding:12px 26px;font-weight:700;display:none;">
+                Move to Next Level <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Completion Modal -->
-        <div class="modal-overlay" id="completion-modal">
-          <div class="modal-dialog" style="max-width:500px;text-align:center;">
-            <div style="padding:32px 24px;">
-              <div style="width:72px;height:72px;border-radius:50%;background:rgba(16,185,129,0.15);border:2px solid #10b981;color:#10b981;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px;">
-                <i class="fa-solid fa-trophy"></i>
+          <!-- Final Scorecard Screen (after completing all 3 levels) -->
+          <div class="debug-workspace-card" id="final-scorecard-panel" style="display:none;text-align:center;padding:40px;">
+            <div style="font-size:54px;color:#fbbf24;margin-bottom:14px;"><i class="fa-solid fa-trophy"></i></div>
+            <h2 style="font-size:28px;color:#fff;font-weight:800;margin-bottom:8px;">Debugging Challenge Completed!</h2>
+            <p style="color:var(--text-secondary);font-size:15px;max-width:500px;margin:0 auto 24px;">
+              You have finished all 3 difficulty levels. Your verified score has been saved to the MongoDB Leaderboard.
+            </p>
+
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;max-width:540px;margin:0 auto 28px;">
+              <div style="background:rgba(15,23,42,0.7);padding:16px;border-radius:10px;border:1px solid var(--border-subtle);">
+                <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;">Easy Level</div>
+                <div style="font-size:22px;color:#fff;font-weight:800;margin-top:4px;" id="score-level-0">0/30</div>
               </div>
-              <h2 style="font-size:24px;color:#fff;margin-bottom:8px;">Debugging Game Completed!</h2>
-              <p style="color:var(--text-secondary);font-size:14px;line-height:1.6;margin-bottom:20px;">
-                All 5 levels have been successfully debugged and verified. Your XP has been updated in the global leaderboard.
-              </p>
-              <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:14px;margin-bottom:24px;">
-                <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;">Total Reward</div>
-                <div style="font-size:28px;color:#fbbf24;font-weight:800;margin-top:4px;">+100 XP</div>
+              <div style="background:rgba(15,23,42,0.7);padding:16px;border-radius:10px;border:1px solid var(--border-subtle);">
+                <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;">Medium Level</div>
+                <div style="font-size:22px;color:#fff;font-weight:800;margin-top:4px;" id="score-level-1">0/35</div>
               </div>
-              <div style="display:flex;gap:12px;justify-content:center;">
-                <a href="leaderboard.html" class="btn-nexus btn-nexus-primary">
-                  <i class="fa-solid fa-trophy"></i> View Leaderboard
-                </a>
-                <a href="games.html" class="btn-nexus btn-nexus-secondary">
-                  Back to Games
-                </a>
+              <div style="background:rgba(15,23,42,0.7);padding:16px;border-radius:10px;border:1px solid var(--border-subtle);">
+                <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;">Hard Level</div>
+                <div style="font-size:22px;color:#fff;font-weight:800;margin-top:4px;" id="score-level-2">0/35</div>
               </div>
+            </div>
+
+            <div style="font-size:18px;color:#10b981;font-weight:800;margin-bottom:28px;" id="final-total-score-text">
+              Final Total Score: 0 / 100
+            </div>
+
+            <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+              <a href="leaderboard.html" class="btn-nexus btn-nexus-primary" style="padding:12px 28px;">
+                <i class="fa-solid fa-trophy"></i> View Global Leaderboard
+              </a>
+              <button onclick="window.location.reload()" class="btn-nexus btn-nexus-secondary" style="padding:12px 24px;">
+                <i class="fa-solid fa-rotate-right"></i> Try Again
+              </button>
             </div>
           </div>
         </div>
       `;
 
-      let gameData = null;
-      let levels = [];
+      // 3 Configured Levels: Easy (10 min), Medium (10 min), Hard (10 min)
+      const defaultLevels = [
+        {
+          id: 1,
+          difficulty: 'Easy',
+          title: 'HTML & Syntax Bug',
+          timeLimitSeconds: 600, // 10 minutes
+          weight: 30,
+          filename: 'index.html',
+          code: `<div class="card">\n  <h1>Welcome to EDUTECH</h1\n  <p>Learn programming online.</p>\n</div>`,
+          correctAnswer: '</h1>',
+          acceptableAnswers: ['</h1>', '<h1>Welcome to EDUTECH</h1>'],
+          explanation: 'Closing h1 tag was missing closing angle bracket ">".'
+        },
+        {
+          id: 2,
+          difficulty: 'Medium',
+          title: 'JavaScript Loop & Indexing Bug',
+          timeLimitSeconds: 600, // 10 minutes
+          weight: 35,
+          filename: 'reverseString.js',
+          code: `function reverseWords(str) {\n  let words = str.split(" ");\n  let reversed = [];\n  for (let i = words.length; i >= 0; i--) {\n    reversed.push(words[i]);\n  }\n  return reversed.join(" ");\n}`,
+          correctAnswer: 'words.length - 1',
+          acceptableAnswers: ['words.length - 1', 'i = words.length - 1', 'words.length-1'],
+          explanation: 'Loop index must start at words.length - 1 to prevent reading undefined.'
+        },
+        {
+          id: 3,
+          difficulty: 'Hard',
+          title: 'Algorithmic Binary Search Off-by-One',
+          timeLimitSeconds: 600, // 10 minutes
+          weight: 35,
+          filename: 'binarySearch.js',
+          code: `function binarySearch(arr, target) {\n  let left = 0, right = arr.length - 1;\n  while (left < right) {\n    let mid = Math.floor((left + right) / 2);\n    if (arr[mid] === target) return mid;\n    if (arr[mid] < target) left = mid;\n    else right = mid - 1;\n  }\n  return -1;\n}`,
+          correctAnswer: 'left = mid + 1',
+          acceptableAnswers: ['left = mid + 1', 'mid + 1', 'left=mid+1'],
+          explanation: 'When arr[mid] < target, left must be incremented to mid + 1 to avoid infinite loop.'
+        }
+      ];
+
+      let levels = defaultLevels;
       let currentLevelIndex = 0;
-      let solvedLevels = new Set();
+      let levelScores = [0, 0, 0];
+      let levelCompleted = [false, false, false];
+      let timerSeconds = 600;
+      let timerInterval = null;
+      let activeGameRecord = null;
+      const attemptId = `debug-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
       try {
-        const res = await api.get('/games/debugging-game/questions');
-        if (!res.success || !res.questions || !res.questions.length) {
-          throw new Error(res.message || 'No debugging levels found.');
-        }
-
-        gameData = res.game;
-        levels = res.questions;
-
-        document.getElementById('debug-loader').style.display = 'none';
-        document.getElementById('debug-view').style.display = 'grid';
-
-        renderLevelsNav();
-        loadLevel(0);
-
-      } catch (err) {
-        document.getElementById('debug-loader').innerHTML = `
-          <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i></div>
-          <div class="state-title">Unable to Load Debugging Game</div>
-          <p class="state-desc">${err.message}</p>
-          <a href="games.html" class="btn-nexus btn-nexus-primary" style="margin-top:16px;">Back to Games</a>
-        `;
+        const gamesRes = await api.get('/games');
+        const dbGame = (gamesRes.games || []).find(g => g.slug === 'debugging-challenge' || g.gameType === 'debugging');
+        if (dbGame) activeGameRecord = dbGame;
+      } catch (e) {
+        console.warn('Could not load game record:', e);
       }
 
-      function renderLevelsNav() {
+      document.getElementById('debug-loader').style.display = 'none';
+      document.getElementById('debug-view').style.display = 'grid';
+
+      function renderSidebar() {
         const container = document.getElementById('level-pills-container');
         container.innerHTML = levels.map((lvl, idx) => {
-          const isCurrent = idx === currentLevelIndex;
-          const isSolved = solvedLevels.has(lvl.level || idx + 1);
-          const isLocked = idx > 0 && !solvedLevels.has(levels[idx - 1].level || idx);
+          const isActive = idx === currentLevelIndex;
+          const isDone = levelCompleted[idx];
+          const score = levelScores[idx];
 
           return `
-            <button type="button" class="level-pill-btn ${isCurrent ? 'active' : ''} ${isSolved ? 'solved' : ''} ${isLocked ? 'locked' : ''}" data-idx="${idx}">
-              <span>
-                <strong>Level ${lvl.level || idx + 1}:</strong> ${lvl.category || 'Bug Fix'}
-              </span>
-              <span>
-                ${isSolved ? '<i class="fa-solid fa-circle-check" style="color:#34d399;"></i>' : (isLocked ? '<i class="fa-solid fa-lock" style="font-size:11px;"></i>' : '<i class="fa-solid fa-chevron-right" style="font-size:11px;"></i>')}
-              </span>
-            </button>
+            <div class="level-pill-btn ${isActive ? 'active' : ''} ${isDone ? 'done' : ''}">
+              <div>
+                <strong>${lvl.difficulty} (10 Min)</strong>
+                <div style="font-size:11px;color:var(--text-muted);">${lvl.title}</div>
+              </div>
+              <div>
+                ${isDone 
+                  ? `<span style="font-weight:700;color:${score > 0 ? '#10b981' : '#ef4444'};">${score} / ${lvl.weight}</span>`
+                  : `<span class="nexus-badge badge-blue">Pending</span>`}
+              </div>
+            </div>
           `;
         }).join('');
 
-        container.querySelectorAll('.level-pill-btn').forEach(btn => {
-          btn.onclick = () => {
-            const idx = Number(btn.getAttribute('data-idx'));
-            const isLocked = idx > 0 && !solvedLevels.has(levels[idx - 1].level || idx);
-            if (isLocked) {
-              if (window.showToast) showToast('Complete the previous level to continue.', 'warning');
-              return;
-            }
-            loadLevel(idx);
-          };
-        });
+        const totalEarned = levelScores.reduce((a, b) => a + b, 0);
+        document.getElementById('total-score-badge').textContent = `${totalEarned} / 100`;
+      }
+
+      function startLevelTimer() {
+        if (timerInterval) clearInterval(timerInterval);
+        timerSeconds = levels[currentLevelIndex].timeLimitSeconds || 600;
+
+        function tick() {
+          const m = Math.floor(timerSeconds / 60);
+          const s = timerSeconds % 60;
+          document.getElementById('timer-display').textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+
+          if (timerSeconds <= 0) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            showToast(`Time expired for ${levels[currentLevelIndex].difficulty} level! Automatically transitioning...`, 'warning');
+            evaluateAnswer(true); // timeout = 0 marks
+          }
+          timerSeconds--;
+        }
+
+        tick();
+        timerInterval = setInterval(tick, 1000);
       }
 
       function loadLevel(idx) {
         currentLevelIndex = idx;
         const lvl = levels[idx];
-        renderLevelsNav();
 
-        const extMap = { HTML: 'index.html', CSS: 'style.css', JavaScript: 'app.js', Python: 'main.py', SQL: 'query.sql' };
-        document.getElementById('file-name-label').textContent = extMap[lvl.category] || 'code.txt';
+        document.getElementById('level-difficulty-badge').textContent = `Level ${idx + 1}: ${lvl.difficulty}`;
+        document.getElementById('level-title').textContent = lvl.title;
+        document.getElementById('editor-filename').textContent = lvl.filename;
+        document.getElementById('bug-code-display').textContent = lvl.code;
+        document.getElementById('answer-input').value = '';
+        document.getElementById('answer-input').disabled = false;
+        document.getElementById('submit-answer-btn').disabled = false;
+        document.getElementById('submit-answer-btn').style.display = 'inline-flex';
+        document.getElementById('next-level-btn').style.display = 'none';
 
-        document.getElementById('level-tag').textContent = `Level ${lvl.level || idx + 1}: ${lvl.category || 'Code'} Error`;
-        document.getElementById('xp-tag').textContent = `+${lvl.xp || 20} XP`;
-        document.getElementById('level-question-title').textContent = lvl.question || 'Find the error.';
+        const fb = document.getElementById('feedback-box');
+        fb.style.display = 'none';
+        fb.className = 'feedback-banner';
 
-        document.getElementById('bug-code-display').textContent = lvl.codeSnippet || '';
-        document.getElementById('full-code-input').value = lvl.codeSnippet || '';
-        document.getElementById('answer-token-input').value = '';
-
-        const feedback = document.getElementById('feedback-box');
-        feedback.style.display = 'none';
-
-        const isSolved = solvedLevels.has(lvl.level || idx + 1);
-        const statusPill = document.getElementById('level-status-pill');
-        if (isSolved) {
-          statusPill.innerHTML = '<span class="nexus-badge badge-green"><i class="fa-solid fa-check"></i> Level Solved</span>';
-        } else {
-          statusPill.innerHTML = '<span class="nexus-badge badge-blue">Unsolved</span>';
-        }
-
-        document.getElementById('next-level-btn').style.display = isSolved && idx < levels.length - 1 ? 'inline-flex' : 'none';
+        renderSidebar();
+        startLevelTimer();
       }
 
-      document.getElementById('reset-code-btn').onclick = () => {
+      function evaluateAnswer(isTimeout = false) {
+        if (timerInterval) clearInterval(timerInterval);
         const lvl = levels[currentLevelIndex];
-        if (lvl) {
-          document.getElementById('full-code-input').value = lvl.codeSnippet || '';
-          document.getElementById('answer-token-input').value = '';
+        const inputVal = (document.getElementById('answer-input').value || '').trim();
+        const fb = document.getElementById('feedback-box');
+        const submitBtn = document.getElementById('submit-answer-btn');
+        const nextBtn = document.getElementById('next-level-btn');
+
+        document.getElementById('answer-input').disabled = true;
+        submitBtn.disabled = true;
+        submitBtn.style.display = 'none';
+
+        let isCorrect = false;
+        if (!isTimeout && inputVal) {
+          const normInput = inputVal.replace(/\s+/g, '').toLowerCase();
+          const matches = lvl.acceptableAnswers.some(ans => ans.replace(/\s+/g, '').toLowerCase() === normInput);
+          if (matches) isCorrect = true;
         }
-      };
 
-      document.getElementById('check-answer-btn').onclick = async () => {
-        const lvl = levels[currentLevelIndex];
-        const tokenVal = document.getElementById('answer-token-input').value.trim();
-        const codeVal = document.getElementById('full-code-input').value.trim();
+        const scoreEarned = isCorrect ? lvl.weight : 0;
+        levelScores[currentLevelIndex] = scoreEarned;
+        levelCompleted[currentLevelIndex] = true;
 
-        if (!tokenVal && !codeVal) {
-          if (window.showToast) showToast('Please enter your fix or corrected code.', 'warning');
-          return;
+        fb.style.display = 'flex';
+        if (isCorrect) {
+          fb.className = 'feedback-banner feedback-correct';
+          fb.innerHTML = `<i class="fa-solid fa-circle-check"></i> Correct! Awarded full ${scoreEarned} marks. ${lvl.explanation}`;
+          showToast(`Level ${currentLevelIndex + 1} Solved! +${scoreEarned} Marks Awarded!`, 'success');
+        } else {
+          fb.className = 'feedback-banner feedback-wrong';
+          fb.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Incorrect. Awarded 0 marks. Correct fix: <code>${lvl.correctAnswer}</code>. ${lvl.explanation}`;
+          showToast(`Level ${currentLevelIndex + 1} Failed. 0 Marks awarded.`, 'error');
         }
 
-        const checkBtn = document.getElementById('check-answer-btn');
-        checkBtn.disabled = true;
-        checkBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+        renderSidebar();
 
-        const feedback = document.getElementById('feedback-box');
-        feedback.style.display = 'none';
-
-        try {
-          const res = await api.post(`/games/${gameData._id || 'debugging-game'}/submit`, {
-            action: 'check-level',
-            level: lvl.level || (currentLevelIndex + 1),
-            answer: tokenVal,
-            code: codeVal
-          });
-
-          checkBtn.disabled = false;
-          checkBtn.innerHTML = '<i class="fa-solid fa-wrench"></i> CHECK ANSWER';
-
-          if (res.isCorrect || res.correct) {
-            feedback.className = 'feedback-banner feedback-correct';
-            feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Correct ✓ — ${res.explanation || 'Bug successfully fixed!'} (+${res.xpEarned || 20} XP)`;
-            feedback.style.display = 'flex';
-
-            solvedLevels.add(lvl.level || currentLevelIndex + 1);
-            renderLevelsNav();
-            document.getElementById('level-status-pill').innerHTML = '<span class="nexus-badge badge-green"><i class="fa-solid fa-check"></i> Level Solved</span>';
-
-            if (currentLevelIndex < levels.length - 1) {
-              document.getElementById('next-level-btn').style.display = 'inline-flex';
-            } else {
-              // All 5 levels completed!
-              setTimeout(() => {
-                document.getElementById('completion-modal').classList.add('active');
-              }, 600);
-            }
-
-            if (window.showToast) showToast('Correct ✓! XP recorded.', 'success');
-
-          } else {
-            feedback.className = 'feedback-banner feedback-wrong';
-            feedback.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Try Again — The submitted code or token still contains the syntax error.';
-            feedback.style.display = 'flex';
-            if (window.showToast) showToast('Try Again', 'error');
-          }
-
-        } catch (err) {
-          checkBtn.disabled = false;
-          checkBtn.innerHTML = '<i class="fa-solid fa-wrench"></i> CHECK ANSWER';
-          feedback.className = 'feedback-banner feedback-wrong';
-          feedback.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Error: ${err.message}`;
-          feedback.style.display = 'flex';
-        }
-      };
-
-      document.getElementById('next-level-btn').onclick = () => {
         if (currentLevelIndex < levels.length - 1) {
-          loadLevel(currentLevelIndex + 1);
+          nextBtn.style.display = 'inline-flex';
+          nextBtn.onclick = () => {
+            loadLevel(currentLevelIndex + 1);
+          };
+          // Auto advance after 4 seconds if timeout occurred
+          if (isTimeout) {
+            setTimeout(() => {
+              if (currentLevelIndex < levels.length - 1) loadLevel(currentLevelIndex + 1);
+            }, 3000);
+          }
+        } else {
+          // Finished all 3 levels
+          setTimeout(finishChallenge, 2500);
         }
-      };
+      }
+
+      async function finishChallenge() {
+        if (timerInterval) clearInterval(timerInterval);
+        document.getElementById('workspace-panel').style.display = 'none';
+        document.getElementById('final-scorecard-panel').style.display = 'block';
+
+        const totalEarned = levelScores.reduce((a, b) => a + b, 0);
+        document.getElementById('score-level-0').textContent = `${levelScores[0]} / 30`;
+        document.getElementById('score-level-1').textContent = `${levelScores[1]} / 35`;
+        document.getElementById('score-level-2').textContent = `${levelScores[2]} / 35`;
+        document.getElementById('final-total-score-text').textContent = `Final Total Score: ${totalEarned} / 100 Marks (${levelScores.filter(s => s > 0).length} of 3 Levels Correct)`;
+
+        // Save result to MongoDB and update Leaderboard
+        try {
+          const gameId = activeGameRecord?._id || 'debugging-challenge';
+          await api.post(`/games/${encodeURIComponent(gameId)}/submit`, {
+            attemptId,
+            gameName: 'Debugging Challenge',
+            score: totalEarned,
+            totalQuestions: 3,
+            correctCount: levelScores.filter(s => s > 0).length,
+            timeTaken: 1800 - timerSeconds
+          });
+          showToast('Game score officially submitted to the Leaderboard!', 'success');
+        } catch (err) {
+          console.warn('Game submit warning:', err.message);
+        }
+      }
+
+      document.getElementById('submit-answer-btn').onclick = () => evaluateAnswer(false);
+
+      loadLevel(0);
     });
   </script>
 </body>

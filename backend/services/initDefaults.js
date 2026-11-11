@@ -176,18 +176,44 @@ async function ensureDefaultAccounts() {
       );
     }
 
-    // 6. Ensure exactly 4 core courses with 10 lessons each and quizzes
-    const exact4Courses = require('../seed/coursesData');
+    // 6. Ensure exactly 5 core courses with 10 lessons each and quizzes
+    const exact5Courses = require('../seed/coursesData');
     const Quiz = require('../models/Quiz');
+    const SystemConfig = require('../models/SystemConfig');
 
-    if (Array.isArray(exact4Courses)) {
-      // Ensure the core starter courses are initialized without deleting admin-created courses
+    // Ensure Certificate Configuration
+    await SystemConfig.findOneAndUpdate(
+      { key: 'certificate_config' },
+      {
+        key: 'certificate_config',
+        organizationName: 'EDUTECH NEXUS',
+        adminName: 'Course Administrator',
+        adminDesignation: 'Course Administrator',
+        adminSignature: 'Course Administrator',
+        certificateHeading: 'CERTIFICATE OF COMPLETION',
+        mainHeading: 'THIS CERTIFICATE IS PROUDLY PRESENTED TO',
+        certificateDescription: 'This certificate is awarded in recognition of successfully completing the course and fulfilling all learning requirements.'
+      },
+      { upsert: true }
+    );
 
-      for (const c of exact4Courses) {
-        const existing = await Course.findOne({ title: c.title });
+    if (Array.isArray(exact5Courses)) {
+      for (const c of exact5Courses) {
+        // Find existing course by title, slug, or legacy variations
+        const legacyQueries = [{ title: c.title }, { slug: c.slug }];
+        if (c.title === 'Artificial Intelligence (AI)') {
+          legacyQueries.push({ title: 'AI Fundamentals' }, { slug: 'ai-fundamentals' });
+        }
+        if (c.title === 'Machine Learning (ML)') {
+          legacyQueries.push({ title: 'AI & Machine Learning' }, { slug: 'ai-and-machine-learning' });
+        }
+
+        const existing = await Course.findOne({ $or: legacyQueries });
         let savedCourse;
         if (existing) {
+          existing.title = c.title;
           existing.slug = c.slug;
+          existing.category = c.category;
           existing.description = c.description;
           existing.image = c.image;
           existing.thumbnail = c.thumbnail;
@@ -200,7 +226,8 @@ async function ensureDefaultAccounts() {
           existing.requirements = c.requirements;
           existing.learningOutcomes = c.learningOutcomes;
           existing.whatYouWillLearn = c.learningOutcomes;
-          const currentLessons = (existing.lessons || []).map(lesson => lesson.toObject());
+
+          const currentLessons = (existing.lessons || []).map(lesson => lesson.toObject ? lesson.toObject() : lesson);
           existing.lessons = c.lessons.map((lesson, index) => {
             const lessonNumber = lesson.lessonNumber || index + 1;
             const currentLesson = currentLessons.find(
@@ -208,19 +235,20 @@ async function ensureDefaultAccounts() {
             );
             if (!currentLesson) return lesson;
 
-            const mergedLesson = {
+            // Preserve admin customized videoUrl if updated, while ensuring defaultVideo is present
+            const isCustomVideo = currentLesson.videoUrl && !currentLesson.videoUrl.includes('sample-lesson.mp4') && currentLesson.videoUrl !== lesson.videoUrl;
+
+            return {
               ...lesson,
               ...currentLesson,
               _id: currentLesson._id,
+              title: lesson.title, // Use current accurate lesson structure
               lessonNumber,
-              order: lesson.order || lessonNumber
+              order: lessonNumber,
+              videoUrl: isCustomVideo ? currentLesson.videoUrl : lesson.videoUrl,
+              youtubeVideoId: isCustomVideo ? (currentLesson.youtubeVideoId || '') : lesson.youtubeVideoId,
+              defaultVideo: lesson.defaultVideo || '/videos/sample-lesson.mp4'
             };
-            if (hasSampleVideo(currentLesson)) {
-              for (const field of ['videoType', 'videoUrl', 'youtubeVideoId', 'videoFile']) {
-                mergedLesson[field] = lesson[field] || '';
-              }
-            }
-            return mergedLesson;
           });
           existing.status = 'active';
           savedCourse = await existing.save();
@@ -233,6 +261,7 @@ async function ensureDefaultAccounts() {
             { courseId: savedCourse._id },
             {
               courseId: savedCourse._id,
+              title: c.quiz.title || `${c.title} Certification Quiz`,
               questions: c.quiz.questions.map(q => ({
                 question: q.questionText || q.question,
                 options: q.options,
@@ -245,7 +274,7 @@ async function ensureDefaultAccounts() {
           );
         }
       }
-      console.log(`[BOOT] ✅ ${exact4Courses.length} core courses synchronized with 10 lessons each`);
+      console.log(`[BOOT] ✅ ${exact5Courses.length} core courses synchronized with 10 lessons each`);
     }
 
     const removedSampleMappings = await removeSampleVideoMappings();
@@ -253,56 +282,71 @@ async function ensureDefaultAccounts() {
       console.log(`[BOOT] Removed ${removedSampleMappings} incorrect sample video mappings.`);
     }
 
-    // 7. Ensure Example Companies
+    // 7. Ensure Initial 3 Companies (TCS, OYO, Wipro - Maximum 5)
     const companiesData = [
       {
-        name: 'Tata Consultancy Services',
+        name: 'Tata Consultancy Services (TCS)',
         logo: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80',
-        about: 'Tata Consultancy Services is a global leader in IT services, consulting, and business solutions.',
-        description: 'TCS partners with many of the world’s largest businesses in their transformation journeys. Note: This is an example company record for student learning simulations.',
-        industry: 'Information Technology & Consulting',
+        about: 'Global leader in IT services, consulting, and business solutions powering global enterprises.',
+        description: 'Tata Consultancy Services is an IT services, consulting, and business solutions organization that has been partnering with many of the world’s largest businesses for the past 50 years. A part of the Tata group, India\'s largest multinational business group, TCS has over 600,000 of the world’s best-trained consultants across 55 countries.',
+        industry: 'Information Technology & Cloud Services',
         website: 'https://www.tcs.com',
-        email: 'careers-info@tcs.example.com',
+        email: 'campus.recruitment@tcs.com',
         phone: '+91 22 6778 9999',
-        location: 'Chennai, Tamil Nadu, India',
-        companySize: '500,000+ employees',
-        verificationStatus: 'Example Record',
-        isExample: true,
-        notes: 'Example Company Record — Verify details on the official company website.'
+        location: 'Chennai / Mumbai / Global',
+        companySize: '600,000+ employees',
+        availableDomains: ['Cloud Architecture', 'Full Stack Development', 'AI & Machine Learning', 'Cybersecurity', 'Data Engineering'],
+        requiredSkills: ['Java', 'Python', 'React', 'Node.js', 'SQL', 'Cloud Fundamentals'],
+        eligibility: 'B.E / B.Tech / M.C.A / M.Tech in CS/IT/ECE with minimum 60% aggregate and no active backlogs.',
+        internshipDuration: '3 to 6 Months',
+        applicationProcedure: '1. Online Application via EDUTECH NEXUS. 2. Cognitive & Technical Assessment. 3. Technical Interview with Enterprise Domain Architect. 4. HR Interview & Offer Dispatch.',
+        verificationStatus: 'Verified',
+        isExample: false,
+        notes: 'Official enterprise partner record.'
       },
       {
-        name: 'Infosys Limited',
+        name: 'OYO',
+        logo: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80',
+        about: 'Global hospitality technology platform empowering entrepreneurs and small businesses.',
+        description: 'OYO is a leading global technology platform that empowers entrepreneurs and small businesses with hotels and homes by providing full-stack technology products and revenue-generation tools that increase revenue and ease operations. OYO operates a distributed real-time inventory management, booking engine, dynamic pricing, and automated hospitality management system.',
+        industry: 'Hospitality Tech & Consumer Software',
+        website: 'https://www.oyorooms.com',
+        email: 'careers@oyorooms.com',
+        phone: '+91 124 6201611',
+        location: 'Gurugram / Bangalore / Remote',
+        companySize: '10,000+ employees',
+        availableDomains: ['Frontend Engineering', 'Backend Services', 'Mobile App Development', 'Product Analytics', 'Data Science'],
+        requiredSkills: ['JavaScript', 'React Native', 'Node.js', 'Go', 'Python', 'MongoDB', 'Redis'],
+        eligibility: 'Pre-final & Final year undergraduate/postgraduate students with strong problem solving and programming fundamentals.',
+        internshipDuration: '3 to 6 Months',
+        applicationProcedure: '1. Profile Screening. 2. Online Algorithmic Coding Challenge (2 Problems). 3. System Design & Frontend/Backend Deep-Dive. 4. Culture Fit & HR Round.',
+        verificationStatus: 'Verified',
+        isExample: false,
+        notes: 'High-growth consumer tech platform.'
+      },
+      {
+        name: 'Wipro',
         logo: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80',
-        about: 'Infosys is a global leader in next-generation digital services and consulting.',
-        description: 'Enabling clients in more than 50 countries to navigate their digital transformation. Note: Illustrative simulated company profile.',
-        industry: 'Digital Services & Consulting',
-        website: 'https://www.infosys.com',
-        email: 'careers-info@infosys.example.com',
-        phone: '+91 80 2852 0261',
-        location: 'Bengaluru / Chennai, India',
-        companySize: '300,000+ employees',
-        verificationStatus: 'Example Record',
-        isExample: true,
-        notes: 'Example Company Record — Verify details on the official company website.'
-      },
-      {
-        name: 'Zoho Corporation',
-        logo: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=400&q=80',
-        about: 'Zoho offers beautifully smart software to help you grow your business.',
-        description: 'With 55+ software products in nearly every major business category, including sales, marketing, and collaboration.',
-        industry: 'Enterprise Software & SaaS',
-        website: 'https://www.zoho.com',
-        email: 'careers-info@zoho.example.com',
-        phone: '+91 44 6744 7070',
-        location: 'Chennai / Tenkasi, Tamil Nadu, India',
-        companySize: '15,000+ employees',
-        verificationStatus: 'Example Record',
-        isExample: true,
-        notes: 'Example Company Record — Verify details on the official company website.'
+        about: 'Leading technology services and consulting company focused on building innovative solutions.',
+        description: 'Wipro Limited is a leading technology services and consulting company focused on building innovative solutions that address clients’ most complex digital transformation needs. Leveraging our holistic portfolio of capabilities in consulting, design, engineering, and operations, we help clients realize their boldest ambitions and build future-ready, sustainable businesses.',
+        industry: 'Digital Transformation & Enterprise IT',
+        website: 'https://www.wipro.com',
+        email: 'campus.helpdesk@wipro.com',
+        phone: '+91 80 2844 0011',
+        location: 'Bengaluru / Hyderabad / Chennai',
+        companySize: '250,000+ employees',
+        availableDomains: ['Full Stack Development', 'Artificial Intelligence', 'DevOps & Cloud', 'Embedded Systems', 'Business Analytics'],
+        requiredSkills: ['Python', 'Java', 'Spring Boot', 'React', 'SQL', 'Docker', 'REST APIs'],
+        eligibility: 'Engineering graduates (CSE, IT, ECE, EEE) with minimum 65% in 10th, 12th, and Degree.',
+        internshipDuration: '6 Months',
+        applicationProcedure: '1. Direct Platform Application. 2. Wipro Elite National Talent Assessment. 3. Coding & Technical Interview. 4. Final HR Discussion.',
+        verificationStatus: 'Verified',
+        isExample: false,
+        notes: 'Global technology consulting partner.'
       }
     ];
 
-    // Ensure the example companies exist without removing administrator-created records.
+    // Ensure initial 3 companies exist
     const companyDocs = {};
     for (const comp of companiesData) {
       const doc = await Company.findOneAndUpdate(
@@ -312,122 +356,116 @@ async function ensureDefaultAccounts() {
       );
       companyDocs[comp.name] = doc;
     }
-    console.log(`[BOOT] ✅ ${companiesData.length} demo companies ensured`);
+    console.log(`[BOOT] ✅ ${companiesData.length} core companies ensured (TCS, OYO, Wipro)`);
 
     // 8. Ensure Verified Opportunities linked to canonical companies
     const internshipsData = [
       {
-        title: 'Full Stack Web Developer Intern',
-        company: 'Tata Consultancy Services',
-        companyId: companyDocs['Tata Consultancy Services']?._id,
+        title: 'Graduate Software Engineer Intern',
+        company: 'Tata Consultancy Services (TCS)',
+        companyId: companyDocs['Tata Consultancy Services (TCS)']?._id,
         companyLogo: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=400&q=80',
         companyWebsite: 'https://www.tcs.com',
-        companyEmail: 'internships-sample@tcs.example.com',
+        companyEmail: 'campus.recruitment@tcs.com',
         companyContact: '+91 22 6778 9999',
         applicationMethod: 'Platform Application',
-        description: 'Design and implement responsive web interfaces and microservices. Collaborate with engineering mentors on real-world software components.',
-        location: 'Chennai, Tamil Nadu',
+        description: 'Work with cloud architecture teams developing microservices, distributed caching, and backend data pipelines for enterprise platforms.',
+        location: 'Chennai / Hyderabad / Hybrid',
         workMode: 'Hybrid',
-        duration: '3 Months',
-        skills: ['JavaScript', 'Node.js', 'Express', 'MongoDB', 'React'],
-        stipend: '₹15,000 / month',
+        duration: '3 to 6 Months',
+        skills: ['Java', 'Spring Boot', 'SQL', 'REST APIs', 'Cloud Fundamentals'],
+        stipend: '₹22,000 / month',
         fee: 0,
         type: 'Free',
-        eligibility: 'Pre-final and Final year B.E / B.Tech / M.C.A students with minimum 65% aggregate',
-        isVerified: true,
-        verificationDate: new Date(),
-        source: 'EDUTECH Career Services Verified',
-        responsibilities: [
-          'Develop modular RESTful APIs and backend services using Node.js & Express',
-          'Collaborate with UI/UX engineers to create accessible and responsive frontend interfaces',
-          'Participate in agile sprint ceremonies, code reviews, and automated testing'
-        ],
-        requirements: [
-          'Proficiency in JavaScript (ES6+), HTML5, and CSS3',
-          'Hands-on experience with MongoDB or relational databases',
-          'Basic understanding of version control with Git'
-        ],
-        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-        category: 'Web Development',
+        eligibility: 'B.E / B.Tech / M.C.A in CSE, IT, ECE with minimum 60% aggregate.',
+        category: 'Software Engineering',
         xpReward: 150,
-        isExample: false,
-        disclaimer: 'Notice: This opportunity is verified by EDUTECH NEXUS administration. Follow official application guidelines.',
-        status: 'active'
-      },
-      {
-        title: 'AI & Data Science Intern',
-        company: 'Infosys Limited',
-        companyId: companyDocs['Infosys Limited']?._id,
-        companyLogo: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80',
-        companyWebsite: 'https://www.infosys.com',
-        companyEmail: 'internships-sample@infosys.example.com',
-        companyContact: '+91 80 2852 0261',
-        applicationMethod: 'Platform Application',
-        description: 'Work with applied machine learning models, statistical datasets, and cloud analytics pipelines under senior data engineering leads.',
-        location: 'Bengaluru / Remote',
-        workMode: 'Remote',
-        duration: '6 Months',
-        skills: ['Python', 'Pandas', 'TensorFlow', 'Machine Learning', 'SQL'],
-        stipend: '₹18,000 / month',
-        fee: 0,
-        type: 'Free',
-        eligibility: '2nd, 3rd, and 4th year undergraduate and postgraduate students in CS/IT/Data Science',
         isVerified: true,
         verificationDate: new Date(),
         source: 'EDUTECH Career Services Verified',
         responsibilities: [
-          'Preprocess, clean, and analyze enterprise tabular and textual datasets',
-          'Train, evaluate, and fine-tune supervised machine learning and NLP models',
-          'Build automated data pipeline transformations and interactive performance dashboards'
+          'Develop modular RESTful APIs and backend services using Java and Spring Boot',
+          'Optimize database queries and integrate microservices with enterprise message queues',
+          'Participate in agile sprint ceremonies, code reviews, and automated CI/CD pipeline builds'
         ],
         requirements: [
-          'Strong Python programming and data structure fundamentals',
-          'Experience with Pandas, NumPy, Scikit-Learn, or TensorFlow/PyTorch',
-          'Solid understanding of statistics and SQL querying'
+          'Strong core Java and OOP principles understanding',
+          'Hands-on experience with SQL databases and relational modeling',
+          'Basic understanding of version control with Git and REST architecture'
         ],
-        deadline: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000), // 20 days
-        category: 'Artificial Intelligence',
-        xpReward: 180,
-        isExample: false,
-        disclaimer: 'Notice: This opportunity is verified by EDUTECH NEXUS administration. Follow official application guidelines.',
+        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         status: 'active'
       },
       {
-        title: 'Cloud & Systems Software Intern',
-        company: 'Zoho Corporation',
-        companyId: companyDocs['Zoho Corporation']?._id,
-        companyLogo: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=400&q=80',
-        companyWebsite: 'https://www.zoho.com',
-        companyEmail: 'internships-sample@zoho.example.com',
-        companyContact: '+91 44 6744 7070',
+        title: 'Full Stack Product Engineering Intern',
+        company: 'OYO',
+        companyId: companyDocs['OYO']?._id,
+        companyLogo: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=400&q=80',
+        companyWebsite: 'https://www.oyorooms.com',
+        companyEmail: 'careers@oyorooms.com',
+        companyContact: '+91 124 6201611',
         applicationMethod: 'Platform Application',
-        description: 'Build backend services, evaluate API scalability, and contribute to enterprise SaaS infrastructure tools.',
-        location: 'Chennai / Tenkasi',
-        workMode: 'On-site',
-        duration: '4 Months',
-        skills: ['Java', 'Python', 'Linux', 'Distributed Systems', 'MySQL'],
+        description: 'Build high-performance real-time consumer web applications, booking engine interfaces, and microservices powering millions of global stays.',
+        location: 'Gurugram / Bangalore / Remote',
+        workMode: 'Remote',
+        duration: '3 to 6 Months',
+        skills: ['JavaScript', 'React', 'Node.js', 'MongoDB', 'Redis'],
+        stipend: '₹25,000 / month',
+        fee: 0,
+        type: 'Free',
+        eligibility: 'Pre-final & Final year undergraduate/postgraduate engineering students with web project portfolio.',
+        category: 'Web Development',
+        xpReward: 180,
+        isVerified: true,
+        verificationDate: new Date(),
+        source: 'EDUTECH Career Services Verified',
+        responsibilities: [
+          'Build customer-facing responsive web components with modern React and CSS architectures',
+          'Collaborate with product managers and UX designers on high-impact booking funnel experiences',
+          'Write unit tests and optimize page load speeds for high-traffic mobile web browsers'
+        ],
+        requirements: [
+          'Proficiency in modern JavaScript (ES6+), React, and Node.js',
+          'Familiarity with state management, REST APIs, and asynchronous workflows',
+          'Passion for building high-scale consumer internet applications'
+        ],
+        deadline: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000),
+        status: 'active'
+      },
+      {
+        title: 'Enterprise Digital Transformation Intern',
+        company: 'Wipro',
+        companyId: companyDocs['Wipro']?._id,
+        companyLogo: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=400&q=80',
+        companyWebsite: 'https://www.wipro.com',
+        companyEmail: 'campus.helpdesk@wipro.com',
+        companyContact: '+91 80 2844 0011',
+        applicationMethod: 'Platform Application',
+        description: 'Design and optimize core cloud modules, automated test harnesses, and client integration microservices across global enterprise accounts.',
+        location: 'Bengaluru / Chennai / Hybrid',
+        workMode: 'Hybrid',
+        duration: '6 Months',
+        skills: ['Python', 'Java', 'Docker', 'SQL', 'REST APIs'],
         stipend: '₹20,000 / month',
         fee: 0,
         type: 'Free',
-        eligibility: 'Passionate coders with strong foundational understanding of algorithms and OS concepts',
+        eligibility: 'Engineering graduates (CSE, IT, ECE) with minimum 65% aggregate.',
+        category: 'Cloud & Software',
+        xpReward: 160,
         isVerified: true,
         verificationDate: new Date(),
         source: 'EDUTECH Career Services Verified',
         responsibilities: [
-          'Design resilient microservices handling high concurrent throughput',
-          'Optimize database queries, indexing strategies, and caching mechanisms',
-          'Contribute to internal cloud tooling and system observability monitors'
+          'Assist senior architects in building scalable business services and cloud microservices',
+          'Develop automated integration test suites and technical API documentation',
+          'Contribute to client digital transformation deliverables using agile methodologies'
         ],
         requirements: [
-          'Proficiency in Java, Python, or C++',
-          'Strong grasp of Linux CLI and process management',
-          'Understanding of networking (TCP/IP, HTTP) and relational database design'
+          'Strong proficiency in Python or Java fundamentals and data structures',
+          'Basic understanding of containerization (Docker) and cloud computing concepts',
+          'Excellent analytical, problem-solving, and collaborative communication skills'
         ],
-        deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days
-        category: 'Cloud Engineering',
-        xpReward: 200,
-        isExample: false,
-        disclaimer: 'Notice: This opportunity is verified by EDUTECH NEXUS administration. Follow official application guidelines.',
+        deadline: new Date(Date.now() + 40 * 24 * 60 * 60 * 1000),
         status: 'active'
       }
     ];
@@ -550,6 +588,8 @@ async function ensureDefaultAccounts() {
       }
     }
     console.log(`[BOOT] ✅ NEXUS PLAYZONE: Initialized ${gamesSeed.length} educational games with full questions suites`);
+
+
 
   } catch (err) {
     console.error('[BOOT] ❌ Error ensuring default accounts and data:', err.message);

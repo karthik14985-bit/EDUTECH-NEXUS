@@ -27,8 +27,11 @@ const certificateSchema = new mongoose.Schema({
   verificationId: { type: String, index: true },
   verificationUrl: { type: String, default: '' },
   status: { type: String, enum: ['active', 'revoked'], default: 'active', index: true },
+  adminName: { type: String, default: 'Course Administrator' },
+  adminDesignation: { type: String, default: 'Course Administrator' },
+  adminSignature: { type: String, default: 'Course Administrator' },
   title: { type: String, default: 'CERTIFICATE OF COMPLETION' },
-  description: { type: String, default: 'For successfully completing the technical curriculum and final assessment with distinction.' }
+  description: { type: String, default: 'This certificate is awarded in recognition of successfully completing the course and fulfilling all learning requirements.' }
 }, { timestamps: true });
 
 certificateSchema.index({ userId: 1, courseId: 1 }, { unique: true });

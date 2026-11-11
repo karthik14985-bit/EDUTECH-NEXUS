@@ -1,980 +1,954 @@
-// Exact 4 Courses required by EDUTECH NEXUS specification (10 lessons each)
+// Exact 5 Courses required by EDUTECH NEXUS specification (10 lessons each)
 const coursesData = [
   {
-    title: 'AI Fundamentals',
-    slug: 'ai-fundamentals',
-    category: 'Artificial Intelligence',
-    description: 'Learn the fundamentals of Artificial Intelligence, AI concepts, intelligent systems and practical applications.',
-    image: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=800&q=80',
-    thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=800&q=80',
-    instructor: 'Dr. A. Ramanathan (AI Research Lead)',
-    duration: '6 weeks',
-    difficulty: 'Beginner',
-    level: 'Beginner',
-    xp: 500,
-    xpReward: 500,
-    totalLessons: 10,
-    status: 'active',
-    requirements: [
-      'Basic computer knowledge',
-      'Curiosity about intelligent systems',
-      'No prior programming background required'
+    "title": "Full Stack Development",
+    "slug": "full-stack-development",
+    "category": "Web Development",
+    "description": "Complete hands-on curriculum covering modern frontend engineering, backend microservices, REST APIs, and database integration with MongoDB.",
+    "image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+    "thumbnail": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+    "instructor": "A. Sundar (Lead Full Stack Architect)",
+    "duration": "10 weeks",
+    "difficulty": "Intermediate",
+    "level": "Intermediate",
+    "xp": 500,
+    "xpReward": 500,
+    "totalLessons": 10,
+    "status": "active",
+    "requirements": [
+      "Basic computer literacy",
+      "Familiarity with web browsers",
+      "Code editor (VS Code recommended)"
     ],
-    learningOutcomes: [
-      'Understand core definitions, history, and taxonomy of Artificial Intelligence',
-      'Analyze intelligent agent architectures and environmental interactions',
-      'Master search algorithms: BFS, DFS, heuristic and A* search techniques',
-      'Examine knowledge representation, semantic networks, and logic systems',
-      'Explore ethical frameworks, fairness, and safety in modern AI deployments'
+    "learningOutcomes": [
+      "Build responsive client-side web applications using semantic HTML5, modern CSS3, and JavaScript ES6+",
+      "Develop scalable RESTful web APIs and authentication pipelines with Node.js and Express",
+      "Model and persist enterprise application data using MongoDB and Mongoose schemas",
+      "Architect single-page applications with React component hierarchies and state hooks",
+      "Deploy full-stack applications with environment configuration and security best practices"
     ],
-    lessons: [
+    "lessons": [
       {
-        lessonNumber: 1,
-        title: 'Introduction to Artificial Intelligence',
-        description: 'Explore what defines intelligence, Turing tests, Dartmouth conference origins, and modern AI paradigms.',
-        learningObjectives: ['Define artificial intelligence', 'Differentiate between narrow, general, and super AI', 'Understand modern AI landscape'],
-        duration: '20 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'JMUxmLyrhSk',
-        videoUrl: 'https://www.youtube.com/watch?v=JMUxmLyrhSk',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 1,
+        "title": "Introduction to Web Development",
+        "description": "Understand the architecture of the modern web: client-server model, HTTP/HTTPS protocols, browsers, and the full stack landscape.",
+        "learningObjectives": [
+          "Understand HTTP client-server model",
+          "Explore frontend vs backend roles",
+          "Set up modern developer workspace"
+        ],
+        "duration": "20 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "nu_pCVPKzTk",
+        "videoUrl": "https://www.youtube.com/watch?v=nu_pCVPKzTk",
+        "defaultVideo": "/videos/full-stack-development/lesson-01-html-fundamentals.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 2,
-        title: 'History and Evolution of AI',
-        description: 'From symbolic AI and the expert system boom to AI winters and the deep learning renaissance.',
-        learningObjectives: ['Trace the chronological timeline of AI', 'Understand the factors that caused AI winters', 'Identify drivers of deep learning breakthroughs'],
-        duration: '22 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: '0yCJMt8ChCw',
-        videoUrl: 'https://www.youtube.com/watch?v=0yCJMt8ChCw',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 2,
+        "title": "HTML Fundamentals",
+        "description": "Semantic markup, document structure, forms, inputs, tables, accessibility, and modern HTML5 specifications.",
+        "learningObjectives": [
+          "Write semantic HTML5 documents",
+          "Build accessible forms and inputs",
+          "Structure SEO-friendly documents"
+        ],
+        "duration": "22 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "UB1O30fR-EE",
+        "videoUrl": "https://www.youtube.com/watch?v=UB1O30fR-EE",
+        "defaultVideo": "/videos/full-stack-development/lesson-01-html-fundamentals.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 3,
-        title: 'AI Applications',
-        description: 'Analyze real-world industrial deployments in healthcare, finance, autonomous driving, and natural language.',
-        learningObjectives: ['Survey key application areas of AI', 'Evaluate cost vs benefit of automated decisions', 'Recognize sector-specific AI requirements'],
-        duration: '25 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: '5q87K1WaoFI',
-        videoUrl: 'https://www.youtube.com/watch?v=5q87K1WaoFI',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 3,
+        "title": "CSS Fundamentals",
+        "description": "CSS cascade, selectors, box model, margins, borders, padding, colors, typography, and specificity rules.",
+        "learningObjectives": [
+          "Master CSS box model calculations",
+          "Implement clean color and typography systems",
+          "Understand specificity and inheritance"
+        ],
+        "duration": "25 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "yfoY53QXEnI",
+        "videoUrl": "https://www.youtube.com/watch?v=yfoY53QXEnI",
+        "defaultVideo": "/videos/full-stack-development/lesson-02-css-fundamentals.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 4,
-        title: 'Intelligent Agents',
-        description: 'Agents, sensors, actuators, and environments (PEAS formulation) and agent types (reflex, goal-based, utility).',
-        learningObjectives: ['Formulate PEAS descriptors for any agent', 'Distinguish simple reflex from goal-based agents', 'Understand environmental properties'],
-        duration: '24 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'z_5gqXz3c1U',
-        videoUrl: 'https://www.youtube.com/watch?v=z_5gqXz3c1U',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 4,
+        "title": "Responsive Web Design",
+        "description": "CSS Flexbox, CSS Grid layouts, media queries, viewport configuration, and mobile-first design principles.",
+        "learningObjectives": [
+          "Build flexible layouts with Flexbox and Grid",
+          "Write media queries for all device sizes",
+          "Adopt mobile-first layout techniques"
+        ],
+        "duration": "26 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "srvUrASNj0s",
+        "videoUrl": "https://www.youtube.com/watch?v=srvUrASNj0s",
+        "defaultVideo": "/videos/full-stack-development/lesson-03-responsive-web-design.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 5,
-        title: 'Problem Solving in AI',
-        description: 'State space representations, problem formulations, state graphs, and search strategy trade-offs.',
-        learningObjectives: ['Formulate problems as state spaces', 'Define initial state, actions, transition models, and goal tests', 'Analyze state space complexity'],
-        duration: '26 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'gTzY2qGqCrc',
-        videoUrl: 'https://www.youtube.com/watch?v=gTzY2qGqCrc',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 5,
+        "title": "JavaScript Fundamentals",
+        "description": "Variables (let/const), data types, control flow, functions, scope, arrow functions, and array iteration methods.",
+        "learningObjectives": [
+          "Write robust ES6+ JavaScript",
+          "Master array methods (map, filter, reduce)",
+          "Understand functional scoping and closures"
+        ],
+        "duration": "28 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "W6NZfCO5SIk",
+        "videoUrl": "https://www.youtube.com/watch?v=W6NZfCO5SIk",
+        "defaultVideo": "/videos/full-stack-development/lesson-04-javascript-fundamentals.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 6,
-        title: 'Knowledge Representation',
-        description: 'Representing knowledge through propositional logic, first-order predicate calculus, and ontologies.',
-        learningObjectives: ['Express domain knowledge using predicate logic', 'Understand ontological hierarchies', 'Apply inference rules and resolution'],
-        duration: '28 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'b_fLhUfL0V0',
-        videoUrl: 'https://www.youtube.com/watch?v=b_fLhUfL0V0',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 6,
+        "title": "Advanced JavaScript and DOM",
+        "description": "Document Object Model (DOM) tree manipulation, event bubbling/capturing, asynchronous JavaScript, Promises, and async/await.",
+        "learningObjectives": [
+          "Manipulate DOM elements dynamically",
+          "Handle user interaction events cleanly",
+          "Consume asynchronous APIs with async/await"
+        ],
+        "duration": "30 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "0ik6X4DJKCc",
+        "videoUrl": "https://www.youtube.com/watch?v=0ik6X4DJKCc",
+        "defaultVideo": "/videos/full-stack-development/lesson-05-dom-and-events.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 7,
-        title: 'Search Techniques',
-        description: 'Uninformed vs informed search, Breadth-First, Depth-First, Greedy Best-First, and A* Search with heuristics.',
-        learningObjectives: ['Implement BFS and DFS traversals', 'Define admissible and consistent heuristics', 'Execute A* search on graph topologies'],
-        duration: '30 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'D14TY5Z1h3w',
-        videoUrl: 'https://www.youtube.com/watch?v=D14TY5Z1h3w',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 7,
+        "title": "React Fundamentals",
+        "description": "Component architecture, JSX, props, state management with useState and useEffect, and building interactive client UIs.",
+        "learningObjectives": [
+          "Construct modular React functional components",
+          "Manage component lifecycle with hooks",
+          "Handle form state and conditional rendering"
+        ],
+        "duration": "32 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "bMknfKXIFA8",
+        "videoUrl": "https://www.youtube.com/watch?v=bMknfKXIFA8",
+        "defaultVideo": "/videos/full-stack-development/lesson-06-node-js-fundamentals.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 8,
-        title: 'AI Ethics and Responsible AI',
-        description: 'Bias in training corpora, algorithmic fairness, intellectual property, transparency, and European AI regulations.',
-        learningObjectives: ['Identify algorithmic bias sources', 'Design fairness checkpoints in AI pipelines', 'Understand data governance and privacy mandates'],
-        duration: '25 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'B_wQ9fTzKbg',
-        videoUrl: 'https://www.youtube.com/watch?v=B_wQ9fTzKbg',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 8,
+        "title": "Node.js and Express.js",
+        "description": "Node.js runtime, event loop, CommonJS/ES modules, Express server architecture, routing, middleware, and error handling.",
+        "learningObjectives": [
+          "Create an Express HTTP web server",
+          "Design RESTful API endpoints",
+          "Implement custom Express middleware"
+        ],
+        "duration": "30 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "Oe421EPjeBE",
+        "videoUrl": "https://www.youtube.com/watch?v=Oe421EPjeBE",
+        "defaultVideo": "/videos/full-stack-development/lesson-07-express-js.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 9,
-        title: 'Real-World AI Systems',
-        description: 'End-to-end case studies: recommender engines, computer vision inspection, and conversational assistants.',
-        learningObjectives: ['Architect scalable AI inference pipelines', 'Balance latency vs model precision', 'Monitor model drift in production'],
-        duration: '27 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'ukzFI9rgwfU',
-        videoUrl: 'https://www.youtube.com/watch?v=ukzFI9rgwfU',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 9,
+        "title": "MongoDB and Database Integration",
+        "description": "NoSQL document concepts, MongoDB Atlas, Mongoose schemas, models, CRUD queries, indexing, and validation.",
+        "learningObjectives": [
+          "Connect Express applications to MongoDB",
+          "Design Mongoose schemas with validation",
+          "Execute relational-style population queries"
+        ],
+        "duration": "28 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "ofme2o29ngU",
+        "videoUrl": "https://www.youtube.com/watch?v=ofme2o29ngU",
+        "defaultVideo": "/videos/full-stack-development/lesson-08-mongodb-and-mongoose.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 10,
-        title: 'AI Mini Project',
-        description: 'Construct a complete intelligent classifier: dataset curation, preprocessing, model evaluation, and deployment.',
-        learningObjectives: ['Synthesize concepts into a functioning AI prototype', 'Validate accuracy metrics', 'Prepare for final certification quiz'],
-        duration: '35 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'wpNrmS_2w0I',
-        videoUrl: 'https://www.youtube.com/watch?v=wpNrmS_2w0I',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 10,
+        "title": "Full Stack Project Development",
+        "description": "End-to-end integration: authentication with JWT, protected routes, file uploads, full stack deployment, and project packaging.",
+        "learningObjectives": [
+          "Integrate React frontend with Express backend",
+          "Secure endpoints with JWT tokens",
+          "Deploy full-stack app to production"
+        ],
+        "duration": "35 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "7CqJlxBYj-M",
+        "videoUrl": "https://www.youtube.com/watch?v=7CqJlxBYj-M",
+        "defaultVideo": "/videos/full-stack-development/lesson-10-full-stack-final-project.mp4",
+        "xp": 50
       }
-    ],
-    quiz: {
-      title: 'AI Fundamentals Final Certification Quiz',
-      passPercentage: 70,
-      questions: [
-        {
-          questionNumber: 1,
-          questionText: 'What does the term "Artificial Intelligence" primarily refer to?',
-          options: [
-            'Machines or software capable of mimicking human cognitive functions',
-            'Hardware that processes electrical currents faster than human synapses',
-            'Any computer program containing more than 1,000 lines of code',
-            'A database system for storing numerical values'
-          ],
-          correctAnswer: 0,
-          explanation: 'AI refers to algorithmic systems designed to perceive environments, reason, and perform tasks traditionally requiring human cognition.'
-        },
-        {
-          questionNumber: 2,
-          questionText: 'Who coined the term "Artificial Intelligence" at the Dartmouth Summer Research Project in 1956?',
-          options: ['Alan Turing', 'John McCarthy', 'Marvin Minsky', 'Geoffrey Hinton'],
-          correctAnswer: 1,
-          explanation: 'John McCarthy organized the 1956 Dartmouth conference and coined the term "Artificial Intelligence".'
-        },
-        {
-          questionNumber: 3,
-          questionText: 'In PEAS descriptor for intelligent agents, what does PEAS stand for?',
-          options: [
-            'Performance measure, Environment, Actuators, Sensors',
-            'Program, Execution, Actions, Signals',
-            'Perception, Evaluation, Algorithms, State',
-            'Prediction, Estimation, Accuracy, System'
-          ],
-          correctAnswer: 0,
-          explanation: 'PEAS stands for Performance measure, Environment, Actuators, and Sensors.'
-        },
-        {
-          questionNumber: 4,
-          questionText: 'Which search algorithm uses a heuristic function h(n) combined with exact path cost g(n)?',
-          options: ['Breadth-First Search (BFS)', 'Depth-First Search (DFS)', 'A* Search', 'Linear Search'],
-          correctAnswer: 2,
-          explanation: 'A* search uses evaluation function f(n) = g(n) + h(n), where g(n) is the cost to reach node n and h(n) is heuristic estimate to goal.'
-        },
-        {
-          questionNumber: 5,
-          questionText: 'What makes a heuristic "admissible" in A* tree search?',
-          options: [
-            'It never overestimates the true cost to reach the goal',
-            'It guarantees that search depth never exceeds 10',
-            'It calculates exact probabilities using Bayes rule',
-            'It executes in constant O(1) time'
-          ],
-          correctAnswer: 0,
-          explanation: 'An admissible heuristic never overestimates the actual minimal cost to reach a goal state.'
-        },
-        {
-          questionNumber: 6,
-          questionText: 'What characterizes an AI agent whose actions depend solely on the current percept rather than percept history?',
-          options: ['Simple Reflex Agent', 'Goal-Based Agent', 'Utility-Based Agent', 'Learning Agent'],
-          correctAnswer: 0,
-          explanation: 'Simple reflex agents select actions based solely on the current percept using condition-action rules.'
-        },
-        {
-          questionNumber: 7,
-          questionText: 'Which formal logic system allows statements about objects, relations, and quantifiers (forall and exists)?',
-          options: ['Propositional Logic', 'First-Order Predicate Logic', 'Boolean Algebra', 'Fuzzy Set Theory'],
-          correctAnswer: 1,
-          explanation: 'First-Order Logic (FOL) extends propositional logic with predicates, functions, objects, and quantifiers.'
-        },
-        {
-          questionNumber: 8,
-          questionText: 'What caused the historical "AI Winters"?',
-          options: [
-            'Excessive hype followed by inability of contemporary hardware and symbolic approaches to deliver promised results',
-            'Global cooling events affecting data centers',
-            'Complete governmental bans on computational research',
-            'The invention of the quantum computer'
-          ],
-          correctAnswer: 0,
-          explanation: 'AI Winters occurred when high expectations clashed with hardware and computational limitations, leading to funding cuts.'
-        },
-        {
-          questionNumber: 9,
-          questionText: 'Which ethical concern in AI arises when training data reflects historical human prejudices?',
-          options: ['Algorithmic Bias', 'Overclocking', 'Memory Leakage', 'Thread Deadlock'],
-          correctAnswer: 0,
-          explanation: 'Algorithmic bias occurs when systemic prejudices in historical training data are encoded into model predictions.'
-        },
-        {
-          questionNumber: 10,
-          questionText: 'What is the benchmark proposed by Alan Turing to evaluate machine intelligence through conversational indistinguishability?',
-          options: ['The Turing Test', 'The Halting Test', 'The P vs NP Test', 'The Von Neumann Check'],
-          correctAnswer: 0,
-          explanation: 'The Turing Test assesses whether an interrogator can distinguish a machine from a human based on written responses.'
-        }
-      ]
-    }
+    ]
   },
-
   {
-    title: 'Python Programming',
-    slug: 'python-programming',
-    category: 'Programming',
-    description: 'Master Python programming from syntax fundamentals, object-oriented design to building real-world automation and projects.',
-    image: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=800&q=80',
-    thumbnail: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=800&q=80',
-    instructor: 'K. Sundaram (Senior Principal Architect)',
-    duration: '6 weeks',
-    difficulty: 'Beginner',
-    level: 'Beginner',
-    xp: 500,
-    xpReward: 500,
-    totalLessons: 10,
-    status: 'active',
-    requirements: [
-      'Basic computer knowledge',
-      'No prior programming background required',
-      'Computer with Python 3 installed'
+    "title": "Artificial Intelligence (AI)",
+    "slug": "artificial-intelligence",
+    "category": "Artificial Intelligence",
+    "description": "Learn the core paradigms of Artificial Intelligence, intelligent agents, heuristic search, knowledge representation, and ethics in AI.",
+    "image": "https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=800&q=80",
+    "thumbnail": "https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=800&q=80",
+    "instructor": "Dr. A. Ramanathan (AI Research Lead)",
+    "duration": "8 weeks",
+    "difficulty": "Beginner",
+    "level": "Beginner",
+    "xp": 500,
+    "xpReward": 500,
+    "totalLessons": 10,
+    "status": "active",
+    "requirements": [
+      "Basic computer science fundamentals",
+      "Curiosity about intelligent systems",
+      "No advanced mathematics required"
     ],
-    learningOutcomes: [
-      'Write clean, readable Python code adhering to PEP 8 standards',
-      'Utilize fundamental variables, strings, integers, floats, and booleans',
-      'Construct branching logic with if-elif-else and repetitive loops',
-      'Organize scalable programs using functions, modules, and namespaces',
-      'Leverage core data structures (lists, tuples, dictionaries, sets)',
-      'Apply Object-Oriented Programming (Classes, Methods, Inheritance)'
+    "learningOutcomes": [
+      "Understand core definitions, history, and taxonomy of Artificial Intelligence",
+      "Analyze intelligent agent architectures and environmental interactions (PEAS)",
+      "Master search algorithms: BFS, DFS, heuristic, and A* search techniques",
+      "Examine knowledge representation, semantic networks, and logic systems",
+      "Explore ethical frameworks, fairness, and safety in modern AI deployments"
     ],
-    lessons: [
+    "lessons": [
       {
-        lessonNumber: 1,
-        title: 'Introduction to Python',
-        description: 'Install Python, set up your development environment, understand interpreted vs compiled execution, and run your first script.',
-        learningObjectives: ['Install Python 3', 'Run scripts in the REPL and IDE', 'Print output and handle standard input'],
-        duration: '18 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'kqtD5dpn9C8',
-        videoUrl: 'https://www.youtube.com/watch?v=kqtD5dpn9C8',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 1,
+        "title": "Introduction to Artificial Intelligence",
+        "description": "Explore intelligence definitions, Turing test, Dartmouth conference origins, and modern AI paradigms.",
+        "learningObjectives": [
+          "Define artificial intelligence",
+          "Differentiate between narrow, general, and super AI",
+          "Survey modern AI applications"
+        ],
+        "duration": "20 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "JMUxmLyrhSk",
+        "videoUrl": "https://www.youtube.com/watch?v=JMUxmLyrhSk",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-01-introduction-to-artificial-intelligence.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 2,
-        title: 'Variables and Data Types',
-        description: 'Explore dynamic typing, integers, floats, complex numbers, strings, booleans, and type casting functions.',
-        learningObjectives: ['Declare variable identifiers', 'Perform type casting with int(), float(), str()', 'Format strings with f-strings'],
-        duration: '22 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'khKv-8q7YmY',
-        videoUrl: 'https://www.youtube.com/watch?v=khKv-8q7YmY',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 2,
+        "title": "History and Evolution of AI",
+        "description": "From symbolic AI and the expert system boom to AI winters and the contemporary deep learning renaissance.",
+        "learningObjectives": [
+          "Trace the timeline of AI evolution",
+          "Identify key milestones and AI winters",
+          "Understand catalysts of modern AI"
+        ],
+        "duration": "22 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "0yCJMt8ChCw",
+        "videoUrl": "https://www.youtube.com/watch?v=0yCJMt8ChCw",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-02-history-and-evolution-of-ai.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 3,
-        title: 'Operators and Expressions',
-        description: 'Arithmetic, comparison, logical, assignment, bitwise, membership (in), and identity (is) operators.',
-        learningObjectives: ['Evaluate operator precedence', 'Combine logical statements with and, or, not', 'Use membership operators on collections'],
-        duration: '20 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'v5MR5JnKcZI',
-        videoUrl: 'https://www.youtube.com/watch?v=v5MR5JnKcZI',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 3,
+        "title": "Types of Artificial Intelligence",
+        "description": "Classifying AI systems: Reactive Machines, Limited Memory, Theory of Mind, and Self-Aware AI architectures.",
+        "learningObjectives": [
+          "Differentiate AI capabilities and classifications",
+          "Compare symbolic vs sub-symbolic systems",
+          "Assess functional boundaries"
+        ],
+        "duration": "25 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "5q87K1WaoFI",
+        "videoUrl": "https://www.youtube.com/watch?v=5q87K1WaoFI",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-03-ai-applications.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 4,
-        title: 'Conditional Statements',
-        description: 'Build decision-making workflows using if, elif, and else branching, nested conditions, and ternary expressions.',
-        learningObjectives: ['Construct multi-branch condition trees', 'Avoid common indentation traps', 'Write concise ternary expressions'],
-        duration: '25 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'DZwmZ8Usvnk',
-        videoUrl: 'https://www.youtube.com/watch?v=DZwmZ8Usvnk',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 4,
+        "title": "Intelligent Agents",
+        "description": "Agents, sensors, actuators, and environments (PEAS formulation) and agent structures (reflex, goal-based, utility).",
+        "learningObjectives": [
+          "Formulate PEAS descriptors for any agent",
+          "Distinguish simple reflex from goal-based agents",
+          "Understand environmental properties"
+        ],
+        "duration": "24 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "z_5gqXz3c1U",
+        "videoUrl": "https://www.youtube.com/watch?v=z_5gqXz3c1U",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-04-intelligent-agents.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 5,
-        title: 'Loops',
-        description: 'Definite iteration with for loops, indefinite iteration with while loops, break, continue, and the else clause on loops.',
-        learningObjectives: ['Iterate using range(), enumerate(), and zip()', 'Control loop flow with break and continue', 'Utilize the loop-else construct'],
-        duration: '24 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: '6iF8Xb7Z3wQ',
-        videoUrl: 'https://www.youtube.com/watch?v=6iF8Xb7Z3wQ',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 5,
+        "title": "Problem Solving in AI",
+        "description": "Problem formulation, state space representations, initial states, transition models, and goal test verification.",
+        "learningObjectives": [
+          "Formulate problems as state spaces",
+          "Define successor functions and action models",
+          "Analyze state search branching factors"
+        ],
+        "duration": "26 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "J34GxqReg0s",
+        "videoUrl": "https://www.youtube.com/watch?v=J34GxqReg0s",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-05-problem-solving-in-ai.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 6,
-        title: 'Functions',
-        description: 'Define reusable functions, parameters, default arguments, *args, **kwargs, return values, and variable scope (LEGB rule).',
-        learningObjectives: ['Define modular functions with def', 'Harness variable positional and keyword arguments', 'Understand local, global, and nonlocal scope'],
-        duration: '28 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: '9Os0o3wzS_I',
-        videoUrl: 'https://www.youtube.com/watch?v=9Os0o3wzS_I',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 6,
+        "title": "Knowledge Representation",
+        "description": "Propositional logic, first-order predicate logic, semantic networks, conceptual graphs, and ontologies.",
+        "learningObjectives": [
+          "Construct propositional statements",
+          "Model domain knowledge with semantic networks",
+          "Translate natural assertions into predicate logic"
+        ],
+        "duration": "28 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "FhY6_B25Xyg",
+        "videoUrl": "https://www.youtube.com/watch?v=FhY6_B25Xyg",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-06-knowledge-representation.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 7,
-        title: 'Lists, Tuples and Dictionaries',
-        description: 'Master mutable lists, immutable tuples, key-value dictionary mappings, set operations, and list comprehensions.',
-        learningObjectives: ['Manipulate list elements and slicing', 'Leverage dictionary fast lookups and methods', 'Write idiomatic list comprehensions'],
-        duration: '32 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'W8KRzm-HUcc',
-        videoUrl: 'https://www.youtube.com/watch?v=W8KRzm-HUcc',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 7,
+        "title": "Search Algorithms",
+        "description": "Uninformed search (BFS, DFS, Uniform Cost) versus Informed heuristic search (Greedy Best-First, A* Algorithm).",
+        "learningObjectives": [
+          "Implement BFS and DFS traversals",
+          "Calculate heuristic admissibility and consistency",
+          "Execute A* search on graph spaces"
+        ],
+        "duration": "26 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "7LZHxTZHc5s",
+        "videoUrl": "https://www.youtube.com/watch?v=7LZHxTZHc5s",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-07-search-techniques.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 8,
-        title: 'Object-Oriented Programming',
-        description: 'Classes, instance attributes, __init__ constructor, self parameter, encapsulation, inheritance, and polymorphism.',
-        learningObjectives: ['Define custom classes and instantiate objects', 'Implement single and multiple inheritance', 'Override superclass methods with super()'],
-        duration: '35 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'JeznW_7DlB0',
-        videoUrl: 'https://www.youtube.com/watch?v=JeznW_7DlB0',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 8,
+        "title": "Machine Learning Fundamentals",
+        "description": "How AI connects with machine learning: supervised, unsupervised, reinforcement learning, and cost function optimization.",
+        "learningObjectives": [
+          "Contrast rule-based AI with statistical learning",
+          "Understand optimization and loss curves",
+          "Explore training and inference lifecycles"
+        ],
+        "duration": "28 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "ukzFI9rgwfU",
+        "videoUrl": "https://www.youtube.com/watch?v=ukzFI9rgwfU",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-08-ai-ethics-and-responsible-ai.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 9,
-        title: 'File Handling and Exceptions',
-        description: 'Read and write text and JSON files using with context managers, and handle runtime errors with try-except-finally.',
-        learningObjectives: ['Safely open and close files with context managers', 'Handle specific exception types gracefully', 'Serialize data with Python json module'],
-        duration: '28 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'NIWwJbo-9_8',
-        videoUrl: 'https://www.youtube.com/watch?v=NIWwJbo-9_8',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 9,
+        "title": "Natural Language Processing",
+        "description": "Text preprocessing, tokenization, stemming, TF-IDF, embeddings, and language understanding architectures.",
+        "learningObjectives": [
+          "Tokenize and vectorize text inputs",
+          "Extract sentiments and syntactic parts of speech",
+          "Understand transformer and attention foundations"
+        ],
+        "duration": "30 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "CMrHM8a3hqw",
+        "videoUrl": "https://www.youtube.com/watch?v=CMrHM8a3hqw",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-09-real-world-ai-systems.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 10,
-        title: 'Python Mini Project',
-        description: 'Build a complete CLI-based Student Management System integrating OOP, dictionaries, and file persistence.',
-        learningObjectives: ['Architect a multi-class Python application', 'Persist and retrieve structured records', 'Prepare for final course examination'],
-        duration: '36 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'pdy33803138',
-        videoUrl: 'https://www.youtube.com/watch?v=pdy33803138',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 10,
+        "title": "Real-World AI Applications",
+        "description": "Industrial implementations in autonomous vehicles, diagnostic healthcare, generative models, and AI safety ethics.",
+        "learningObjectives": [
+          "Analyze commercial AI case studies",
+          "Identify algorithmic bias and ethical challenges",
+          "Synthesize AI course knowledge into practical solutions"
+        ],
+        "duration": "32 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "JDxq-m7UC-Y",
+        "videoUrl": "https://www.youtube.com/watch?v=JDxq-m7UC-Y",
+        "defaultVideo": "/videos/ai-fundamentals/lesson-10-ai-mini-project.mp4",
+        "xp": 50
       }
-    ],
-    quiz: {
-      title: 'Python Programming Final Certification Quiz',
-      passPercentage: 70,
-      questions: [
-        {
-          questionNumber: 1,
-          questionText: 'Which keyword is used to declare a function in Python?',
-          options: ['func', 'function', 'def', 'define'],
-          correctAnswer: 2,
-          explanation: 'In Python, the "def" keyword begins a function definition header.'
-        },
-        {
-          questionNumber: 2,
-          questionText: 'What is the key difference between a Python list and a Python tuple?',
-          options: [
-            'Lists are mutable while tuples are immutable',
-            'Tuples can hold numbers while lists can only hold strings',
-            'Lists require curly brackets {} while tuples use square brackets []',
-            'Tuples cannot be indexed or sliced'
-          ],
-          correctAnswer: 0,
-          explanation: 'Lists can be modified after creation (mutable), whereas tuples cannot have their elements altered (immutable).'
-        },
-        {
-          questionNumber: 3,
-          questionText: 'What is the output of the expression: type(3 / 2)?',
-          options: ['int', 'float', 'decimal', 'double'],
-          correctAnswer: 1,
-          explanation: 'In Python 3, the single slash division operator "/" always produces a float result (1.5).'
-        },
-        {
-          questionNumber: 4,
-          questionText: 'Which statement immediately exits the nearest enclosing loop prematurely?',
-          options: ['continue', 'pass', 'break', 'return'],
-          correctAnswer: 2,
-          explanation: 'The "break" statement terminates execution of the containing loop immediately.'
-        },
-        {
-          questionNumber: 5,
-          questionText: 'What does the __init__ method signify in a Python class?',
-          options: [
-            'The constructor method that initializes an instance upon creation',
-            'A special method for deleting the class definition',
-            'A global variable available to all modules',
-            'A decorator that turns a function into an async coroutine'
-          ],
-          correctAnswer: 0,
-          explanation: 'The __init__ method is Python’s initializer constructor called automatically when a new object is created.'
-        },
-        {
-          questionNumber: 6,
-          questionText: 'How do you safely open a file ensuring it is closed automatically when done?',
-          options: [
-            'open("file.txt").run()',
-            'with open("file.txt", "r") as f:',
-            'file.stream("file.txt", auto_close=True)',
-            'try { open("file.txt") }'
-          ],
-          correctAnswer: 1,
-          explanation: 'The "with" statement acts as a context manager that guarantees the file descriptor is closed properly.'
-        },
-        {
-          questionNumber: 7,
-          questionText: 'Which built-in data structure stores unique elements with no duplicate values?',
-          options: ['list', 'dict', 'tuple', 'set'],
-          correctAnswer: 3,
-          explanation: 'A set is an unordered collection of unique elements that eliminates duplicates automatically.'
-        },
-        {
-          questionNumber: 8,
-          questionText: 'What is the result of [x * 2 for x in [1, 2, 3]]?',
-          options: ['[1, 2, 3, 1, 2, 3]', '[2, 4, 6]', '[2, 2, 2]', 'Error'],
-          correctAnswer: 1,
-          explanation: 'This list comprehension multiplies each element by 2, resulting in [2, 4, 6].'
-        },
-        {
-          questionNumber: 9,
-          questionText: 'Which keyword is used to handle exceptions caught within a "try" block?',
-          options: ['catch', 'except', 'rescue', 'handle'],
-          correctAnswer: 1,
-          explanation: 'Python uses "except" alongside "try" to catch and process exceptions.'
-        },
-        {
-          questionNumber: 10,
-          questionText: 'What parameter must be explicitly passed as the first argument to instance methods in Python classes?',
-          options: ['this', 'self', 'cls', 'super'],
-          correctAnswer: 1,
-          explanation: 'By convention and design, Python passes the object instance as the first parameter named "self".'
-        }
-      ]
-    }
+    ]
   },
-
   {
-    title: 'AI & Machine Learning',
-    slug: 'ai-and-machine-learning',
-    category: 'Artificial Intelligence',
-    description: 'Master practical machine learning algorithms, statistical data preparation, neural networks, and model deployment.',
-    image: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=800&q=80',
-    thumbnail: 'https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=800&q=80',
-    instructor: 'Dr. A. Ramanathan (AI Research Lead)',
-    duration: '8 weeks',
-    difficulty: 'Intermediate',
-    level: 'Intermediate',
-    xp: 500,
-    xpReward: 500,
-    totalLessons: 10,
-    status: 'active',
-    requirements: [
-      'Basic Python programming knowledge',
-      'Understanding of basic linear algebra and statistics',
-      'Familiarity with matrices and plotting'
+    "title": "Machine Learning (ML)",
+    "slug": "machine-learning",
+    "category": "Machine Learning",
+    "description": "Master practical machine learning algorithms, data preparation, linear regression, classification, clustering, and model validation.",
+    "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=800&q=80",
+    "thumbnail": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=800&q=80",
+    "instructor": "Dr. V. Srinivasan (Chief Data Scientist)",
+    "duration": "8 weeks",
+    "difficulty": "Intermediate",
+    "level": "Intermediate",
+    "xp": 500,
+    "xpReward": 500,
+    "totalLessons": 10,
+    "status": "active",
+    "requirements": [
+      "Basic Python programming",
+      "Elementary linear algebra and statistics",
+      "Familiarity with Jupyter notebooks"
     ],
-    learningOutcomes: [
-      'Understand Supervised, Unsupervised, and Reinforcement learning paradigms',
-      'Clean raw data, handle missing values, and normalize features',
-      'Build and train Linear and Multiple Regression predictors',
-      'Implement Classification models (Logistic Regression, Decision Trees)',
-      'Discover latent groupings with K-Means and Hierarchical Clustering',
-      'Perform thorough validation using Confusion Matrix, ROC-AUC, and F1-Score'
+    "learningOutcomes": [
+      "Ingest, inspect, clean, and preprocess real-world tabular data using Pandas and NumPy",
+      "Train, evaluate, and tune linear and logistic regression models with Scikit-Learn",
+      "Construct tree-based models including Decision Trees and Random Forests",
+      "Implement unsupervised clustering techniques like K-Means and evaluate cluster coherence",
+      "Diagnose overfitting vs underfitting with cross-validation and hyperparameter tuning"
     ],
-    lessons: [
+    "lessons": [
       {
-        lessonNumber: 1,
-        title: 'Introduction to Machine Learning',
-        description: 'Understand the difference between traditional rule-based coding and data-driven learning systems.',
-        learningObjectives: ['Define the ML paradigm', 'Identify inputs, features, and targets', 'Set up Scikit-Learn and NumPy'],
-        duration: '22 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'ukzFI9rgwfU',
-        videoUrl: 'https://www.youtube.com/watch?v=ukzFI9rgwfU',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 1,
+        "title": "Introduction to Machine Learning",
+        "description": "Understanding machine learning paradigms: learning patterns from data, train/test separation, and ML engineering pipeline.",
+        "learningObjectives": [
+          "Define machine learning taxonomy",
+          "Understand feature matrices and target vectors",
+          "Set up scientific computing environment"
+        ],
+        "duration": "20 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "ukzFI9rgwfU",
+        "videoUrl": "https://www.youtube.com/watch?v=ukzFI9rgwfU",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-01-introduction-to-machine-learning.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 2,
-        title: 'Types of Machine Learning',
-        description: 'Differentiate between supervised learning, unsupervised clustering, semi-supervised, and reinforcement learning.',
-        learningObjectives: ['Classify real problems into ML categories', 'Identify continuous vs categorical targets', 'Understand feedback in RL'],
-        duration: '24 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'olFxW7kdtP8',
-        videoUrl: 'https://www.youtube.com/watch?v=olFxW7kdtP8',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 2,
+        "title": "Types of Machine Learning",
+        "description": "Deep dive into supervised learning, unsupervised learning, self-supervised learning, and reinforcement learning.",
+        "learningObjectives": [
+          "Compare regression vs classification",
+          "Understand unsupervised clustering and dimensionality reduction",
+          "Analyze real-world ML use cases"
+        ],
+        "duration": "22 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "7eh4d6sabA0",
+        "videoUrl": "https://www.youtube.com/watch?v=7eh4d6sabA0",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-02-types-of-machine-learning.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 3,
-        title: 'Data Preparation',
-        description: 'Missing value imputation, outlier detection, standard scaling, min-max normalization, and one-hot categorical encoding.',
-        learningObjectives: ['Clean datasets with Pandas', 'Scale numerical features using StandardScaler', 'Encode categorical columns'],
-        duration: '28 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: '0LTXpeRC3_8',
-        videoUrl: 'https://www.youtube.com/watch?v=0LTXpeRC3_8',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 3,
+        "title": "Data Collection and Preparation",
+        "description": "Sourcing datasets, parsing CSV/JSON/SQL sources, handling missing entries, and exploratory data analysis (EDA).",
+        "learningObjectives": [
+          "Conduct EDA using Pandas and Matplotlib",
+          "Detect outliers and skewed distributions",
+          "Identify data leakage hazards"
+        ],
+        "duration": "25 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "0LTXpeRC3_8",
+        "videoUrl": "https://www.youtube.com/watch?v=0LTXpeRC3_8",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-03-data-preparation.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 4,
-        title: 'Linear Regression',
-        description: 'Formulate ordinary least squares, compute cost with Mean Squared Error, and optimize weights via gradient descent.',
-        learningObjectives: ['Derive linear regression cost function', 'Interpret slope and intercept coefficients', 'Evaluate R-squared goodness-of-fit'],
-        duration: '30 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'E5RjzSK0fvY',
-        videoUrl: 'https://www.youtube.com/watch?v=E5RjzSK0fvY',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 4,
+        "title": "Data Preprocessing",
+        "description": "Feature scaling (StandardScaler, MinMaxScaler), categorical encoding (One-Hot, Ordinal), and train-test splits.",
+        "learningObjectives": [
+          "Scale numerical feature distributions",
+          "Encode categorical variables properly",
+          "Construct reusable preprocessing pipelines"
+        ],
+        "duration": "24 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "i_LwzRVP7bg",
+        "videoUrl": "https://www.youtube.com/watch?v=i_LwzRVP7bg",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-04-linear-regression.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 5,
-        title: 'Classification',
-        description: 'Logistic regression for binary outcomes, sigmoid activation function, decision boundaries, and log-loss cost.',
-        learningObjectives: ['Map linear outputs to probabilities with Sigmoid', 'Set classification thresholds', 'Compare binary vs multi-class classification'],
-        duration: '32 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'yIYKR4sgzI8',
-        videoUrl: 'https://www.youtube.com/watch?v=yIYKR4sgzI8',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 5,
+        "title": "Linear Regression",
+        "description": "Simple and multiple linear regression, ordinary least squares (OLS), cost function (MSE), and gradient descent.",
+        "learningObjectives": [
+          "Derive simple linear regression model",
+          "Interpret regression coefficients and R² score",
+          "Train regression models in Scikit-Learn"
+        ],
+        "duration": "26 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "E5RjzSK0fvY",
+        "videoUrl": "https://www.youtube.com/watch?v=E5RjzSK0fvY",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-04-linear-regression.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 6,
-        title: 'Decision Trees',
-        description: 'Entropy, Information Gain, Gini impurity, tree pruning to curb overfitting, and Random Forest ensemble basics.',
-        learningObjectives: ['Calculate Gini impurity and Information Gain', 'Construct decision trees in Scikit-Learn', 'Mitigate overfitting via tree depth constraints'],
-        duration: '30 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: '_L39rN6gz7Y',
-        videoUrl: 'https://www.youtube.com/watch?v=_L39rN6gz7Y',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 6,
+        "title": "Classification Algorithms",
+        "description": "Binary and multiclass classification: Logistic Regression, sigmoid function, Decision Boundary, and K-Nearest Neighbors.",
+        "learningObjectives": [
+          "Understand logistic probability mappings",
+          "Tune classification threshold levels",
+          "Implement K-Nearest Neighbors classifier"
+        ],
+        "duration": "28 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "zM4VZR0px8E",
+        "videoUrl": "https://www.youtube.com/watch?v=zM4VZR0px8E",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-05-classification.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 7,
-        title: 'Clustering',
-        description: 'Unsupervised partitioning with K-Means, centroid optimization, Elbow method, and silhouette scores.',
-        learningObjectives: ['Formulate K-Means centroid update algorithm', 'Determine optimal k using the Elbow curve', 'Visualize customer segmentation clusters'],
-        duration: '28 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: '4b5d3muPQmA',
-        videoUrl: 'https://www.youtube.com/watch?v=4b5d3muPQmA',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 7,
+        "title": "Decision Trees and Random Forest",
+        "description": "Information gain, Gini impurity, entropy, decision tree splitting, ensemble methods, bagging, and Random Forest classifier.",
+        "learningObjectives": [
+          "Calculate Gini impurity and information gain",
+          "Prevent decision tree overfitting with max_depth",
+          "Train ensemble Random Forest models"
+        ],
+        "duration": "30 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "_L39rN6gz7Y",
+        "videoUrl": "https://www.youtube.com/watch?v=_L39rN6gz7Y",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-06-decision-trees.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 8,
-        title: 'Model Evaluation',
-        description: 'Confusion matrix metrics: precision, recall, specificity, F1-score, ROC-AUC curve, and k-fold cross-validation.',
-        learningObjectives: ['Construct confusion matrices', 'Balance precision vs recall trade-offs', 'Execute k-fold cross validation'],
-        duration: '30 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'wpNrmS_2w0I',
-        videoUrl: 'https://www.youtube.com/watch?v=wpNrmS_2w0I',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 8,
+        "title": "Clustering Algorithms",
+        "description": "Unsupervised partitioning with K-Means, inertia, elbow method, silhouette scores, and hierarchical clustering.",
+        "learningObjectives": [
+          "Formulate K-Means centroid updates",
+          "Select optimal K clusters via the Elbow method",
+          "Assess silhouette coefficient quality"
+        ],
+        "duration": "26 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "4b5d3muPQmA",
+        "videoUrl": "https://www.youtube.com/watch?v=4b5d3muPQmA",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-07-clustering.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 9,
-        title: 'Feature Engineering',
-        description: 'Polynomial features, interaction terms, dimension reduction via PCA, and automated feature selection.',
-        learningObjectives: ['Derive domain-specific feature columns', 'Perform Principal Component Analysis (PCA)', 'Select most informative features'],
-        duration: '26 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'f5NWvyS-g6A',
-        videoUrl: 'https://www.youtube.com/watch?v=f5NWvyS-g6A',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 9,
+        "title": "Model Evaluation",
+        "description": "Evaluation metrics: Confusion Matrix, Precision, Recall, F1-Score, ROC-AUC curve, and k-fold cross-validation.",
+        "learningObjectives": [
+          "Evaluate classification with Precision and Recall",
+          "Plot and interpret ROC-AUC curves",
+          "Execute k-fold cross-validation"
+        ],
+        "duration": "28 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "wpNl-Juuqzc",
+        "videoUrl": "https://www.youtube.com/watch?v=wpNl-Juuqzc",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-08-model-evaluation.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 10,
-        title: 'Machine Learning Mini Project',
-        description: 'Develop an end-to-end predictive machine learning model pipeline and export weights for serving.',
-        learningObjectives: ['Build a production-ready model pipeline', 'Export model using joblib / pickle', 'Prepare for final certification quiz'],
-        duration: '35 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'aircAruvnKk',
-        videoUrl: 'https://www.youtube.com/watch?v=aircAruvnKk',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 10,
+        "title": "Machine Learning Project",
+        "description": "End-to-end predictive modeling project: problem statement, preprocessing, model selection, hyperparameter tuning, and export.",
+        "learningObjectives": [
+          "Execute end-to-end ML project pipeline",
+          "Save and reload trained models with Joblib",
+          "Document findings and business metrics"
+        ],
+        "duration": "35 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "f_uwKZIAeM0",
+        "videoUrl": "https://www.youtube.com/watch?v=f_uwKZIAeM0",
+        "defaultVideo": "/videos/ai-and-machine-learning/lesson-10-machine-learning-mini-project.mp4",
+        "xp": 50
       }
-    ],
-    quiz: {
-      title: 'AI & Machine Learning Final Certification Quiz',
-      passPercentage: 70,
-      questions: [
-        {
-          questionNumber: 1,
-          questionText: 'Which type of Machine Learning problem involves predicting a continuous numerical value?',
-          options: ['Classification', 'Regression', 'Clustering', 'Reinforcement Learning'],
-          correctAnswer: 1,
-          explanation: 'Regression algorithms predict continuous real-valued numeric outputs, such as house prices or temperature.'
-        },
-        {
-          questionNumber: 2,
-          questionText: 'What activation function squashes any real-valued number into a probability range between 0 and 1?',
-          options: ['ReLU', 'Sigmoid', 'Linear', 'Step'],
-          correctAnswer: 1,
-          explanation: 'The Sigmoid function σ(z) = 1 / (1 + e^-z) maps values into the (0, 1) probability range.'
-        },
-        {
-          questionNumber: 3,
-          questionText: 'What does a high training accuracy coupled with a significantly lower test accuracy typically indicate?',
-          options: ['Underfitting', 'Overfitting', 'Optimal convergence', 'High bias'],
-          correctAnswer: 1,
-          explanation: 'Overfitting occurs when a model memorizes training noise and fails to generalize to unseen test data.'
-        },
-        {
-          questionNumber: 4,
-          questionText: 'Which metric calculates the harmonic mean of Precision and Recall?',
-          options: ['Accuracy', 'ROC-AUC', 'F1-Score', 'Mean Squared Error'],
-          correctAnswer: 2,
-          explanation: 'The F1-Score is the harmonic mean of precision and recall: 2 * (Precision * Recall) / (Precision + Recall).'
-        },
-        {
-          questionNumber: 5,
-          questionText: 'What method is commonly used to find the optimal number of clusters (k) in K-Means?',
-          options: ['Elbow Method', 'Gradient Descent', 'Backpropagation', 'Greedy Search'],
-          correctAnswer: 0,
-          explanation: 'The Elbow Method plots the within-cluster sum of squares (WCSS) against k to find the point where distortion slows.'
-        },
-        {
-          questionNumber: 6,
-          questionText: 'Which algorithm recursively splits data based on Information Gain or Gini Impurity?',
-          options: ['K-Nearest Neighbors', 'Decision Tree', 'Linear Regression', 'K-Means'],
-          correctAnswer: 1,
-          explanation: 'Decision Trees split node features to maximize Information Gain or minimize Gini impurity.'
-        },
-        {
-          questionNumber: 7,
-          questionText: 'What technique prevents data leakage during model training and evaluation?',
-          options: [
-            'Fitting transformers (like StandardScaler) solely on the training split before transforming the test split',
-            'Fitting the scaler on the entire dataset before splitting',
-            'Removing all labels from the dataset entirely',
-            'Increasing the learning rate to 10.0'
-          ],
-          correctAnswer: 0,
-          explanation: 'Fitting scalers or imputers exclusively on training data prevents test data information from leaking into the training pipeline.'
-        },
-        {
-          questionNumber: 8,
-          questionText: 'What is the primary objective of Principal Component Analysis (PCA)?',
-          options: [
-            'Unsupervised dimensionality reduction while maximizing preserved variance',
-            'Supervised classification using support vectors',
-            'Calculating gradient updates for backpropagation',
-            'Balancing class distributions using oversampling'
-          ],
-          correctAnswer: 0,
-          explanation: 'PCA projects high-dimensional data onto orthogonal axes that maximize variance, reducing dimensionality.'
-        },
-        {
-          questionNumber: 9,
-          questionText: 'In a confusion matrix, what is a False Positive?',
-          options: [
-            'An instance that is truly negative but incorrectly predicted as positive',
-            'An instance that is truly positive and correctly predicted as positive',
-            'An instance that is truly negative and correctly predicted as negative',
-            'An instance that is truly positive but incorrectly predicted as negative'
-          ],
-          correctAnswer: 0,
-          explanation: 'A False Positive (Type I error) occurs when a negative case is incorrectly classified as positive.'
-        },
-        {
-          questionNumber: 10,
-          questionText: 'What optimization algorithm updates model weights iteratively in the opposite direction of the loss gradient?',
-          options: ['Gradient Descent', 'K-Means Centroid Shift', 'A* Search', 'Alpha-Beta Pruning'],
-          correctAnswer: 0,
-          explanation: 'Gradient Descent iteratively subtracts a fraction of the cost gradient from weights to minimize loss.'
-        }
-      ]
-    }
+    ]
   },
-
   {
-    title: 'Full Stack Development',
-    slug: 'full-stack-development',
-    category: 'Web Development',
-    description: 'Learn modern frontend and backend development and build complete web applications.',
-    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80',
-    thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80',
-    instructor: 'P. Vignesh (Lead Full Stack Engineer)',
-    duration: '10 weeks',
-    difficulty: 'Intermediate',
-    level: 'Intermediate',
-    xp: 500,
-    xpReward: 500,
-    totalLessons: 10,
-    status: 'active',
-    requirements: [
-      'Basic computer knowledge',
-      'Basic programming knowledge'
+    "title": "Python Programming",
+    "slug": "python-programming",
+    "category": "Programming",
+    "description": "Comprehensive foundation in Python programming from core syntax, control flow, functions, collections, to OOP and capstone automation.",
+    "image": "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=800&q=80",
+    "thumbnail": "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=800&q=80",
+    "instructor": "S. Meenakshi (Senior Python Consultant)",
+    "duration": "6 weeks",
+    "difficulty": "Beginner",
+    "level": "Beginner",
+    "xp": 500,
+    "xpReward": 500,
+    "totalLessons": 10,
+    "status": "active",
+    "requirements": [
+      "No prior programming experience required",
+      "Computer running Windows, macOS, or Linux",
+      "Python 3 installed"
     ],
-    learningOutcomes: [
-      'HTML',
-      'CSS',
-      'JavaScript',
-      'Node.js',
-      'Express.js',
-      'MongoDB',
-      'REST APIs',
-      'Full-stack project development'
+    "learningOutcomes": [
+      "Write clean, readable, idiomatic Python code adhering to PEP 8 standards",
+      "Master core data structures: lists, tuples, dictionaries, sets, and comprehensions",
+      "Encapsulate logic into reusable functions with positional, default, and keyword arguments",
+      "Model real-world entities through Object-Oriented Programming (classes, inheritance)",
+      "Handle file I/O operations and build defensive code with structured exception handling"
     ],
-    lessons: [
+    "lessons": [
       {
-        lessonNumber: 1,
-        title: 'HTML Fundamentals',
-        description: 'Semantic HTML5 structure, doctype declaration, document hierarchy, forms, inputs, and accessibility tags.',
-        learningObjectives: ['Structure semantic documents with header, nav, main, footer', 'Build accessible forms with proper label linkages', 'Validate HTML documents according to W3C standards'],
-        duration: '20 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'kUMe1FH4CHE',
-        videoUrl: 'https://www.youtube.com/watch?v=kUMe1FH4CHE',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 1,
+        "title": "Introduction to Python",
+        "description": "Python installation, IDE setup (VS Code), interactive shell, syntax philosophy, and running first script.",
+        "learningObjectives": [
+          "Set up Python 3 development environment",
+          "Execute scripts from terminal and IDE",
+          "Understand Python indentation and comments"
+        ],
+        "duration": "18 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "kqtD5dpn9C8",
+        "videoUrl": "https://www.youtube.com/watch?v=kqtD5dpn9C8",
+        "defaultVideo": "/videos/python-programming/lesson-01-introduction-to-python.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 2,
-        title: 'CSS Fundamentals',
-        description: 'The CSS box model, cascade specificity, typography, custom variables, positioning, and modern flexbox layouts.',
-        learningObjectives: ['Master margins, borders, padding, and content dimensions', 'Compute specificity weights', 'Create multi-item layouts with CSS Flexbox'],
-        duration: '25 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: '1Rs2ND1ryYc',
-        videoUrl: 'https://www.youtube.com/watch?v=1Rs2ND1ryYc',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 2,
+        "title": "Variables and Data Types",
+        "description": "Dynamic typing, integers, floats, strings, booleans, type conversion (casting), and formatted f-strings.",
+        "learningObjectives": [
+          "Declare and inspect Python variables",
+          "Cast between primitive data types",
+          "Format console output with f-strings"
+        ],
+        "duration": "20 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "khKv-8q7YmY",
+        "videoUrl": "https://www.youtube.com/watch?v=khKv-8q7YmY",
+        "defaultVideo": "/videos/python-programming/lesson-02-variables-and-data-types.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 3,
-        title: 'Responsive Web Design',
-        description: 'Media queries, fluid viewports, mobile-first design, CSS Grid two-dimensional layouts, and glassmorphism styling.',
-        learningObjectives: ['Implement responsive breakpoints for mobile, tablet, and desktop', 'Create two-dimensional grid layouts with CSS Grid', 'Style modern glassmorphic cards and buttons'],
-        duration: '26 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'srvUrASNj0s',
-        videoUrl: 'https://www.youtube.com/watch?v=srvUrASNj0s',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 3,
+        "title": "Operators and Expressions",
+        "description": "Arithmetic operators, comparison operators, logical operators (and, or, not), membership, and identity operators.",
+        "learningObjectives": [
+          "Evaluate compound conditional expressions",
+          "Use membership operators (in / not in)",
+          "Avoid identity vs equality pitfalls"
+        ],
+        "duration": "22 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "v5MR5JnKcZI",
+        "videoUrl": "https://www.youtube.com/watch?v=v5MR5JnKcZI",
+        "defaultVideo": "/videos/python-programming/lesson-03-operators-and-expressions.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 4,
-        title: 'JavaScript Fundamentals',
-        description: 'Variables (let, const), data types, functions, arrow syntax, template literals, arrays, and object destructuring.',
-        learningObjectives: ['Understand block scope vs functional scope', 'Use modern ES6+ array methods: map, filter, reduce', 'Destructure nested objects and arrays'],
-        duration: '30 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'W6NZfCO5SIk',
-        videoUrl: 'https://www.youtube.com/watch?v=W6NZfCO5SIk',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 4,
+        "title": "Conditional Statements",
+        "description": "if, elif, and else branching logic, nested conditionals, pass statement, and ternary conditional expressions.",
+        "learningObjectives": [
+          "Structure decision branches with clean indentation",
+          "Evaluate multi-clause elif statements",
+          "Write concise ternary expressions"
+        ],
+        "duration": "22 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "AWek49wXGzI",
+        "videoUrl": "https://www.youtube.com/watch?v=AWek49wXGzI",
+        "defaultVideo": "/videos/python-programming/lesson-04-conditional-statements.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 5,
-        title: 'DOM and Events',
-        description: 'Document Object Model traversal, querying elements, manipulating styles, event listeners, bubbling, and delegation.',
-        learningObjectives: ['Select and mutate DOM nodes dynamically', 'Attach listeners with addEventListener', 'Handle event propagation and delegation'],
-        duration: '28 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'y17RuWkWdn8',
-        videoUrl: 'https://www.youtube.com/watch?v=y17RuWkWdn8',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 5,
+        "title": "Loops",
+        "description": "for loops with range(), while loops with condition flags, break, continue, and loop else clauses.",
+        "learningObjectives": [
+          "Iterate sequences using for loops and range()",
+          "Implement while loops with safe termination",
+          "Use break and continue appropriately"
+        ],
+        "duration": "24 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "6iF8Xb7Z3wQ",
+        "videoUrl": "https://www.youtube.com/watch?v=6iF8Xb7Z3wQ",
+        "defaultVideo": "/videos/python-programming/lesson-05-loops.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 6,
-        title: 'Node.js Fundamentals',
-        description: 'Node runtime architecture, the V8 engine, asynchronous non-blocking event loop, npm ecosystem, and commonJS modules.',
-        learningObjectives: ['Execute JavaScript on the server environment', 'Require built-in modules (fs, path, http)', 'Manage package.json dependencies with npm'],
-        duration: '28 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'TlB_eWDSMt4',
-        videoUrl: 'https://www.youtube.com/watch?v=TlB_eWDSMt4',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 6,
+        "title": "Functions",
+        "description": "Defining functions with def, parameters, return values, *args, **kwargs, docstrings, and lambda expressions.",
+        "learningObjectives": [
+          "Define modular, well-documented functions",
+          "Accept variable positional and keyword arguments",
+          "Write inline lambda functions"
+        ],
+        "duration": "26 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "9Os0o3wzS_I",
+        "videoUrl": "https://www.youtube.com/watch?v=9Os0o3wzS_I",
+        "defaultVideo": "/videos/python-programming/lesson-06-functions.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 7,
-        title: 'Express.js',
-        description: 'Building web servers with Express, routing parameters, query strings, custom middleware, and serving static assets.',
-        learningObjectives: ['Create Express applications and HTTP route handlers', 'Write custom middleware for logging and authentication', 'Handle JSON request bodies with express.json()'],
-        duration: '32 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'L72fhGm1tfE',
-        videoUrl: 'https://www.youtube.com/watch?v=L72fhGm1tfE',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 7,
+        "title": "Lists, Tuples, and Dictionaries",
+        "description": "Indexed sequences, mutability vs immutability, list operations, dictionary key-value lookups, and list comprehensions.",
+        "learningObjectives": [
+          "Perform slicing and manipulation on lists",
+          "Leverage immutable tuples for fixed records",
+          "Master fast key-value lookups with dictionaries"
+        ],
+        "duration": "28 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "daefaLgNkw0",
+        "videoUrl": "https://www.youtube.com/watch?v=daefaLgNkw0",
+        "defaultVideo": "/videos/python-programming/lesson-07-lists-tuples-and-dictionaries.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 8,
-        title: 'MongoDB and Mongoose',
-        description: 'NoSQL document database fundamentals, MongoDB Atlas connection, defining Mongoose schemas, models, and validation.',
-        learningObjectives: ['Design schema definitions and relationships in Mongoose', 'Perform CRUD queries (find, create, update, delete)', 'Implement schema validation rules and pre-save hooks'],
-        duration: '34 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'DZBGEExL2eE',
-        videoUrl: 'https://www.youtube.com/watch?v=DZBGEExL2eE',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 8,
+        "title": "Object-Oriented Programming",
+        "description": "Classes, objects, __init__ constructor, instance methods, self reference, inheritance, and encapsulation.",
+        "learningObjectives": [
+          "Model real-world entities through classes",
+          "Implement inheritance for code reuse",
+          "Protect state with encapsulation"
+        ],
+        "duration": "30 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "JeznW_7DlB0",
+        "videoUrl": "https://www.youtube.com/watch?v=JeznW_7DlB0",
+        "defaultVideo": "/videos/python-programming/lesson-08-object-oriented-programming.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 9,
-        title: 'REST API Development',
-        description: 'Architecting RESTful endpoints, HTTP verb standards (GET, POST, PUT, DELETE), status codes, and JWT authentication.',
-        learningObjectives: ['Design RESTful resource URI structures', 'Send appropriate HTTP status codes (200, 201, 400, 401, 404, 500)', 'Protect sensitive API endpoints using JWT authentication'],
-        duration: '35 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: 'pKd0Rpw7O48',
-        videoUrl: 'https://www.youtube.com/watch?v=pKd0Rpw7O48',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 9,
+        "title": "File Handling and Exception Handling",
+        "description": "Reading/writing files using with open(), try-except-finally blocks, handling FileNotFoundError, and custom exceptions.",
+        "learningObjectives": [
+          "Safely read and write text and CSV files",
+          "Catch and handle exceptions with try-except",
+          "Ensure cleanup with context managers"
+        ],
+        "duration": "26 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "b5qUu4hP_zM",
+        "videoUrl": "https://www.youtube.com/watch?v=b5qUu4hP_zM",
+        "defaultVideo": "/videos/python-programming/lesson-09-file-handling-and-exceptions.mp4",
+        "xp": 50
       },
       {
-        lessonNumber: 10,
-        title: 'Full Stack Final Project',
-        description: 'Connect frontend HTML/CSS/JS with Express and MongoDB to deliver a complete production application.',
-        learningObjectives: ['Connect client fetch API calls with backend Express endpoints', 'Implement token persistence in browser localStorage', 'Prepare for final certification quiz and certificate claim'],
-        duration: '40 minutes',
-        videoType: 'youtube',
-        youtubeVideoId: '7CqJlxBYj-M',
-        videoUrl: 'https://www.youtube.com/watch?v=7CqJlxBYj-M',
-        videoFile: '',
-        xp: 50
+        "lessonNumber": 10,
+        "title": "Python Mini Project",
+        "description": "Capstone project: Command-line file analyzer and automated reporting tool combining data structures, functions, and OOP.",
+        "learningObjectives": [
+          "Architect multi-file Python project",
+          "Process datasets and output formatted reports",
+          "Apply clean code practices"
+        ],
+        "duration": "35 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "rfscVS0vtbw",
+        "videoUrl": "https://www.youtube.com/watch?v=rfscVS0vtbw",
+        "defaultVideo": "/videos/python-programming/lesson-10-python-mini-project.mp4",
+        "xp": 50
       }
+    ]
+  },
+  {
+    "title": "Java Programming",
+    "slug": "java-programming",
+    "category": "Programming",
+    "description": "Master enterprise object-oriented programming with Java: syntax, OOP paradigms, collections framework, exception handling, and project architecture.",
+    "image": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+    "thumbnail": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80",
+    "instructor": "K. Sundaram (Principal Java Architect)",
+    "duration": "8 weeks",
+    "difficulty": "Beginner",
+    "level": "Beginner",
+    "xp": 500,
+    "xpReward": 500,
+    "totalLessons": 10,
+    "status": "active",
+    "requirements": [
+      "Basic computer problem-solving ability",
+      "No prior Java knowledge required",
+      "JDK 17+ installed on workstation"
     ],
-    quiz: {
-      title: 'Full Stack Development Final Certification Quiz',
-      passPercentage: 70,
-      questions: [
-        {
-          questionNumber: 1,
-          questionText: 'What does HTML stand for?',
-          options: [
-            'Hyper Text Markup Language',
-            'High Text Machine Language',
-            'Hyper Tool Multi Language',
-            'Home Tool Markup Language'
-          ],
-          correctAnswer: 0,
-          explanation: 'HTML stands for HyperText Markup Language, the standard markup language for documents designed to be displayed in a web browser.'
-        },
-        {
-          questionNumber: 2,
-          questionText: 'Which CSS layout model provides one-dimensional linear flow along either a row or column?',
-          options: ['CSS Grid', 'CSS Flexbox', 'Float Positioning', 'Table Layout'],
-          correctAnswer: 1,
-          explanation: 'Flexbox is a 1-dimensional layout module designed for distributing space along a single main axis (row or column).'
-        },
-        {
-          questionNumber: 3,
-          questionText: 'Which HTTP method is conventionally used to create a new resource on the server?',
-          options: ['GET', 'POST', 'PUT', 'DELETE'],
-          correctAnswer: 1,
-          explanation: 'In RESTful architecture, HTTP POST is the standard method used to submit data and create a new resource.'
-        },
-        {
-          questionNumber: 4,
-          questionText: 'What is the purpose of the express.json() middleware in Express.js?',
-          options: [
-            'Parses incoming requests with JSON payloads and populates req.body',
-            'Compiles JavaScript into machine code',
-            'Encrypts all database collections into JSON strings',
-            'Compresses outgoing images into JSON format'
-          ],
-          correctAnswer: 0,
-          explanation: 'express.json() is built-in middleware that parses incoming request bodies formatted as JSON.'
-        },
-        {
-          questionNumber: 5,
-          questionText: 'What kind of database is MongoDB?',
-          options: [
-            'Relational SQL Database',
-            'NoSQL Document-Oriented Database',
-            'Graph-only Database',
-            'Flat-file In-Memory Buffer'
-          ],
-          correctAnswer: 1,
-          explanation: 'MongoDB is a leading NoSQL document database storing records as BSON (binary JSON) documents.'
-        },
-        {
-          questionNumber: 6,
-          questionText: 'What does JWT stand for in web application security?',
-          options: ['Java Web Token', 'JSON Web Token', 'Joint Web Transfer', 'JavaScript Web Tool'],
-          correctAnswer: 1,
-          explanation: 'JWT stands for JSON Web Token, an open standard for securely transmitting information between parties as a JSON object.'
-        },
-        {
-          questionNumber: 7,
-          questionText: 'Which method attaches an event handler function to a specified HTML DOM element without overwriting existing handlers?',
-          options: ['attach()', 'addEventListener()', 'bindEvent()', 'on()'],
-          correctAnswer: 1,
-          explanation: 'addEventListener() attaches an event handler to the target element without overwriting existing listeners.'
-        },
-        {
-          questionNumber: 8,
-          questionText: 'What HTTP status code represents "401"?',
-          options: ['OK', 'Not Found', 'Unauthorized', 'Internal Server Error'],
-          correctAnswer: 2,
-          explanation: 'HTTP 401 Unauthorized indicates that the request requires authentication credentials or the provided token is invalid.'
-        },
-        {
-          questionNumber: 9,
-          questionText: 'In Mongoose, which function is used to convert an ObjectId reference into its full populated document?',
-          options: ['.populate()', '.expand()', '.join()', '.include()'],
-          correctAnswer: 0,
-          explanation: 'The Mongoose .populate() method automatically replaces specified paths in the document with documents from other collections.'
-        },
-        {
-          questionNumber: 10,
-          questionText: 'What keyword allows you to pause asynchronous execution inside an async function until a Promise settles?',
-          options: ['yield', 'await', 'pause', 'wait'],
-          correctAnswer: 1,
-          explanation: 'The await expression pauses execution of the surrounding async function until the Promise is fulfilled or rejected.'
-        }
-      ]
-    }
+    "learningOutcomes": [
+      "Understand JVM, JRE, bytecode, and compilation lifecycle",
+      "Master object-oriented concepts: encapsulation, inheritance, polymorphism",
+      "Leverage Java Collections Framework: ArrayList, HashMap, LinkedList, HashSet",
+      "Implement robust exception handling with try-catch-finally and custom exceptions",
+      "Build modular, production-ready console and enterprise Java applications"
+    ],
+    "lessons": [
+      {
+        "lessonNumber": 1,
+        "title": "Introduction to Java",
+        "description": "JVM architecture, bytecode, JRE vs JDK, installing tools, and writing, compiling, and executing your first Java program.",
+        "learningObjectives": [
+          "Understand Java compilation & JVM execution",
+          "Compile and run Java programs via terminal",
+          "Learn Java file naming and package rules"
+        ],
+        "duration": "20 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "eIrMbAQSU34",
+        "videoUrl": "https://www.youtube.com/watch?v=eIrMbAQSU34",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      },
+      {
+        "lessonNumber": 2,
+        "title": "Java Variables and Data Types",
+        "description": "Primitive types (int, double, char, boolean), reference types, type casting (widening vs narrowing), and memory allocation.",
+        "learningObjectives": [
+          "Declare and initialize primitive variables",
+          "Perform safe and explicit type conversions",
+          "Understand memory stack vs heap basics"
+        ],
+        "duration": "22 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "m4-HM_H7v0k",
+        "videoUrl": "https://www.youtube.com/watch?v=m4-HM_H7v0k",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      },
+      {
+        "lessonNumber": 3,
+        "title": "Operators and Expressions",
+        "description": "Arithmetic, relational, logical, bitwise, assignment, and ternary operators in Java expressions.",
+        "learningObjectives": [
+          "Evaluate compound Java expressions",
+          "Master operator precedence rules",
+          "Use ternary conditional operators"
+        ],
+        "duration": "22 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "ldYLYRNaucM",
+        "videoUrl": "https://www.youtube.com/watch?v=ldYLYRNaucM",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      },
+      {
+        "lessonNumber": 4,
+        "title": "Conditional Statements",
+        "description": "if, else-if, else ladders, nested conditionals, and switch statements with modern switch expressions.",
+        "learningObjectives": [
+          "Structure multi-branch conditional logic",
+          "Use modern switch yield statements",
+          "Avoid unreachable code errors"
+        ],
+        "duration": "24 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "Z1Yd7upQsXY",
+        "videoUrl": "https://www.youtube.com/watch?v=Z1Yd7upQsXY",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      },
+      {
+        "lessonNumber": 5,
+        "title": "Loops",
+        "description": "for loops, while loops, do-while loops, enhanced for-each loops, break, and continue statements.",
+        "learningObjectives": [
+          "Execute standard and enhanced for-each loops",
+          "Write while loops with guaranteed termination",
+          "Apply break and continue correctly"
+        ],
+        "duration": "25 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "7mK_9pWq89A",
+        "videoUrl": "https://www.youtube.com/watch?v=7mK_9pWq89A",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      },
+      {
+        "lessonNumber": 6,
+        "title": "Arrays and Strings",
+        "description": "1D and 2D arrays, Array utility class, String immutability, String pool, StringBuilder, and StringBuffer.",
+        "learningObjectives": [
+          "Declare and traverse multi-dimensional arrays",
+          "Understand String pool and immutability",
+          "Use StringBuilder for performance optimization"
+        ],
+        "duration": "26 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "bSrm9RXwBaI",
+        "videoUrl": "https://www.youtube.com/watch?v=bSrm9RXwBaI",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      },
+      {
+        "lessonNumber": 7,
+        "title": "Methods and Functions",
+        "description": "Method declarations, parameter passing (pass by value), return types, static methods, and method overloading.",
+        "learningObjectives": [
+          "Define modular methods with proper signatures",
+          "Implement method overloading cleanly",
+          "Understand static versus instance methods"
+        ],
+        "duration": "26 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "9Jp44kH_h5c",
+        "videoUrl": "https://www.youtube.com/watch?v=9Jp44kH_h5c",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      },
+      {
+        "lessonNumber": 8,
+        "title": "Object-Oriented Programming",
+        "description": "Classes, objects, constructors, this keyword, encapsulation, inheritance, method overriding, and polymorphism.",
+        "learningObjectives": [
+          "Encapsulate data with private fields and getters/setters",
+          "Extend classes using inheritance",
+          "Achieve runtime polymorphism"
+        ],
+        "duration": "30 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "RRubcjpTkks",
+        "videoUrl": "https://www.youtube.com/watch?v=RRubcjpTkks",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      },
+      {
+        "lessonNumber": 9,
+        "title": "Exception Handling and Collections",
+        "description": "try-catch-finally, checked vs unchecked exceptions, List (ArrayList), Set (HashSet), and Map (HashMap).",
+        "learningObjectives": [
+          "Handle runtime exceptions defensively",
+          "Store and manipulate collections of objects",
+          "Perform fast key-value lookups with HashMap"
+        ],
+        "duration": "28 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "viTHc_4XfCA",
+        "videoUrl": "https://www.youtube.com/watch?v=viTHc_4XfCA",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      },
+      {
+        "lessonNumber": 10,
+        "title": "Java Mini Project",
+        "description": "Capstone project: Object-oriented student management system with validation, collections persistence, and interactive CLI.",
+        "learningObjectives": [
+          "Architect complete OOP Java console project",
+          "Apply SOLID principles to software design",
+          "Prepare for technical interviews"
+        ],
+        "duration": "35 minutes",
+        "videoType": "youtube",
+        "youtubeVideoId": "U_8pG9jO6lI",
+        "videoUrl": "https://www.youtube.com/watch?v=U_8pG9jO6lI",
+        "defaultVideo": "/videos/sample-lesson.mp4",
+        "xp": 50
+      }
+    ]
   }
 ];
 

@@ -138,7 +138,7 @@ const adminResources = {
   },
 
   companies: {
-    title: 'Companies & Partners',
+    title: 'Companies & Partners (Max 5)',
     endpoint: '/admin/companies',
     createEndpoint: '/admin/companies',
     updateEndpoint: '/admin/companies',
@@ -151,21 +151,26 @@ const adminResources = {
       ['phone', 'Contact Telephone'],
       ['location', 'Headquarters / Locations'],
       ['companySize', 'Company Size (e.g. 100,000+ Employees)'],
+      ['availableDomains', 'Available Domains (comma-separated, e.g. Full Stack, AI, Cloud)'],
+      ['requiredSkills', 'Required Skills (comma-separated, e.g. JavaScript, Python, Problem Solving)'],
+      ['eligibility', 'Eligibility Criteria (e.g. B.Tech / MCA / BCA students)'],
+      ['internshipDuration', 'Internship Duration (e.g. 8 to 12 Weeks)'],
+      ['applicationProcedure', 'Application Procedure / Instructions', 'textarea'],
       ['verificationStatus', 'Verification Status', 'select', 'Verified,Example Record,Pending'],
       ['logo', 'Company Logo URL'],
       ['about', 'Short Tagline / Summary'],
       ['description', 'Full Corporate Description', 'textarea']
     ],
-    columns: ['Company Name', 'Industry', 'Location', 'Website', 'Size', 'Status'],
+    columns: ['Company Name', 'Industry', 'Domains', 'Duration', 'Website', 'Status'],
     rows: c => [
       `<strong>${c.name}</strong>`,
       c.industry || '-',
-      c.location || '-',
+      Array.isArray(c.availableDomains) ? c.availableDomains.slice(0, 2).join(', ') : (c.availableDomains || '-'),
+      c.internshipDuration || '8-12 Weeks',
       c.website ? `<a href="${c.website}" target="_blank" style="color:#38bdf8;text-decoration:none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Visit</a>` : '-',
-      c.companySize || '-',
       c.verificationStatus === 'Verified' 
         ? '<span style="color:#10b981;font-weight:600;"><i class="fa-solid fa-circle-check"></i> Verified</span>' 
-        : '<span style="color:#f59e0b;"><i class="fa-solid fa-triangle-exclamation"></i> Example Record</span>'
+        : '<span style="color:#f59e0b;"><i class="fa-solid fa-triangle-exclamation"></i> Featured Record</span>'
     ],
     edit: true
   },

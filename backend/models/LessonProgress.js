@@ -33,13 +33,36 @@ const lessonProgressSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  lessonNumber: {
+    type: Number,
+    default: 1
+  },
+  watchedSeconds: {
+    type: Number,
+    default: 0
+  },
+  totalDuration: {
+    type: Number,
+    default: 0
+  },
+  watchPercentage: {
+    type: Number,
+    default: 0
+  },
+  lastPosition: {
+    type: Number,
+    default: 0
+  },
+  watchedIntervals: [{
+    start: { type: Number, default: 0 },
+    end: { type: Number, default: 0 }
+  }],
   completed: {
     type: Boolean,
-    default: true
+    default: false
   },
   completedAt: {
-    type: Date,
-    default: Date.now
+    type: Date
   },
   xpAwarded: {
     type: Number,

@@ -20,6 +20,12 @@ const contentTypes = {
   '.mov': 'video/quicktime'
 };
 
+const chatWidgetScript = `<script
+  src="https://chatbot-rakesh.vercel.app/widget.js"
+  data-widget-token="94b1b573b164c0311ad9bfc3c3843d19744de3697915cda50b972246d645fd65"
+  data-api-url="https://chat-bot-api-ns81.onrender.com">
+</script>`;
+
 const backendVideosDir = path.join(__dirname, 'backend', 'uploads', 'course-videos');
 const publicVideosDir = path.join(__dirname, 'public', 'videos');
 
@@ -75,6 +81,30 @@ const server = http.createServer((request, response) => {
         'Accept-Ranges': 'bytes'
       });
       return response.end();
+    }
+
+    if (ext === '.html') {
+      fs.readFile(filePath, 'utf8', (readError, html) => {
+        if (readError) {
+          response.writeHead(500);
+          return response.end('Server error');
+        }
+
+        const htmlWithWidget = html.includes('https://chatbot-rakesh.vercel.app/widget.js')
+          ? html
+          : /<\/body\s*>/i.test(html)
+            ? html.replace(/<\/body\s*>/i, `${chatWidgetScript}\n</body>`)
+            : `${html}\n${chatWidgetScript}`;
+        const contentLength = Buffer.byteLength(htmlWithWidget);
+
+        response.writeHead(200, {
+          'Content-Length': contentLength,
+          'Content-Type': contentType,
+          'Accept-Ranges': 'bytes'
+        });
+        response.end(htmlWithWidget);
+      });
+      return;
     }
 
     // Support range requests for video playback

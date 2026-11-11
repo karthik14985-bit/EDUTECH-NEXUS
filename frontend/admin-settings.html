@@ -1,1 +1,185 @@
-<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Settings | EDUTECH NEXUS</title><link rel="stylesheet" href="css/admin.css"><script src="js/api.js"></script><script src="js/auth.js"></script><script src="js/admin.js"></script>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>System & Certificate Settings | EDUTECH NEXUS Admin</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="css/admin.css">
+  <style>
+    .settings-panel {
+      background: var(--bg-card, #0f172a);
+      border: 1px solid var(--line, #1e293b);
+      border-radius: 14px;
+      padding: 32px;
+      max-width: 800px;
+      color: #fff;
+    }
+    .form-group {
+      margin-bottom: 22px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .form-control {
+      width: 100%;
+      background: #081626;
+      border: 1px solid var(--line, #1e293b);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 14px;
+      box-sizing: border-box;
+      outline: none;
+    }
+    .form-control:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+    }
+    .signature-preview {
+      font-family: 'Brush Script MT', 'Dancing Script', cursive, sans-serif;
+      font-size: 32px;
+      color: #fbbf24;
+      padding: 10px 16px;
+      background: #081626;
+      border: 1px dashed var(--line, #1e293b);
+      border-radius: 8px;
+      margin-top: 6px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <div id="admin-sidebar-mount"></div>
+
+    <main class="admin-main">
+      <header class="admin-header">
+        <div>
+          <h1 style="font-size:24px;font-weight:800;color:#fff;margin:0 0 4px;">Certificate & Platform Settings</h1>
+          <p style="color:#8fa3bf;font-size:13px;margin:0;">Configure official credential signature, issuing authority designation, and institutional policies.</p>
+        </div>
+      </header>
+
+      <div class="admin-content" style="padding:28px;">
+        <div class="settings-panel">
+          <h2 style="font-size:20px;color:#fff;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+            <i class="fa-solid fa-stamp" style="color:#fbbf24;"></i> Official Certificate Configuration
+          </h2>
+          <p style="color:#94a3b8;font-size:13px;line-height:1.6;margin-bottom:24px;">
+            These credentials are automatically placed onto every student's generated Certificate of Completion upon 100% video curriculum watch time.
+          </p>
+
+          <form id="cert-settings-form">
+            <div class="form-group">
+              <label for="admin-name">Administrator Full Name</label>
+              <input type="text" id="admin-name" class="form-control" placeholder="e.g. Dr. Rajesh Sharma" required>
+              <small style="color:#64748b;font-size:11px;margin-top:4px;display:block;">Printed under the digital signature line.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="admin-designation">Administrator Designation</label>
+              <input type="text" id="admin-designation" class="form-control" placeholder="e.g. Course Administrator" value="Course Administrator" required>
+            </div>
+
+            <div class="form-group">
+              <label for="admin-signature">Digital Signature Script Text</label>
+              <input type="text" id="admin-signature" class="form-control" placeholder="e.g. R. Sharma" required>
+              <div class="signature-preview" id="sig-preview">Signature Preview</div>
+            </div>
+
+            <div class="form-group">
+              <label for="org-name">Organization Name</label>
+              <input type="text" id="org-name" class="form-control" placeholder="e.g. EDUTECH NEXUS" value="EDUTECH NEXUS" required>
+            </div>
+
+            <div style="margin-top:30px;display:flex;gap:12px;">
+              <button type="submit" id="save-btn" class="btn primary" style="padding:12px 28px;font-weight:700;">
+                <i class="fa-solid fa-floppy-disk"></i> Save Configuration
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Check admin auth
+      const user = auth.getUser();
+      if (!user || user.role !== 'admin') {
+        window.location.href = 'admin-login.html';
+        return;
+      }
+
+      // Populate sidebar
+      const sidebarMount = document.getElementById('admin-sidebar-mount');
+      if (typeof adminSidebar === 'function' && sidebarMount) {
+        sidebarMount.innerHTML = adminSidebar('admin-settings.html');
+      }
+
+      const sigInput = document.getElementById('admin-signature');
+      const sigPreview = document.getElementById('sig-preview');
+      sigInput.addEventListener('input', () => {
+        sigPreview.textContent = sigInput.value || 'Signature Preview';
+      });
+
+      // Load config from backend
+      try {
+        const res = await api.get('/admin/certificate-config');
+        if (res.success && res.config) {
+          document.getElementById('admin-name').value = res.config.adminName || 'Course Administrator';
+          document.getElementById('admin-designation').value = res.config.adminDesignation || 'Course Administrator';
+          document.getElementById('admin-signature').value = res.config.adminSignature || 'Course Administrator';
+          document.getElementById('org-name').value = res.config.organizationName || 'EDUTECH NEXUS';
+          sigPreview.textContent = res.config.adminSignature || 'Course Administrator';
+        }
+      } catch (err) {
+        console.warn('Could not load certificate config:', err);
+      }
+
+      // Save config
+      document.getElementById('cert-settings-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('save-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+
+        try {
+          const payload = {
+            adminName: document.getElementById('admin-name').value.trim(),
+            adminDesignation: document.getElementById('admin-designation').value.trim(),
+            adminSignature: document.getElementById('admin-signature').value.trim(),
+            organizationName: document.getElementById('org-name').value.trim()
+          };
+
+          const res = await api.put('/admin/certificate-config', payload);
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Configuration';
+          if (res.success) {
+            toast('Certificate configuration successfully updated.');
+          } else {
+            throw new Error(res.message || 'Save failed');
+          }
+        } catch (err) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Configuration';
+          toast(err.message || 'Failed to save settings', true);
+        }
+      };
+    });
+  </script>
+</body>
+</html>

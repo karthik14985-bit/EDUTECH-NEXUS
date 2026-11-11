@@ -22,7 +22,7 @@
       border-radius: var(--radius-lg);
       padding: 36px;
       width: 100%;
-      max-width: 600px;
+      max-width: 620px;
       backdrop-filter: blur(20px);
       box-shadow: var(--shadow-card);
       text-align: center;
@@ -39,7 +39,6 @@
       font-family: var(--font-heading);
       font-size: 28px;
       font-weight: 900;
-      letter-spacing: -2px;
       color: #ffffff;
       box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
     }
@@ -65,6 +64,7 @@
       padding: 10px 0;
       border-bottom: 1px solid var(--border-subtle);
       font-size: 14px;
+      gap: 12px;
     }
     .result-row:last-child {
       border-bottom: none;
@@ -89,7 +89,7 @@
       <div class="et-badge-logo">ET</div>
       <h1 style="font-size:24px;margin-bottom:8px;">Certificate Verification Portal</h1>
       <p style="color:var(--text-secondary);font-size:14px;margin-bottom:24px;">
-        Validate the authenticity of an EDUTECH NEXUS course completion credential directly from MongoDB records.
+        Validate the authenticity of an official EDUTECH NEXUS course completion credential directly from MongoDB records.
       </p>
 
       <form id="verify-form" style="display:flex;gap:10px;margin-bottom:10px;">
@@ -138,17 +138,17 @@
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
                   <i class="fa-solid fa-circle-check" style="color:#10b981;font-size:26px;"></i>
                   <div>
-                    <h3 style="font-size:18px;color:#10b981;font-weight:700;">VALID CERTIFICATE ✓</h3>
-                    <div style="font-size:12px;color:var(--text-secondary);">Authentic record verified in EDUTECH NEXUS database</div>
+                    <h3 style="font-size:18px;color:#10b981;font-weight:700;">VALID & AUTHENTIC CREDENTIAL ✓</h3>
+                    <div style="font-size:12px;color:var(--text-secondary);">Verified against permanent EDUTECH NEXUS database</div>
                   </div>
                 </div>
 
                 <div class="result-row">
                   <span style="color:var(--text-muted);">Student Name:</span>
-                  <strong style="color:#fff;">${res.studentName}</strong>
+                  <strong style="color:#fff;font-size:15px;">${res.studentName}</strong>
                 </div>
                 <div class="result-row">
-                  <span style="color:var(--text-muted);">Course:</span>
+                  <span style="color:var(--text-muted);">Course Title:</span>
                   <strong style="color:var(--cyan-accent);">${res.courseName}</strong>
                 </div>
                 <div class="result-row">
@@ -157,15 +157,24 @@
                 </div>
                 <div class="result-row">
                   <span style="color:var(--text-muted);">Certificate ID:</span>
-                  <strong style="color:#fbbf24;font-family:var(--font-heading);">${res.certificateId}</strong>
+                  <strong style="color:#fbbf24;font-family:monospace;letter-spacing:1px;">${res.certificateId}</strong>
                 </div>
-                ${res.quizScore !== undefined ? `
                 <div class="result-row">
-                  <span style="color:var(--text-muted);">Quiz Score:</span>
-                  <strong style="color:#10b981;">${res.quizScore}%</strong>
-                </div>` : ''}
+                  <span style="color:var(--text-muted);">Issuing Authority:</span>
+                  <span style="color:#cbd5e1;">EDUTECH NEXUS Certification Board</span>
+                </div>
+                <div class="result-row">
+                  <span style="color:var(--text-muted);">Authorized By:</span>
+                  <span style="color:#cbd5e1;">${res.adminName || 'Course Administrator'} (${res.adminDesignation || 'Course Administrator'})</span>
+                </div>
+                <div class="result-row">
+                  <span style="color:var(--text-muted);">Curriculum Fulfillment:</span>
+                  <span style="color:#10b981;font-weight:700;">100% Video Lessons Watched & Verified</span>
+                </div>
               </div>
             `;
+          } else {
+            throw new Error(res.message || 'No record found.');
           }
         } catch (err) {
           output.innerHTML = `

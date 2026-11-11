@@ -3,91 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Code Challenge | EDUTECH NEXUS</title>
+  <title>Logic & Coding Challenge | EDUTECH NEXUS</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link rel="stylesheet" href="css/nexus-core.css">
   <style>
-    .ide-layout {
+    .challenge-layout {
       display: grid;
-      grid-template-columns: 1fr 1.2fr;
+      grid-template-columns: 320px 1fr;
       gap: 24px;
-      align-items: stretch;
-      min-height: calc(100vh - 200px);
+      align-items: flex-start;
     }
-    .problem-panel {
+    .problems-sidebar-card {
       background: var(--bg-card);
       border: 1px solid var(--border-subtle);
       border-radius: var(--radius-lg);
-      padding: 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      padding: 22px;
       backdrop-filter: blur(16px);
-      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
-    .editor-panel {
-      background: #020617;
-      border: 1px solid var(--border-medium);
-      border-radius: var(--radius-lg);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-    }
-    .editor-topbar {
-      background: #0b1329;
-      padding: 12px 20px;
+    .problem-pill-btn {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-    .code-editor-area {
-      flex: 1;
-      width: 100%;
-      min-height: 320px;
-      background: #020617;
-      color: #38bdf8;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 14px;
-      line-height: 1.6;
-      padding: 20px;
-      border: none;
-      resize: none;
-      outline: none;
-    }
-    .timer-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      border-radius: 20px;
-      color: #fca5a5;
-      font-weight: 700;
-      font-family: var(--font-heading);
-    }
-    .test-cases-panel {
-      background: #090e1a;
-      border-top: 1px solid var(--border-subtle);
-      padding: 18px 20px;
-    }
-    .test-result-pill {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--border-subtle);
-      border-radius: var(--radius-sm);
-      margin-bottom: 6px;
+      color: var(--text-secondary);
       font-size: 13px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-align: left;
+      width: 100%;
+      font-family: inherit;
+      margin-bottom: 8px;
     }
-    @media (max-width: 900px) {
-      .ide-layout {
-        grid-template-columns: 1fr;
-      }
+    .problem-pill-btn.active {
+      background: rgba(99, 102, 241, 0.22);
+      border-color: #6366f1;
+      color: #fff;
+      font-weight: 700;
+    }
+    .problem-pill-btn.solved {
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #34d399;
+    }
+
+    .ide-main-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 26px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+    }
+    .editor-wrapper {
+      background: #020617;
+      border: 1px solid var(--border-medium);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 18px 0;
+    }
+    .editor-header-bar {
+      background: #0b1329;
+      padding: 10px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+    .code-textarea {
+      width: 100%;
+      min-height: 240px;
+      background: #020617;
+      color: #38bdf8;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 14.5px;
+      line-height: 1.6;
+      padding: 18px;
+      border: none;
+      resize: vertical;
+      outline: none;
+    }
+    .test-cases-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 14px;
+    }
+    .test-cases-table th, .test-cases-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+    .test-cases-table th {
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--cyan-accent);
+    }
+    .test-cases-table td {
+      background: rgba(15, 23, 42, 0.4);
+      font-family: monospace;
+    }
+    @media (max-width: 850px) {
+      .challenge-layout { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -95,187 +115,319 @@
   <script src="js/api.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/nexus-student.js"></script>
+
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      const layout = await renderStudentLayout('games.html', 'Code Challenge Arena', 'Complete the JavaScript algorithmic problem, run test cases, and submit for score and XP.');
+      const layout = await renderStudentLayout('games.html', 'Logic & Coding Challenge', 'Solve algorithmic and logical reasoning problems with automated test case validation across multiple difficulty levels.');
       if (!layout) return;
 
       const { pageContent, headerActions } = layout;
 
       headerActions.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div class="timer-badge" id="timer-display">
-            <i class="fa-regular fa-clock"></i> <span id="timer-text">10:00</span>
-          </div>
-          <a href="games.html" class="btn-nexus btn-nexus-secondary">
-            <i class="fa-solid fa-arrow-left"></i> Exit Game
-          </a>
-        </div>
+        <a href="leaderboard.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-trophy" style="color:#fbbf24;"></i> View Leaderboard
+        </a>
+        <a href="games.html" class="btn-nexus btn-nexus-secondary">
+          <i class="fa-solid fa-arrow-left"></i> All Games
+        </a>
       `;
 
       pageContent.innerHTML = `
-        <div class="state-container" id="game-loader">
-          <div class="state-spinner"></div>
-          <div class="state-title">Loading Coding Challenge...</div>
-        </div>
+        <div class="challenge-layout">
+          <!-- Sidebar: Problems by Difficulty -->
+          <div class="problems-sidebar-card">
+            <h3 style="font-size:16px;color:#fff;margin-bottom:6px;display:flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-brain" style="color:var(--cyan-accent);"></i> Problem Tiers
+            </h3>
+            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Multiple Difficulty Levels</p>
 
-        <div class="ide-layout" id="ide-container" style="display:none;">
-          <!-- Left Problem Panel -->
-          <div class="problem-panel">
-            <div>
-              <div style="display:flex;gap:8px;margin-bottom:12px;">
-                <span class="nexus-badge badge-purple">JavaScript</span>
-                <span class="nexus-badge badge-green">String & Array</span>
-                <span class="nexus-badge badge-amber"><i class="fa-solid fa-bolt"></i> +50 XP Reward</span>
+            <div id="problems-nav-list"></div>
+
+            <div style="margin-top:20px;border-top:1px solid var(--border-subtle);padding-top:14px;">
+              <div style="font-size:12px;color:var(--text-muted);">Total Score Earned:</div>
+              <div style="font-size:22px;color:#fbbf24;font-weight:800;margin-top:4px;" id="sidebar-total-score">
+                0 / 100
               </div>
-              <h2 id="problem-title" style="font-size:22px;margin-bottom:12px;">Loading...</h2>
-              <div id="problem-desc" style="color:var(--text-secondary);font-size:14px;line-height:1.7;margin-bottom:20px;"></div>
-
-              <h4 style="font-size:15px;margin-bottom:8px;color:#fff;">Example Test Inputs:</h4>
-              <div id="test-preview" style="font-size:13px;color:var(--text-muted);background:rgba(0,0,0,0.3);padding:12px;border-radius:var(--radius-sm);border:1px solid var(--border-subtle);font-family:monospace;"></div>
-            </div>
-
-            <div style="border-top:1px solid var(--border-subtle);padding-top:16px;margin-top:20px;">
-              <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;">Scoring Guidelines:</div>
-              <p style="font-size:12px;color:var(--text-secondary);">
-                All test cases must pass for full score. +20 XP awarded for submission attempt, +50 XP for passing all test assertions.
-              </p>
             </div>
           </div>
 
-          <!-- Right Code Editor Panel -->
-          <div class="editor-panel">
-            <div class="editor-topbar">
-              <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-secondary);">
-                <i class="fa-brands fa-js" style="color:#f7df1e;"></i>
-                <span>solution.js</span>
+          <!-- Main Challenge Arena -->
+          <div class="ide-main-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+              <div>
+                <span class="nexus-badge badge-purple" id="problem-diff-badge">Level: Easy</span>
+                <span class="nexus-badge badge-blue" style="margin-left:8px;" id="problem-category-badge">Algorithm</span>
+                <h2 style="font-size:22px;color:#fff;margin-top:8px;" id="problem-title-text">Loading problem...</h2>
               </div>
-              <button class="btn-nexus btn-nexus-secondary" id="reset-code-btn" style="padding:4px 12px;font-size:12px;">
-                <i class="fa-solid fa-rotate-left"></i> Reset
-              </button>
+              <div id="problem-status-tag" style="font-size:13px;font-weight:700;"></div>
             </div>
 
-            <textarea id="code-input" class="code-editor-area" spellcheck="false"></textarea>
+            <p style="color:var(--text-secondary);font-size:14.5px;line-height:1.7;margin-bottom:16px;" id="problem-desc-text">
+              Problem description...
+            </p>
 
-            <div class="test-cases-panel">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <h4 style="font-size:14px;color:#fff;">Test Cases & Output</h4>
-                <div style="display:flex;gap:10px;">
-                  <button class="btn-nexus btn-nexus-glow" id="submit-code-btn" style="padding:8px 20px;">
-                    <i class="fa-solid fa-play"></i> Run Tests & Submit
-                  </button>
-                </div>
+            <!-- Code Editor Frame -->
+            <div class="editor-wrapper">
+              <div class="editor-header-bar">
+                <span style="font-family:monospace;"><i class="fa-brands fa-js" style="color:#facc15;"></i> solution.js</span>
+                <button type="button" id="btn-reset-code" class="btn-nexus btn-nexus-secondary" style="padding:3px 10px;font-size:11px;">
+                  <i class="fa-solid fa-rotate-left"></i> Reset Starter Code
+                </button>
               </div>
-              <div id="test-results-output">
-                <p style="font-size:13px;color:var(--text-muted);">Click "Run Tests & Submit" to evaluate your solution.</p>
+              <textarea id="code-editor-input" class="code-textarea" spellcheck="false"></textarea>
+            </div>
+
+            <!-- Test Cases Section -->
+            <div style="margin-top:20px;">
+              <h4 style="font-size:15px;color:#fff;margin-bottom:8px;"><i class="fa-solid fa-vial-circle-check" style="color:var(--cyan-accent);"></i> Test Cases & Assertions</h4>
+              <div style="overflow-x:auto;">
+                <table class="test-cases-table" id="test-cases-table">
+                  <thead>
+                    <tr>
+                      <th>Input</th>
+                      <th>Expected Output</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="test-cases-tbody"></tbody>
+                </table>
               </div>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:24px;flex-wrap:wrap;gap:12px;">
+              <div id="eval-result-summary" style="font-size:14px;font-weight:700;color:var(--text-secondary);">
+                Submit your solution to automatically validate against all test cases.
+              </div>
+              <button id="btn-submit-code" class="btn-nexus btn-nexus-glow" style="padding:12px 28px;font-weight:700;">
+                <i class="fa-solid fa-play"></i> RUN & VALIDATE SOLUTION
+              </button>
             </div>
           </div>
         </div>
       `;
 
-      let activeGame = null;
-      let initialStarterCode = '';
-
-      // Timer Logic (10 minutes countdown)
-      let timeRemaining = 600;
-      const timerInterval = setInterval(() => {
-        timeRemaining--;
-        if (timeRemaining <= 0) {
-          clearInterval(timerInterval);
-          document.getElementById('timer-text').textContent = '00:00';
-          showToast('Time limit expired! You can still submit for evaluation.', 'info');
-          return;
+      // 3 Difficulty Levels: Easy, Medium, Hard
+      const challengeProblems = [
+        {
+          id: 1,
+          difficulty: 'Easy',
+          category: 'Strings & Logic',
+          weight: 30,
+          title: 'Palindrome Validator',
+          description: 'Write a function <code>isPalindrome(str)</code> that returns true if the given string is a palindrome (ignoring spaces and casing), or false otherwise.',
+          starterCode: `function isPalindrome(str) {\n  // Write your logic here\n  const clean = str.toLowerCase().replace(/[^a-z0-9]/g, '');\n  return clean === clean.split('').reverse().join('');\n}`,
+          testCases: [
+            { input: '"racecar"', expected: 'true' },
+            { input: '"A man, a plan, a canal: Panama"', expected: 'true' },
+            { input: '"hello world"', expected: 'false' }
+          ],
+          validator: (code) => {
+            try {
+              const fn = new Function(`${code}\nreturn isPalindrome;`)();
+              const t1 = fn('racecar') === true;
+              const t2 = fn('A man, a plan, a canal: Panama') === true;
+              const t3 = fn('hello world') === false;
+              return [t1, t2, t3];
+            } catch (e) {
+              return [false, false, false];
+            }
+          }
+        },
+        {
+          id: 2,
+          difficulty: 'Medium',
+          category: 'Arrays & Math',
+          weight: 35,
+          title: 'Two Sum Target Index',
+          description: 'Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to target. Return <code>[index1, index2]</code> sorted ascending.',
+          starterCode: `function twoSum(nums, target) {\n  // Return [i, j] such that nums[i] + nums[j] === target\n  const map = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const comp = target - nums[i];\n    if (map.has(comp)) return [map.get(comp), i];\n    map.set(nums[i], i);\n  }\n  return [];\n}`,
+          testCases: [
+            { input: '[2, 7, 11, 15], target = 9', expected: '[0, 1]' },
+            { input: '[3, 2, 4], target = 6', expected: '[1, 2]' },
+            { input: '[3, 3], target = 6', expected: '[0, 1]' }
+          ],
+          validator: (code) => {
+            try {
+              const fn = new Function(`${code}\nreturn twoSum;`)();
+              const r1 = JSON.stringify(fn([2, 7, 11, 15], 9));
+              const r2 = JSON.stringify(fn([3, 2, 4], 6));
+              const r3 = JSON.stringify(fn([3, 3], 6));
+              return [r1 === '[0,1]' || r1 === '[0, 1]', r2 === '[1,2]' || r2 === '[1, 2]', r3 === '[0,1]' || r3 === '[0, 1]'];
+            } catch (e) {
+              return [false, false, false];
+            }
+          }
+        },
+        {
+          id: 3,
+          difficulty: 'Hard',
+          category: 'Algorithms & Dynamic Thinking',
+          weight: 35,
+          title: 'Max Subarray Sum (Kadane)',
+          description: 'Given an integer array <code>nums</code>, find the contiguous subarray (containing at least one number) which has the largest sum and return its sum.',
+          starterCode: `function maxSubArray(nums) {\n  // Write your logic here\n  let maxSoFar = nums[0];\n  let curr = nums[0];\n  for (let i = 1; i < nums.length; i++) {\n    curr = Math.max(nums[i], curr + nums[i]);\n    maxSoFar = Math.max(maxSoFar, curr);\n  }\n  return maxSoFar;\n}`,
+          testCases: [
+            { input: '[-2, 1, -3, 4, -1, 2, 1, -5, 4]', expected: '6' },
+            { input: '[1]', expected: '1' },
+            { input: '[5, 4, -1, 7, 8]', expected: '23' }
+          ],
+          validator: (code) => {
+            try {
+              const fn = new Function(`${code}\nreturn maxSubArray;`)();
+              const r1 = fn([-2, 1, -3, 4, -1, 2, 1, -5, 4]) === 6;
+              const r2 = fn([1]) === 1;
+              const r3 = fn([5, 4, -1, 7, 8]) === 23;
+              return [r1, r2, r3];
+            } catch (e) {
+              return [false, false, false];
+            }
+          }
         }
-        const mins = Math.floor(timeRemaining / 60);
-        const secs = timeRemaining % 60;
-        const timeEl = document.getElementById('timer-text');
-        if (timeEl) timeEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-      }, 1000);
+      ];
 
-      window.addEventListener('beforeunload', () => clearInterval(timerInterval));
+      let currentProblemIndex = 0;
+      let problemScores = [0, 0, 0];
+      let problemStatus = ['pending', 'pending', 'pending'];
+      let activeGameRecord = null;
+      const attemptId = `coding-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 
       try {
         const gamesRes = await api.get('/games');
-        const codeGames = (gamesRes.games || []).filter(g => g.gameType === 'code-challenge');
-        activeGame = codeGames[0];
-
-        if (!activeGame) {
-          // Fallback fetch first game
-          activeGame = gamesRes.games?.[0];
-        }
-
-        if (!activeGame) throw new Error('No coding challenges currently available.');
-
-        document.getElementById('game-loader').style.display = 'none';
-        document.getElementById('ide-container').style.display = 'grid';
-
-        document.getElementById('problem-title').textContent = activeGame.title;
-        document.getElementById('problem-desc').textContent = activeGame.description;
-
-        initialStarterCode = activeGame.starterCode || `function solution(str) {\n  // Your code here\n  return str.replace(/[^a-zA-Z0-9]/g, '').split('').reverse().join('');\n}`;
-        document.getElementById('code-input').value = initialStarterCode;
-
-        const testPreview = document.getElementById('test-preview');
-        if (activeGame.testCases && activeGame.testCases.length) {
-          testPreview.innerHTML = activeGame.testCases.map((tc, idx) => `Test ${idx + 1}: input = ${tc.input || '""'} -> expected = ${tc.expectedOutput}`).join('<br>');
-        }
-
-        document.getElementById('reset-code-btn').onclick = () => {
-          document.getElementById('code-input').value = initialStarterCode;
-        };
-
-        const submitBtn = document.getElementById('submit-code-btn');
-        submitBtn.onclick = async () => {
-          const code = document.getElementById('code-input').value;
-          submitBtn.disabled = true;
-          submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Running Tests...';
-
-          try {
-            const result = await api.post('/games/code-challenge/run', {
-              gameId: activeGame._id,
-              code
-            });
-
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fa-solid fa-play"></i> Run Tests & Submit';
-
-            const outputEl = document.getElementById('test-results-output');
-            const passBadge = result.passedAll ? '<span class="nexus-badge badge-green">Passed All Tests</span>' : '<span class="nexus-badge badge-rose">Partial / Failed</span>';
-
-            let resultsHtml = `
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                <strong>Score: ${result.score}% (${result.passedCount}/${result.totalCount} passed)</strong>
-                <div>${passBadge} <span class="nexus-badge badge-purple">+${result.xpAwarded} XP Earned</span></div>
-              </div>
-            `;
-
-            (result.results || []).forEach((r, idx) => {
-              resultsHtml += `
-                <div class="test-result-pill" style="border-left: 4px solid ${r.passed ? '#10b981' : '#ef4444'};">
-                  <span>${r.passed ? '<i class="fa-solid fa-check" style="color:#10b981;"></i>' : '<i class="fa-solid fa-xmark" style="color:#ef4444;"></i>'} Test ${idx + 1}: ${r.description || ''}</span>
-                  <span style="font-family:monospace;font-size:12px;color:${r.passed ? '#6ee7b7' : '#fca5a5'};">${r.passed ? 'PASSED' : `Got: ${r.actual}`}</span>
-                </div>
-              `;
-            });
-
-            outputEl.innerHTML = resultsHtml;
-            await refreshUserXP();
-            showToast(`Challenge evaluated! Score: ${result.score}% (+${result.xpAwarded} XP)`, result.passedAll ? 'success' : 'info');
-          } catch (err) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fa-solid fa-play"></i> Run Tests & Submit';
-            showToast(err.message || 'Execution error', 'error');
-          }
-        };
-
-      } catch (err) {
-        document.getElementById('game-loader').innerHTML = `
-          <div class="state-icon" style="color:#ef4444;"><i class="fa-solid fa-circle-exclamation"></i></div>
-          <div class="state-title">Error Loading Challenge</div>
-          <p class="state-desc">${err.message}</p>
-        `;
+        const dbGame = (gamesRes.games || []).find(g => g.slug === 'logic-coding-challenge' || g.gameType === 'coding');
+        if (dbGame) activeGameRecord = dbGame;
+      } catch (e) {
+        console.warn('Could not load game record:', e);
       }
+
+      function renderSidebar() {
+        const nav = document.getElementById('problems-nav-list');
+        nav.innerHTML = challengeProblems.map((p, idx) => {
+          const isAct = idx === currentProblemIndex;
+          const status = problemStatus[idx];
+          const score = problemScores[idx];
+
+          return `
+            <button type="button" class="problem-pill-btn ${isAct ? 'active' : ''} ${status === 'passed' ? 'solved' : ''}" data-idx="${idx}">
+              <div>
+                <strong>${p.difficulty}: ${p.title}</strong>
+                <div style="font-size:11px;color:var(--text-muted);">${p.category}</div>
+              </div>
+              <div>
+                ${status === 'passed' 
+                  ? `<span style="color:#10b981;font-weight:700;">+${score}</span>` 
+                  : `<span class="nexus-badge badge-blue">${p.weight} Pts</span>`}
+              </div>
+            </button>
+          `;
+        }).join('');
+
+        nav.querySelectorAll('.problem-pill-btn').forEach(btn => {
+          btn.onclick = () => {
+            const idx = Number(btn.dataset.idx);
+            loadProblem(idx);
+          };
+        });
+
+        const totalEarned = problemScores.reduce((a, b) => a + b, 0);
+        document.getElementById('sidebar-total-score').textContent = `${totalEarned} / 100`;
+      }
+
+      function loadProblem(idx) {
+        currentProblemIndex = idx;
+        const p = challengeProblems[idx];
+
+        document.getElementById('problem-diff-badge').textContent = `Level: ${p.difficulty}`;
+        document.getElementById('problem-category-badge').textContent = p.category;
+        document.getElementById('problem-title-text').textContent = p.title;
+        document.getElementById('problem-desc-text').innerHTML = p.description;
+        document.getElementById('code-editor-input').value = p.starterCode;
+
+        const tag = document.getElementById('problem-status-tag');
+        if (problemStatus[idx] === 'passed') {
+          tag.innerHTML = '<span class="nexus-badge badge-green">Passed (+30 Pts)</span>';
+        } else {
+          tag.innerHTML = '<span class="nexus-badge badge-blue">Not Evaluated</span>';
+        }
+
+        renderTestCasesTable([null, null, null]);
+        renderSidebar();
+      }
+
+      function renderTestCasesTable(results = []) {
+        const p = challengeProblems[currentProblemIndex];
+        const tbody = document.getElementById('test-cases-tbody');
+
+        tbody.innerHTML = p.testCases.map((tc, idx) => {
+          const res = results[idx];
+          let statusBadge = '<span style="color:var(--text-muted);">Not run</span>';
+          if (res === true) statusBadge = '<span style="color:#10b981;font-weight:700;"><i class="fa-solid fa-check"></i> Passed</span>';
+          else if (res === false) statusBadge = '<span style="color:#ef4444;font-weight:700;"><i class="fa-solid fa-xmark"></i> Failed</span>';
+
+          return `
+            <tr>
+              <td><code>${tc.input}</code></td>
+              <td><code>${tc.expected}</code></td>
+              <td>${statusBadge}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('btn-reset-code').onclick = () => {
+        document.getElementById('code-editor-input').value = challengeProblems[currentProblemIndex].starterCode;
+      };
+
+      document.getElementById('btn-submit-code').onclick = async () => {
+        const btn = document.getElementById('btn-submit-code');
+        const code = document.getElementById('code-editor-input').value;
+        const p = challengeProblems[currentProblemIndex];
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Validating Tests...';
+
+        setTimeout(async () => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-play"></i> RUN & VALIDATE SOLUTION';
+
+          const results = p.validator(code);
+          renderTestCasesTable(results);
+
+          const allPassed = results.every(r => r === true);
+          const summary = document.getElementById('eval-result-summary');
+
+          if (allPassed) {
+            problemScores[currentProblemIndex] = p.weight;
+            problemStatus[currentProblemIndex] = 'passed';
+            summary.innerHTML = `<span style="color:#10b981;"><i class="fa-solid fa-circle-check"></i> All test cases passed! +${p.weight} Marks Awarded!</span>`;
+            showToast(`All test cases passed for ${p.title}! +${p.weight} Marks!`, 'success');
+          } else {
+            problemScores[currentProblemIndex] = 0; // Incorrect answers receive 0 marks
+            problemStatus[currentProblemIndex] = 'failed';
+            summary.innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-circle-xmark"></i> One or more test cases failed. 0 marks awarded.</span>`;
+            showToast('Test execution failed. Correct your solution and retry.', 'error');
+          }
+
+          renderSidebar();
+
+          // Sync to Leaderboard
+          const totalEarned = problemScores.reduce((a, b) => a + b, 0);
+          try {
+            const gameId = activeGameRecord?._id || 'logic-coding-challenge';
+            await api.post(`/games/${encodeURIComponent(gameId)}/submit`, {
+              attemptId,
+              gameName: 'Logic & Coding Challenge',
+              score: totalEarned,
+              totalQuestions: challengeProblems.length,
+              correctCount: problemScores.filter(s => s > 0).length,
+              timeTaken: 120
+            });
+          } catch (err) {
+            console.warn('Game submit warning:', err.message);
+          }
+        }, 600);
+      };
+
+      loadProblem(0);
     });
   </script>
 </body>
